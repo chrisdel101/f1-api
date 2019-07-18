@@ -1,4 +1,5 @@
 from scraper import driver_data
+from flask import render_template
 
 from flask import jsonify
 from flask import Flask
@@ -8,8 +9,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def all_drivers():
-    print(driver_data.driver_stats("lewis-hamilton"))
-    return 'Hello, World!'
+    data = driver_data.list_all_drivers()
+    return render_template("index.jinja", data=data)
+
 
 # # individual driver data
 # @app.route('/racing/api/v0.1/drivers/<driver>')

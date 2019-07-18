@@ -3,6 +3,17 @@ from bs4 import BeautifulSoup
 import requests
 
 
+def list_all_drivers():
+    page = requests.get(endpoints.drivers_endpoint())
+    soup = BeautifulSoup(page.text, 'html.parser')
+    drivers_list = soup.find(class_='drivers').ul
+    drivers = []
+    drivers_list = drivers_list.find_all('li')
+    for driver in drivers_list:
+        drivers.append(driver.text.split())
+    return drivers
+
+
 def driver_stats(name):
     page = requests.get(endpoints.driver_endpoint(name))
     soup = BeautifulSoup(page.text, 'html.parser')
