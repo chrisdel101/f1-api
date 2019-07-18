@@ -1,6 +1,5 @@
-import requests
 from bs4 import BeautifulSoup
-from user_agent import generate_user_agent, generate_navigator
+import requests
 
 
 def home_endpoint():
@@ -8,22 +7,15 @@ def home_endpoint():
 
 
 def drivers_endpoint():
-    return f'#{home_endpoint()}/en/drivers.html'
+    return "{0}/en/drivers.html".format(home_endpoint())
 
 
-def driver_endppoint(driver):
-    return f"https://www.formula1.com/en/drivers/{driver}.html"
-
-
-page = requests.get(driver_endppoint('daniel-ricciardo'))
-soup = BeautifulSoup(page.text, 'html.parser')
-
-# driver_details = soup.find(class_='driver-details')
-# driver_stats = driver_details.find_all('tr')
+def driver_endpoint(driver):
+    return "https://www.formula1.com/en/drivers/{0}.html".format(driver)
 
 
 def driver_stats(name):
-    page = requests.get(driver_endppoint(name))
+    page = requests.get(driver_endpoint(name))
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_details = soup.find(class_='driver-details')
     driver_stats = driver_details.find_all('tr')[8].td.string
@@ -42,7 +34,7 @@ def driver_stats(name):
 
 
 def driver_name_flag_number(name):
-    page = requests.get(driver_endppoint(name))
+    page = requests.get(driver_endpoint(name))
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_info = soup.find(
         'figcaption', class_="driver-details")
@@ -53,7 +45,4 @@ def driver_name_flag_number(name):
     }
 
 
-print(driver_stats('daniel-ricciardo'))
-
-
-# print(driver_name("daniel-ricciardo"))
+# print(driver_endpoint('lewis-hamilton'))
