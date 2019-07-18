@@ -1,4 +1,4 @@
-import scraper
+from scraper import driver_data
 
 from flask import jsonify
 from flask import Flask
@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def test():
-    print(scraper.driver_stats("daniel-ricciardo"))
+def all_drivers():
+    print(driver_data.driver_stats("lewis-hamilton"))
     return 'Hello, World!'
 
 # # individual driver data

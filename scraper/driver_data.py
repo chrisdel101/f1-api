@@ -1,21 +1,10 @@
+from scraper import endpoints
 from bs4 import BeautifulSoup
 import requests
 
 
-def home_endpoint():
-    return "https://www.formula1.com"
-
-
-def drivers_endpoint():
-    return "{0}/en/drivers.html".format(home_endpoint())
-
-
-def driver_endpoint(driver):
-    return "https://www.formula1.com/en/drivers/{0}.html".format(driver)
-
-
 def driver_stats(name):
-    page = requests.get(driver_endpoint(name))
+    page = requests.get(endpoints.driver_endpoint(name))
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_details = soup.find(class_='driver-details')
     driver_stats = driver_details.find_all('tr')[8].td.string
@@ -34,7 +23,7 @@ def driver_stats(name):
 
 
 def driver_name_flag_number(name):
-    page = requests.get(driver_endpoint(name))
+    page = requests.get(endpoints.driver_endpoint(name))
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_info = soup.find(
         'figcaption', class_="driver-details")
