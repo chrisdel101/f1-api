@@ -1,4 +1,4 @@
-from scraper import endpoints, utils
+from scraper import endpoints
 from bs4 import BeautifulSoup
 import requests
 from user_agent import generate_user_agent
@@ -19,11 +19,10 @@ def list_all_drivers():
     drivers = []
     drivers_list = drivers_list.find_all('li')
     text = drivers_list[0].text
-    # name = utils.extract_name_whitespace(drivers_list[0].text)
     for driver in drivers_list:
+        # remove whitespace
         d = ",".join(driver.text.split())
         drivers.append(d)
-    # print(drivers)
     return drivers
 
 
@@ -52,20 +51,13 @@ def _driver_images(name):
         else:
             print("Error: No number for driver found.")
 
-            print("Error: No number for driver found.")
         if driver_info.find('span', {'class', 'icn-flag'}) and driver_info.find(
                 'span', {'class', 'icn-flag'}).img.has_attr('src'):
             driver_images['flag_img_url'] = driver_info.find(
                 'span', {'class', 'icn-flag'}).img['src']
         else:
             print("Error: No flag-icon for driver found.")
-            # print(driver_info.h1.has_class("driver-name"))
-            # return {
-            #     'main_image': "{0}/{1}".format(endpoints.home_endpoint(), soup.find(class_='driver-main-image').img['src']),
-            #     'name': driver_info.h1.string,
-            #     'number': driver_info.find('span').string,
-            #     'flag_img_url': driver_info.find_all('img')[0]['src']
-            #
+
         return driver_images
     except ValueError:
         return "An error occured creating driver images."
@@ -89,6 +81,7 @@ def driver_stats(name):
     driver_dict = {}
     _driver_images(name)
     try:
+        # loop in other outside values to driver_dict
         for _, (k, v) in enumerate(_driver_images(name).items()):
             driver_dict[k] = v
     except ValueError:
@@ -108,6 +101,3 @@ def driver_stats(name):
             return driver_dict
     except ValueError:
         return "An error occured creating driver data."
-        # 'main_image': images['main_image'],
-        # 'name': images['name'],
-        # 'number': images['number'],
