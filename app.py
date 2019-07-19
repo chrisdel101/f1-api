@@ -4,19 +4,21 @@ from flask import render_template
 from flask import jsonify
 from flask import Flask
 app = Flask(__name__)
-# print(scraper)
 
 
-@app.route('/')
+@app.route('/drivers')
 def all_drivers():
-    data = driver_data.driver_stats("lewis-hamilton")
-    return render_template("index.jinja", data=data)
+    data = drivers.list_all_drivers()
+    data = {
+        'drivers': drivers.list_all_drivers()
+    }
+    return jsonify(data)
 
 
-# # individual driver data
-# @app.route('/racing/api/v0.1/drivers/<driver>')
-# def drivers_data(driver):
-#     return driver
+@app.route('/drivers/<driver>')
+def driver(driver):
+    data = drivers.driver_stats(driver)
+    return jsonify(data)
 
 
 if __name__ == '__main__':

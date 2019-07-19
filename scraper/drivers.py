@@ -1,7 +1,7 @@
-from scraper import endpoints
+from scraper import endpoints, utils
+
 from bs4 import BeautifulSoup
 import requests
-import user_agent
 from user_agent import generate_user_agent
 
 headers = {
@@ -16,8 +16,12 @@ def list_all_drivers():
     drivers_list = soup.find(class_='drivers').ul
     drivers = []
     drivers_list = drivers_list.find_all('li')
+    text = drivers_list[0].text
+    # name = utils.extract_name_whitespace(drivers_list[0].text)
     for driver in drivers_list:
-        drivers.append(driver.text.split())
+        d = ",".join(driver.text.split())
+        drivers.append(d)
+    # print(drivers)
     return drivers
 
 
