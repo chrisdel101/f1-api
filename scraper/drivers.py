@@ -4,6 +4,7 @@ import requests
 from user_agent import generate_user_agent
 from slugify import slugify, Slugify
 _slugify = Slugify(to_lower=True)
+_slugify.separator = '_'
 
 
 headers = {
