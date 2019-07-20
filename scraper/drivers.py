@@ -30,13 +30,20 @@ def list_all_drivers():
 def _driver_images(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
+    print('ff', soup.find_all('img', {"class", "fom-image"}))
+    return
+    # driver_info.find('div', {"class", "fom-image"})
     driver_info = soup.find(
         'figcaption', class_="driver-details")
     driver_images = {}
+    # print(soup.find(class_='fom-adaptiveimage').contents)
     try:
-        if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
-            driver_images['main_image'] = "{0}/{1}".format(
-                endpoints.home_endpoint(), soup.find(class_='driver-main-image').img['src'])
+        if soup.find(class_='driver-main-image') and driver_info.find(class_='driver-main-image').img:
+            print("HELLO", soup.find(class_='driver-main-image'))
+
+            return "FUCK"
+            # driver_images['main_image'] = "{0}/{1}".format(
+            #     endpoints.home_endpoint(), soup.find(class_='driver-main-image').img['src'])
         else:
             print("Error: No main image for driver found.")
 
@@ -81,6 +88,7 @@ def driver_stats(name):
                ]
     driver_dict = {}
     _driver_images(name)
+    return
     try:
         # loop in other outside values to driver_dict
         for _, (k, v) in enumerate(_driver_images(name).items()):
