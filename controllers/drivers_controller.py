@@ -21,7 +21,6 @@ def change_img_size(src, list_index):
     regex = "image.img.[\d]+\.?.[\w]+"
     sizes = ['320', '640', '768', '1536']
     r = "image.img.{0}.medium".format(sizes[list_index])
-    # print(r)
     sub = re.sub(regex, r, src)
     return sub
 
@@ -76,7 +75,6 @@ def _driver_images(name):
                 'span', {'class', 'icn-flag'}).img['src']
         else:
             print("Error: No flag-icon for driver found.")
-        print(driver_dict)
         return driver_dict
     except ValueError:
         return "An error occured creating driver images."
@@ -117,7 +115,6 @@ def driver_stats(name):
                         driver_dict[_slugify(driver.span.text)
                                     ] = driver.td.text
                         continue
-            print(driver_dict)
             return driver_dict
     except ValueError:
         return "An error occured creating driver data."
