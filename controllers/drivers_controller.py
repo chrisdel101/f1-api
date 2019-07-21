@@ -1,3 +1,4 @@
+import re
 from slugify import slugify, Slugify
 from user_agent import generate_user_agent
 import requests
@@ -11,6 +12,18 @@ headers = {
     'User-Agent': generate_user_agent(os=None, navigator=None, platform=None, device_type=None),
     'From': 'webdev@chrisdel.ca'
 }
+
+
+# manually add in dif sizes for imgs
+# takes url and index to choose size from list
+def change_img_size(src, list_index):
+    # replace scraped img size with one the sizes below
+    regex = "image.img.[\d]+\.?.[\w]+"
+    sizes = ['320', '640', '768', '1536']
+    r = "image.img.{0}.medium".format(sizes[list_index])
+    # print(r)
+    sub = re.sub(regex, r, src)
+    return sub
 
 
 def list_all_drivers():
@@ -33,11 +46,15 @@ def _driver_images(name):
     driver_info = soup.find(
         'figcaption', class_="driver-details")
     driver_dict = {}
-    print(soup.find(class_='driver-main-image'))
     try:
         if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
+
+            img_src = soup.find(class_='driver-main-image').img['src']
+            # replace img size with custom size
+            new_str = change_img_size(img_src, 3)
             driver_dict['main_image'] = "{0}/{1}".format(
-                endpoints.home_endpoint(), soup.find(class_='driver-main-image').img['src'])
+                endpoints.home_endpoint(), new_str)
+
         else:
             print("Error: No main image for driver found.")
 
@@ -100,6 +117,7 @@ def driver_stats(name):
                         driver_dict[_slugify(driver.span.text)
                                     ] = driver.td.text
                         continue
+            print(driver_dict)
             return driver_dict
     except ValueError:
         return "An error occured creating driver data."
