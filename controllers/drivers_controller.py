@@ -1,9 +1,9 @@
 import re
-from slugify import slugify, Slugify
 from user_agent import generate_user_agent
 import requests
 from bs4 import BeautifulSoup
 import endpoints
+from slugify import slugify, Slugify
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
 
