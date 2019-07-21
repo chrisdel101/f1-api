@@ -1,3 +1,4 @@
+import re
 from scraper import endpoints
 from bs4 import BeautifulSoup
 import requests
@@ -11,6 +12,18 @@ headers = {
     'User-Agent': generate_user_agent(os=None, navigator=None, platform=None, device_type=None),
     'From': 'webdev@chrisdel.ca'
 }
+
+
+# manually add in dif sizes for imgs
+# takes url and index to choose size from list
+def change_img_size(src, list_index):
+    # replace scraped img size with one the sizes below
+    regex = "image.img.[\d]+\.?.[\w]+"
+    sizes = ['320', '640', '768', '1536']
+    r = "image.img.{0}.medium".format(sizes[list_index])
+    # print(r)
+    sub = re.sub(regex, r, src)
+    return sub
 
 
 def list_all_drivers():
@@ -30,20 +43,20 @@ def list_all_drivers():
 def _driver_images(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
-    print('ff', soup.find_all('img', {"class", "fom-image"}))
-    return
-    # driver_info.find('div', {"class", "fom-image"})
     driver_info = soup.find(
         'figcaption', class_="driver-details")
+    # driver_info.find('div', {"class", "fom-image"})
     driver_images = {}
-    # print(soup.find(class_='fom-adaptiveimage').contents)
     try:
-        if soup.find(class_='driver-main-image') and driver_info.find(class_='driver-main-image').img:
-            print("HELLO", soup.find(class_='driver-main-image'))
+        if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
 
-            return "FUCK"
-            # driver_images['main_image'] = "{0}/{1}".format(
-            #     endpoints.home_endpoint(), soup.find(class_='driver-main-image').img['src'])
+            img_src = soup.find(class_='driver-main-image').img['src']
+            new_str = change_img_size(img_src, 3)
+            print("{0}/{1}".format(
+                endpoints.home_endpoint(), new_str))
+            driver_images['main_image'] = "{0}/{1}".format(
+                endpoints.home_endpoint(), new_str)
+
         else:
             print("Error: No main image for driver found.")
 
@@ -88,7 +101,6 @@ def driver_stats(name):
                ]
     driver_dict = {}
     _driver_images(name)
-    return
     try:
         # loop in other outside values to driver_dict
         for _, (k, v) in enumerate(_driver_images(name).items()):
@@ -107,6 +119,7 @@ def driver_stats(name):
                         driver_dict[_slugify(driver.span.text)
                                     ] = driver.td.text
                         continue
+            print(driver_dict)
             return driver_dict
     except ValueError:
         return "An error occured creating driver data."
