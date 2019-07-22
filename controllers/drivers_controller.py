@@ -2,8 +2,8 @@ import re
 from user_agent import generate_user_agent
 import requests
 from bs4 import BeautifulSoup
-import endpoints
 from slugify import slugify, Slugify
+import endpoints
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
 
@@ -41,6 +41,7 @@ def list_all_drivers():
 
 def _driver_images(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
+    print('====', page)
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_info = soup.find(
         'figcaption', class_="driver-details")
@@ -82,6 +83,7 @@ def _driver_images(name):
 
 def driver_stats(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
+    print("====", name)
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_details = soup.find(class_='driver-details')
     details = ['Team',

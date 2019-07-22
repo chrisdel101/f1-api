@@ -8,20 +8,22 @@ app = Flask(__name__)
 @app.route('/drivers')
 def all_drivers():
     data = drivers_controller.list_all_drivers()
-    data = {
-        'drivers': drivers_controller.list_all_drivers()
-    }
     return jsonify(data)
 
 
-@app.route('/drivers/<driver>')
-def driver(driver):
-    return jsonify(drivers_controller.driver_stats(driver))
+@app.route('/drivers/<driver_slug>')
+def driver(driver_slug):
+    return jsonify(drivers_controller.driver_stats(driver_slug))
 
 
 @app.route('/teams')
 def all_teams():
     return jsonify(teams_controller.list_all_teams())
+
+
+@app.route('/teams/<team_slug>')
+def team(team_slug):
+    return "hello"
 
 
 if __name__ == '__main__':
