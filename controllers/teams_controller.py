@@ -17,12 +17,14 @@ def list_all_teams():
     page = requests.get(endpoints.teams_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
     ul_teams_list = soup.find('ul', {'class', 'teamindex-teamteasers'})
-    teams = []
     li_team_list = ul_teams_list.find_all('li')
+    teams_endpoint = []
     for team in li_team_list:
         if team.find('h2'):
-            print(_slugify(team.find('h2').text))
-            name = "".join(_slugify(team.find('h2').text).split())
-            teams.append(name)
-
+            team_dict = {}
+            name_slug = "".join(_slugify(team.find('h2').text).split())
+            team_dict['name_slug'] = name_slug
+            name = " ".join(team.find('h2').text.split())
+            team_dict['name'] = name
+            teams.append(team_dict)
     return teams
