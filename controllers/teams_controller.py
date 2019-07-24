@@ -47,21 +47,19 @@ def team_stats(team_slug):
                'Fastest Laps'
                ]
     team_dict = {}
-    print(team_details)
-    return
     try:
         if team_details.find_all('tr'):
             # loop over html
             for team in team_details.find_all('tr'):
-                print(team)
+                print('Team', team)
                 # # loop over all wanted details
-                # for detail in details:
-                #     # if they match add to driver object
-                #     if driver.span and driver.span.text == detail:
-                #         driver_dict[_slugify(driver.span.text)
-                #                     ] = driver.td.text
-                #         continue
-        return driver_dict
+                for detail in details:
+                    #     # if they match add to driver object
+                    if team.span and team.span.text == detail:
+                        team_dict[_slugify(team.span.text)
+                                  ] = team.td.text
+                        continue
+        return team_dict
 
     except ValueError:
         return "An error occured creating driver data."
