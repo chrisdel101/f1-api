@@ -26,5 +26,42 @@ def list_all_teams():
             team_dict['name_slug'] = name_slug
             name = " ".join(team.find('h2').text.split())
             team_dict['name'] = name
-            teams.append(team_dict)
-    return teams
+            teams_endpoint.append(team_dict)
+    return teams_endpoint
+
+
+def team_stats(team_slug):
+    print('TS', endpoints.team_endpoint(team_slug))
+    page = requests.get(endpoints.team_endpoint(team_slug), headers=headers)
+    soup = BeautifulSoup(page.text, 'html.parser')
+    team_details = soup.find('section', {'class', 'stats'})
+    details = ['Full Team Name',
+               'Base',
+               'Team Chief',
+               'Technical Chief',
+               'Chasis',
+               'Power Unit',
+               'First Team Entry',
+               'Highest Race Finish',
+               'Pole Positions',
+               'Fastest Laps'
+               ]
+    team_dict = {}
+    print(team_details)
+    return
+    try:
+        if team_details.find_all('tr'):
+            # loop over html
+            for team in team_details.find_all('tr'):
+                print(team)
+                # # loop over all wanted details
+                # for detail in details:
+                #     # if they match add to driver object
+                #     if driver.span and driver.span.text == detail:
+                #         driver_dict[_slugify(driver.span.text)
+                #                     ] = driver.td.text
+                #         continue
+        return driver_dict
+
+    except ValueError:
+        return "An error occured creating driver data."

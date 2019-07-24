@@ -23,7 +23,11 @@ def all_teams():
 
 @app.route('/teams/<team_slug>')
 def team(team_slug):
-    return "hello"
+    print('ROUTE')
+    print(team_slug)
+    data = teams_controller.team_stats(team_slug)
+    print(data)
+    return "H"
 
 
 if __name__ == '__main__':
