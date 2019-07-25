@@ -26,6 +26,7 @@ def change_img_size(src, list_index):
 
 
 def list_all_drivers():
+    # scrape all drivers names of the page - return list
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
     drivers_list = soup.find(class_='drivers').ul
@@ -40,6 +41,7 @@ def list_all_drivers():
 
 
 def _driver_images(name):
+    # scrape for driver images and other info - return dict
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     print('====', page)
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -82,6 +84,7 @@ def _driver_images(name):
 
 
 def driver_stats(name):
+    # scrape for driver datas - return dict
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     print("====", name)
     soup = BeautifulSoup(page.text, 'html.parser')
