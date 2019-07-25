@@ -1,15 +1,17 @@
-from models import driver_model
 from controllers import drivers_controller, teams_controller
+from models import driver_model
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
 from flask import jsonify
+
 app = Flask(__name__)
 
 app.config.from_pyfile("flask.cfg")
 app.config.update(
     MAIL_SERVER=app.config['SQLALCHEMY_DATABASE_URI']
 )
+
 db = SQLAlchemy(app)
 
 
@@ -21,7 +23,30 @@ def all_drivers():
 
 @app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
-    return jsonify(drivers_controller.driver_stats(driver_slug))
+
+    data = drivers_controller.driver_stats(driver_slug)
+    print(data['driver_number'])
+
+    __table_args__ = {'extend_existing': True}
+    db.metadata.clear()
+
+    d = driver_model.Driver(
+        name=data['driver_name'],
+        date_of_birth=data['date_of_birth'],
+        driver_number=data['driver_number'],
+        place_of_birth=data['place_of_birth'],
+        flag_img_url=data['flag_img_url'],
+        main_image=data['main_image'],
+        podiums=data['podiums'],
+        points=data['points'],
+        world_championships=data['world_championships'],
+        team=data['team']
+    )
+    # print('XXX', data['country'])
+    db.session.add(d)
+    db.session.commit()
+
+    return "hello"
 
 
 @app.route('/teams')
@@ -32,24 +57,6 @@ def all_teams():
 @app.route('/teams/<team_slug>')
 def team(team_slug):
     return jsonify(teams_controller.team_stats(team_slug))
-
-
-class Driver(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    date_of_birth = db.Column(db.String(20))
-    place_of_birth = db.Column(db.String(50))
-    # country = db.Column(db.string(50))
-    # driver_number = db.Column(db.string(10))
-    # flag_img_url = db.Column(db.string(150))
-    # flag_img_url = db.Column(db.string(150))
-    # podiums = db.Column(db.string(10))
-    # points = db.Column(db.string(10))
-    # world_championships = db.Column(db.string(10))
-    # team = db.Column(db.string(50))
-
-    def __repr__(self):
-        return f"{self.name}"
 
 
 if __name__ == '__main__':
