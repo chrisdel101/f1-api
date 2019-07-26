@@ -7,7 +7,6 @@ import endpoints
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
 
-
 headers = {
     'User-Agent': generate_user_agent(os=None, navigator=None, platform=None, device_type=None),
     'From': 'webdev@chrisdel.ca'
@@ -26,7 +25,8 @@ def change_img_size(src, list_index):
 
 
 def list_all_drivers():
-    # scrape all drivers names of the page - return list
+    # - scrape all drivers names of the page -
+    # - return list
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
     drivers_list = soup.find(class_='drivers').ul
@@ -41,7 +41,8 @@ def list_all_drivers():
 
 
 def _driver_images(name):
-    # scrape for driver images and other info - return dict
+    # - scrape for driver images and other info -
+    # - return dict
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     print('====', page)
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -120,6 +121,9 @@ def driver_stats(name):
                         driver_dict[_slugify(driver.span.text)
                                     ] = driver.td.text
                         continue
+                # add driver slug
+            driver_dict['driver_slug'] = slugify(
+                driver_dict['driver_name']).lower()
             return driver_dict
     except ValueError:
         return "An error occured creating driver data."
