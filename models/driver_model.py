@@ -1,11 +1,12 @@
 from database import db
+import utils
 
 
 class Driver(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    driver_name = db.Column(db.String(80))
+    driver_name = db.Column(db.String(80), nullable=False)
     country = db.Column(db.String(100))
-    name_slug = db.Column(db.String(80))
+    name_slug = db.Column(db.String(80), unique=True, nullable=False)
     date_of_birth = db.Column(db.String(20))
     driver_number = db.Column(db.String(10))
     place_of_birth = db.Column(db.String(50))
@@ -21,42 +22,33 @@ class Driver(db.Model):
         return "{0}".format(self.driver_name)
 
     @classmethod
-    def create(self, data):
+    def create(self, data_dict):
         db.create_all()
         d = self(
-            driver_name=data['driver_name'],
-            name_slug=data['driver_slug'],
-            date_of_birth=data['date_of_birth'],
-            driver_number=data['driver_number'],
-            place_of_birth=data['place_of_birth'],
-            flag_img_url=data['flag_img_url'],
-            main_image=data['main_image'],
-            podiums=data['podiums'],
-            points=data['points'],
-            world_championships=data['world_championships'],
-            team=data['team']
+            driver_name=data_dict.get('driver_name'),
+            name_slug=data_dict.get('driver_slug'),
+            date_of_birth=data_dict.get('date_of_birth'),
+            driver_number=data_dict.get('driver_number'),
+            place_of_birth=data_dict.get('place_of_birth'),
+            flag_img_url=data_dict.get('flag_img_url'),
+            main_image=data_dict.get('main_image'),
+            podiums=data_dict.get('podiums'),
+            points=data_dict.get('points'),
+            world_championships=data_dict.get('world_championships'),
+            team=data_dict.get('team')
         )
+
         db.session.add(d)
         db.session.commit()
-        print(self.query.all())
-    # d = driver_model.Driver(
-    #     driver_name=data['driver_name'],
-    #     name_slug=data['driver_slug'],
-    #     date_of_birth=data['date_of_birth'],
-    #     driver_number=data['driver_number'],
-    #     place_of_birth=data['place_of_birth'],
-    #     flag_img_url=data['flag_img_url'],
-    #     main_image=data['main_image'],
-    #     podiums=data['podiums'],
-    #     points=data['points'],
-    #     world_championships=data['world_championships'],
-    #     team=data['team']
-    # )
 
+    @classmethod
+    def update(self, data_dict):
+        db_dict = utils.convert_db_row_dict(self, data_dict)
+        result = utils.dict_compare_vals(data_dict, db_dict)
+        print('res', result)
 
-#  # convert to dict
-#         db_data = dict((col, getattr(slug, col))
-#                        for col in slug.__table__.columns.keys())
-#         # check if any values are changed
-#         changed_vals = utils.dict_compare_vals(new_data, db_data)
-#         print('XXX', changed_vals)
+    @classmethod
+    def exists(self, driver_slug):
+        if self.query.filter_by(name_slug=driver_slug).first():
+            return True
+        return False

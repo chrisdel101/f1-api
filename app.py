@@ -33,7 +33,10 @@ def all_drivers():
 def driver(driver_slug):
 
     new_data = drivers_controller.driver_stats(driver_slug)
-    print('DD', driver_model.Driver.create(new_data))
+    if not driver_model.Driver.exists(driver_slug):
+        driver_model.Driver.create(new_data)
+    else:
+        driver_model.Driver.update(new_data)
     return "hello"
 
 

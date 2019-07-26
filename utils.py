@@ -16,3 +16,9 @@ def dict_compare_vals(new_data, db_data):
         'new_keys_to_add': new_keys_to_add,
         'keys_to_update': keys_to_update
     }
+
+
+def convert_db_row_dict(self, db_dict):
+    # https://stackoverflow.com/a/54283540/5972531
+    return self.query.filter_by(
+        name_slug=db_dict['driver_slug']).first().__dict__
