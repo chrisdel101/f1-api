@@ -1,15 +1,15 @@
 from controllers import drivers_controller, teams_controller
 from models import driver_model
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
 from flask import jsonify
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
 app.config.from_pyfile("flask.cfg")
 app.config.update(
-    MAIL_SERVER=app.config['SQLALCHEMY_DATABASE_URI']
+    SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
 )
 
 db = SQLAlchemy(app)
@@ -42,7 +42,6 @@ def driver(driver_slug):
         world_championships=data['world_championships'],
         team=data['team']
     )
-    # print('XXX', data['country'])
     db.session.add(d)
     db.session.commit()
 
