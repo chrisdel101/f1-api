@@ -1,5 +1,6 @@
 from database import db
 import utils
+from sqlalchemy import text
 
 
 class Driver(db.Model):
@@ -23,6 +24,7 @@ class Driver(db.Model):
 
     @classmethod
     def create(self, data_dict):
+        print('CREATE')
         db.create_all()
         d = self(
             driver_name=data_dict.get('driver_name'),
@@ -45,7 +47,18 @@ class Driver(db.Model):
     def update(self, data_dict):
         db_dict = utils.convert_db_row_dict(self, data_dict)
         result = utils.dict_compare_vals(data_dict, db_dict)
-        print('res', result)
+        try:
+            sql = text('SELECT * FROM driver')
+            result = db.session.execute(text('SELECT * FROM driver'))
+            print('RES', result)
+            for r in result:
+                print('what', [0])  # Access by positional index
+                # Access by column name as a string
+                print('name', r['driver_name'])
+                # convert to dict keyed by column names
+                r_dict = dict(r.items())
+        except:
+            print('Error')
 
     @classmethod
     def exists(self, driver_slug):
