@@ -39,29 +39,28 @@ class Driver(db.Model):
             world_championships=data_dict.get('world_championships'),
             team=data_dict.get('team')
         )
-
-        db.session.add(d)
-        db.session.commit()
+        try:
+            db.session.add(d)
+            db.session.commit()
+        except:
+            print('RollBack')
+            session.rollback()
 
     @classmethod
     def update(self, data_dict):
         db_dict = utils.convert_db_row_dict(self, data_dict)
         result = utils.dict_compare_vals(data_dict, db_dict)
         try:
-            sql = text('SELECT * FROM driver')
-            result = db.session.execute(text('SELECT * FROM driver'))
-            print('RES', result)
-            # for r in result:
-            #     print('what', [0])  # Access by positional index
-            #     # Access by column name as a string
-            #     print('name', w r['driver_name'])
-            #     # convert to dict keyed by column names
-            #     r_dict = dict(r.items())
+            print('Result', result)
         except:
-            print('Error')
+            print('ModelError')
 
     @classmethod
     def exists(self, driver_slug):
-        if self.query.filter_by(name_slug=driver_slug).first():
-            return True
-        return False
+        try:
+            if self.query.filter_by(name_slug=driver_slug).first():
+                return True
+            return False
+        except:
+            print("Does not exist")
+            return False
