@@ -16,8 +16,6 @@ app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
     SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
 )
-# db = SQLAlchemy(app)
-
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
