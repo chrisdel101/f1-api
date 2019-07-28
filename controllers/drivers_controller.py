@@ -122,7 +122,7 @@ def driver_stats(name):
                                     ] = driver.td.text
                         continue
                 # add driver slug
-            driver_dict['driver_slug'] = slugify(
+            driver_dict['name_slug'] = slugify(
                 driver_dict['driver_name']).lower()
             return driver_dict
     except ValueError:

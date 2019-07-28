@@ -18,44 +18,60 @@ class Driver(db.Model):
     world_championships = db.Column(db.String(10))
     team = db.Column(db.String(50))
     highest_grid_position = db.Column(db.String(10))
+    driver_slug = db.Column(db.String(80), unique=True)
 
     def __repr__(self):
         return "{0}".format(self.driver_name)
 
     @classmethod
-    def create(self, data_dict):
+    def create(cls, data_dict):
         print('CREATE')
         db.create_all()
-        d = self(
-            driver_name=data_dict.get('driver_name'),
-            name_slug=data_dict.get('driver_slug'),
-            date_of_birth=data_dict.get('date_of_birth'),
-            driver_number=data_dict.get('driver_number'),
-            place_of_birth=data_dict.get('place_of_birth'),
-            flag_img_url=data_dict.get('flag_img_url'),
-            main_image=data_dict.get('main_image'),
-            podiums=data_dict.get('podiums'),
-            points=data_dict.get('points'),
-            world_championships=data_dict.get('world_championships'),
-            team=data_dict.get('team')
-        )
+        d = cls()
+        d.driver_name = data_dict.get('driver_name')
+        d.name_slug = data_dict.get('name_slug')
+        d.country = data_dict.get('coutry')
+        d.highest_grid_position = data_dict.get('highest_grid_position')
+        d.driver_name = data_dict.get('driver_name')
+        d.name_slug = data_dict.get('driver_slug')
+        d.date_of_birth = data_dict.get('date_of_birth')
+        d.driver_number = data_dict.get('driver_number')
+        d.place_of_birth = data_dict.get('place_of_birth')
+        d.flag_img_url = data_dict.get('flag_img_url')
+        d.main_image = data_dict.get('main_image')
+        d.podiums = data_dict.get('podiums')
+        d.points = data_dict.get('points')
+        d.world_championships = data_dict.get('world_championships')
+        d.team = data_dict.get('team')
         try:
             db.session.add(d)
             db.session.commit()
         except:
             print('RollBack')
-            session.rollback()
+            db.session.rollback()
+        return d
 
-    @classmethod
-    def update(self, data_dict):
+    def compare(self, data_dict):
         db_dict = utils.convert_db_row_dict(self, data_dict)
         result = utils.dict_compare_vals(data_dict, db_dict)
+        return {
+            compare_results: results,
+            db_dict: db_dict
+        }
+
+    def update(self, data_dict):
+
+        results = compare(self, data_dict)
+        print(self)
         try:
-            print('Result', result)
+            if len(results.compare_results['new_keys_to_add']):
+                print('Migration needed - cols to add')
+            else:
+                # -query for driver slug and deltete
+                print(results.db_dict)
         except:
             print('ModelError')
 
-    @classmethod
     def exists(self, driver_slug):
         try:
             if self.query.filter_by(name_slug=driver_slug).first():

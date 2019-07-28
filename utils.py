@@ -20,5 +20,10 @@ def dict_compare_vals(new_data, db_data):
 
 def convert_db_row_dict(self, db_dict):
     # https://stackoverflow.com/a/54283540/5972531
-    return self.query.filter_by(
-        name_slug=db_dict['driver_slug']).first().__dict__
+    try:
+        print("===============================")
+        return self.query.filter_by(
+            name_slug=db_dict.get('name_slug')).first().__dict__
+        return
+    except KeyError:
+        print("Cannot convert. No key")
