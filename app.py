@@ -1,23 +1,24 @@
 from controllers import drivers_controller, teams_controller
 import utils
-from database import db
 from models import driver_model
 from flask import Flask
 from flask import render_template
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from database import db
 
 app = Flask(__name__)
-db = SQLAlchemy(app)
 # db.init_app(app)
 
-# app.config.from_pyfile("flask.cfg")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/f1'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
+app.config.from_pyfile("flask.cfg")
+app.config.update(
+    SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
+    SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
+)
 # db = SQLAlchemy(app)
+
+db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 

@@ -51,12 +51,12 @@ class Driver(db.Model):
             sql = text('SELECT * FROM driver')
             result = db.session.execute(text('SELECT * FROM driver'))
             print('RES', result)
-            for r in result:
-                print('what', [0])  # Access by positional index
-                # Access by column name as a string
-                print('name', r['driver_name'])
-                # convert to dict keyed by column names
-                r_dict = dict(r.items())
+            # for r in result:
+            #     print('what', [0])  # Access by positional index
+            #     # Access by column name as a string
+            #     print('name', w r['driver_name'])
+            #     # convert to dict keyed by column names
+            #     r_dict = dict(r.items())
         except:
             print('Error')
 
