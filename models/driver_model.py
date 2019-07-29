@@ -70,3 +70,6 @@ class Driver(db.Model):
         except Exception as e:
             print("Does not exist", e)
             return False
+
+    def as_dict(req):
+        return {c.name: getattr(req, c.name) for c in req.__table__.columns}

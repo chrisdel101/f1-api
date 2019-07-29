@@ -46,3 +46,11 @@ def serialize(list, lowerCase=True):
         return dict
     except Exception as e:
         print("serialize error", e)
+
+
+def serialize_row(row):
+    # https://stackoverflow.com/a/10370224/597253
+    dictret = dict(row.__dict__)
+    # remove the field causing the error
+    dictret.pop('_sa_instance_state', None)
+    return dictret

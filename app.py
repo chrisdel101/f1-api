@@ -29,14 +29,13 @@ def all_drivers():
 
 @app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
-
-    new_data = scraper.scrape_single_driver_stats(driver_slug)
-    print('NEW', new_data)
-    d = driver_model.Driver.new(new_data)
-    if d.exists(driver_slug):
-        d.delete(driver_slug)
-    d.insert()
-    return "hello"
+    d = drivers_controller.show_single_driver(driver_slug)
+    print(d)
+    # print(driver_model.Driver.as_dict(d))
+    # print('=====', d)
+    # for i in d:
+    #     print(jsoni)
+    return d
 
 
 @app.route('/teams')
@@ -53,6 +52,17 @@ def team(team_slug):
 @app.route('/test')
 def test():
     scraper_runner.scrape()
+
+
+@app.route('/test/<driver_slug>')
+def test1(driver_slug):
+    new_data = scraper.scrape_single_driver_stats(driver_slug)
+    print('NEW', new_data)
+    d = driver_model.Driver.new(new_data)
+    if d.exists(driver_slug):
+        d.delete(driver_slug)
+    d.insert()
+    return "hello"
 
 
 if __name__ == '__main__':
