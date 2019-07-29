@@ -1,5 +1,5 @@
 from controllers import drivers_controller, teams_controller
-import utils
+from utilities import scraper
 from models import driver_model
 from flask import Flask
 from flask import render_template
@@ -22,31 +22,30 @@ migrate = Migrate(app, db)
 
 @app.route('/drivers')
 def all_drivers():
-    data = drivers_controller.list_all_drivers()
+    data = scraper.scrape_all_driver_names()
     return jsonify(data)
 
 
 @app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
 
-    new_data = drivers_controller.driver_stats(driver_slug)
+    new_data = scraper.scrape_single_driver_stats(driver_slug)
     # print('new', new_data)
     d = driver_model.Driver.new(new_data)
     if d.exists(driver_slug):
         d.delete(driver_slug)
-    # print(vars(d))
     d.insert()
     return "hello"
 
 
 @app.route('/teams')
 def all_teams():
-    return jsonify(teams_controller.list_all_teams())
+    return jsonify(scraper.scrape_all_team_names())
 
 
 @app.route('/teams/<team_slug>')
 def team(team_slug):
-    return jsonify(teams_controller.team_stats(team_slug))
+    return jsonify(scraper.scrape_single_team_stats(team_slug))
 
 
 if __name__ == '__main__':

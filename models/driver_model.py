@@ -1,5 +1,4 @@
 from database import db
-import utils
 from sqlalchemy import text
 from slugify import slugify
 
