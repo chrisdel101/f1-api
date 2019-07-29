@@ -31,7 +31,7 @@ def all_drivers():
 def driver(driver_slug):
 
     new_data = scraper.scrape_single_driver_stats(driver_slug)
-    # print('new', new_data)
+    print('NEW', new_data)
     d = driver_model.Driver.new(new_data)
     if d.exists(driver_slug):
         d.delete(driver_slug)

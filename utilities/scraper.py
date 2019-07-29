@@ -1,6 +1,7 @@
 # from utilities
 from utilities import endpoints
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, UnicodeDammit
+
 import requests
 import re
 from user_agent import generate_user_agent
@@ -46,8 +47,13 @@ def _driver_images(name):
     # - scrape for driver images and other info -
     # - return dict
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
-    print('====', page)
-    soup = BeautifulSoup(page.text, 'html.parser')
+    soup = BeautifulSoup(page.text, "html.parser")
+    # # x = BeautifulSoup(soup.decode('utf-8', 'ignore'))
+
+    # y = soup.find(
+    #     'h1', {"class", "driver-name"}).text.encode('ASCII').decode('utf-8')
+    # x = driver_info.find(
+    # 'h1', {"class", "driver-name"}).text
     driver_info = soup.find(
         'figcaption', class_="driver-details")
     driver_dict = {}
@@ -89,7 +95,7 @@ def _driver_images(name):
 def scrape_single_driver_stats(name_slug):
     # scrape for driver datas - return dict
     page = requests.get(endpoints.driver_endpoint(name_slug), headers=headers)
-    print("====", name_slug)
+    # print("====", name_slug)
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_details = soup.find(class_='driver-details')
     details = ['Team',
@@ -109,6 +115,7 @@ def scrape_single_driver_stats(name_slug):
         # loop in other outside values to driver_dict
         for _, (k, v) in enumerate(_driver_images(name_slug).items()):
             driver_dict[k] = v
+            print('v', v)
     except ValueError:
         return "An error occured unpacking driver images"
     # error checking
