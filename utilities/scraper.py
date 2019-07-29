@@ -1,3 +1,4 @@
+# from utilities
 from utilities import endpoints
 from bs4 import BeautifulSoup
 import requests
@@ -16,7 +17,7 @@ headers = {
 
 # manually add in dif sizes for imgs
 # takes url and index to choose size from list
-def change_img_size(src, list_index):
+def _change_img_size(src, list_index):
     # replace scraped img size with one the sizes below
     regex = "image.img.[\d]+\.?.[\w]+"
     sizes = ['320', '640', '768', '1536']
@@ -55,7 +56,7 @@ def _driver_images(name):
 
             img_src = soup.find(class_='driver-main-image').img['src']
             # replace img size with custom size
-            new_str = change_img_size(img_src, 3)
+            new_str = _change_img_size(img_src, 3)
             driver_dict['main_image'] = "{0}/{1}".format(
                 endpoints.home_endpoint(), new_str)
 
@@ -85,10 +86,10 @@ def _driver_images(name):
         return "An error occured creating driver images."
 
 
-def scrape_single_driver_stats(name):
+def scrape_single_driver_stats(name_slug):
     # scrape for driver datas - return dict
-    page = requests.get(endpoints.driver_endpoint(name), headers=headers)
-    print("====", name)
+    page = requests.get(endpoints.driver_endpoint(name_slug), headers=headers)
+    print("====", name_slug)
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_details = soup.find(class_='driver-details')
     details = ['Team',
@@ -103,10 +104,10 @@ def scrape_single_driver_stats(name):
                'Place of birth'
                ]
     driver_dict = {}
-    _driver_images(name)
+    _driver_images(name_slug)
     try:
         # loop in other outside values to driver_dict
-        for _, (k, v) in enumerate(_driver_images(name).items()):
+        for _, (k, v) in enumerate(_driver_images(name_slug).items()):
             driver_dict[k] = v
     except ValueError:
         return "An error occured unpacking driver images"

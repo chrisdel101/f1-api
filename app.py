@@ -7,6 +7,7 @@ from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from database import db
+from utilities import scraper_runner
 
 app = Flask(__name__)
 # db.init_app(app)
@@ -45,7 +46,12 @@ def all_teams():
 
 @app.route('/teams/<team_slug>')
 def team(team_slug):
-    return jsonify(scraper.scrape_single_team_stats(team_slug))
+    return jsonify(scraper.scrape_single_drvier_stats(team_slug))
+
+
+@app.route('/test')
+def test():
+    scraper_runner.scrape()
 
 
 if __name__ == '__main__':
