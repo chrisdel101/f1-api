@@ -34,15 +34,15 @@ def convert_db_row_dict(self, db_dict):
         print("Cannot convert. No key")
 
 
-def serialize(list, lowerCase=True):
+def serialize(l, lowerCase=True):
     dict = {}
     try:
-        for item in list:
+        for item in l:
             item_slug = slugify(str(item))
             if lowerCase:
                 item_slug = item_slug.lower()
             if item_slug not in dict:
-                dict[item_slug] = item
+                dict[item_slug] = str(item)
         return dict
     except Exception as e:
         print("serialize error", e)
@@ -50,7 +50,12 @@ def serialize(list, lowerCase=True):
 
 def serialize_row(row):
     # https://stackoverflow.com/a/10370224/597253
-    dictret = dict(row.__dict__)
-    # remove the field causing the error
-    dictret.pop('_sa_instance_state', None)
-    return dictret
+    try:
+        if type(row) is not dict:
+            row = dict(row)
+        # remove the field causing the error
+        row.pop('_sa_instance_state', None)
+        row.pop('kimi-ra-ikkapnen', None)
+        return row
+    except Exception as e:
+        print("Serialize Error", e)
