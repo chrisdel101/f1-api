@@ -1,4 +1,9 @@
+from slugify import slugify, Slugify
+_slugify = Slugify(to_lower=True)
+_slugify.separator = '_'
 # compare dict values
+
+
 def dict_compare_vals(new_data, db_data):
     # loop over new_data
     new_keys_to_add = []
@@ -27,3 +32,17 @@ def convert_db_row_dict(self, db_dict):
         return
     except KeyError:
         print("Cannot convert. No key")
+
+
+def serialize(list, lowerCase=True):
+    dict = {}
+    try:
+        for item in list:
+            item_slug = slugify(str(item))
+            if lowerCase:
+                item_slug = item_slug.lower()
+            if item_slug not in dict:
+                dict[item_slug] = item
+        return dict
+    except Exception as e:
+        print("serialize error", e)

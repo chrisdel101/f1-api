@@ -7,7 +7,7 @@ from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from database import db
-from utilities import scraper_runner
+from utilities import scraper_runner, utils
 
 app = Flask(__name__)
 # db.init_app(app)
@@ -23,8 +23,8 @@ migrate = Migrate(app, db)
 
 @app.route('/drivers')
 def all_drivers():
-    data = scraper.scrape_all_driver_names()
-    return jsonify(data)
+    data = utils.serialize(list(drivers_controller.show_all_drivers()))
+    return data
 
 
 @app.route('/drivers/<driver_slug>')
@@ -41,6 +41,7 @@ def driver(driver_slug):
 
 @app.route('/teams')
 def all_teams():
+    drivers_controller.show_all_drivers
     return jsonify(scraper.scrape_all_team_names())
 
 

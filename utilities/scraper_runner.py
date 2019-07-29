@@ -9,11 +9,13 @@ _slugify.separator = '_'
 def scrape():
     # -get all driver names
     all_drivers = scraper.scrape_all_driver_names()
-    # - loop over names and scrape each
+    # - loop over names
     for driver in all_drivers:
+        # slugify name
         driver_slug = slugify(driver).lower()
-    # - insert on scrape into DB
+        # scrape each driver
         new_data = scraper.scrape_single_driver_stats(driver_slug)
+    # - insert on scrape into DB
         d = driver_model.Driver.new(new_data)
         if d.exists(driver_slug):
             d.delete(driver_slug)
