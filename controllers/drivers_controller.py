@@ -10,6 +10,7 @@ def show_all_drivers():
 
 
 def show_single_driver(name_slug):
-    driver = driver_model.Driver.query.filter_by(
-        name_slug=name_slug).first()
-    return dict(utils.serialize_row(driver))
+    driver = vars(driver_model.Driver.query.filter_by(
+        name_slug=name_slug).first())
+    print('++++++++', driver)
+    return utils.serialize_row(driver)

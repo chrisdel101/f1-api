@@ -29,7 +29,7 @@ def all_drivers():
 
 @app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
-    return drivers_controller.show_single_driver(driver_slug)
+    return jsonify(drivers_controller.show_single_driver(driver_slug))
 
 
 @app.route('/teams')
