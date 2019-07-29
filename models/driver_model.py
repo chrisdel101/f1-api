@@ -1,6 +1,7 @@
 from database import db
 import utils
 from sqlalchemy import text
+from slugify import slugify
 
 
 class Driver(db.Model):
@@ -24,59 +25,49 @@ class Driver(db.Model):
         return "{0}".format(self.driver_name)
 
     @classmethod
-    def create(cls, data_dict):
-        print('CREATE')
+    def new(cls, scraper_dict):
+        print('CREATE', scraper_dict)
         db.create_all()
         d = cls()
-        d.driver_name = data_dict.get('driver_name')
-        d.name_slug = data_dict.get('name_slug')
-        d.country = data_dict.get('coutry')
-        d.highest_grid_position = data_dict.get('highest_grid_position')
-        d.driver_name = data_dict.get('driver_name')
-        d.name_slug = data_dict.get('driver_slug')
-        d.date_of_birth = data_dict.get('date_of_birth')
-        d.driver_number = data_dict.get('driver_number')
-        d.place_of_birth = data_dict.get('place_of_birth')
-        d.flag_img_url = data_dict.get('flag_img_url')
-        d.main_image = data_dict.get('main_image')
-        d.podiums = data_dict.get('podiums')
-        d.points = data_dict.get('points')
-        d.world_championships = data_dict.get('world_championships')
-        d.team = data_dict.get('team')
-        try:
-            db.session.add(d)
-            db.session.commit()
-        except:
-            print('RollBack')
-            db.session.rollback()
+        d.driver_name = scraper_dict.get('driver_name')
+        d.name_slug = slugify(d.driver_name).lower()
+        d.country = scraper_dict.get('coutry')
+        d.highest_grid_position = scraper_dict.get('highest_grid_position')
+        d.driver_name = scraper_dict.get('driver_name')
+        d.date_of_birth = scraper_dict.get('date_of_birth')
+        d.driver_number = scraper_dict.get('driver_number')
+        d.place_of_birth = scraper_dict.get('place_of_birth')
+        d.flag_img_url = scraper_dict.get('flag_img_url')
+        d.main_image = scraper_dict.get('main_image')
+        d.podiums = scraper_dict.get('podiums')
+        d.points = scraper_dict.get('points')
+        d.world_championships = scraper_dict.get('world_championships')
+        d.team = scraper_dict.get('team')
         return d
 
-    def compare(self, data_dict):
-        db_dict = utils.convert_db_row_dict(self, data_dict)
-        result = utils.dict_compare_vals(data_dict, db_dict)
-        return {
-            compare_results: results,
-            db_dict: db_dict
-        }
-
-    def update(self, data_dict):
-
-        results = compare(self, data_dict)
-        print(self)
+    def insert(self):
         try:
-            if len(results.compare_results['new_keys_to_add']):
-                print('Migration needed - cols to add')
-            else:
-                # -query for driver slug and deltete
-                print(results.db_dict)
-        except:
-            print('ModelError')
+            db.session.add(self)
+            db.session.commit()
+            print('INSERT OKAY')
+        except Exception as e:
+            print('RollBack', e)
+            db.session.rollback()
+
+    def delete(self, driver_slug):
+        d = self.query.filter_by(name_slug=driver_slug).first()
+        try:
+            db.session.delete(d)
+            db.session.commit()
+            print('DELETE OKAY')
+        except Exception as e:
+            print('Delete Error', e)
 
     def exists(self, driver_slug):
         try:
             if self.query.filter_by(name_slug=driver_slug).first():
                 return True
             return False
-        except:
-            print("Does not exist")
+        except Exception as e:
+            print("Does not exist", e)
             return False

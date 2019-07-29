@@ -121,9 +121,9 @@ def driver_stats(name):
                         driver_dict[_slugify(driver.span.text)
                                     ] = driver.td.text
                         continue
-                # add driver slug
-            driver_dict['name_slug'] = slugify(
-                driver_dict['driver_name']).lower()
+            #     # add driver slug
+            # driver_dict['name_slug'] = slugify(
+            #     driver_dict['driver_name']).lower()
             return driver_dict
     except ValueError:
         return "An error occured creating driver data."
