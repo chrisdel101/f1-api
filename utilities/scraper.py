@@ -174,7 +174,7 @@ def scrape_single_team_stats(team_slug):
         if team_details.find_all('tr'):
             # loop over html
             for team in team_details.find_all('tr'):
-                print('Team', team)
+                # print('Team', team)
                 # # loop over all wanted details
                 for detail in details:
                     #     # if they match add to driver object
@@ -182,6 +182,7 @@ def scrape_single_team_stats(team_slug):
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text
                         continue
+            print(team_dict)
         return team_dict
 
     except ValueError:
