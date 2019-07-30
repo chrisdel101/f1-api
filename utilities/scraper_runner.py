@@ -32,37 +32,32 @@ def scrape_drivers():
     return d
 
 
+# scrape and add to DB
+# return dict
 def scrape_teams():
     # -get all driver names
     all_teams = scraper.scrape_all_team_names()
     print('ALL', all_teams)
     # - loop over names
     for team in all_teams:
-        #     # remove all separators for count
+        print('TEAM', team['name_slug'])
+        # remove all separators for count
         name = utils.custom_seperators(team['name'], "_")
-    #     # shorten to match urls
+     # shorten to match urls
         name = utils.teamShortener(name)
-    #     # print(name)
-    #     # print(name)
     #     # remove underscores - add dashes to match urls
         name = utils.custom_seperators(name, '_', '-')
     #     # # remove whitespace - add dashes
         name = utils.custom_seperators(name, ' ', '-')
-    #     print(name)
-
     # # scrape each team
         new_data = scraper.scrape_single_team_stats(name)
-    # print(new_data)
+        # add slug
+        new_data['name_slug'] = team['name_slug']
     # - insert on scrape into DB
         d = team_model.Team.new(new_data)
-        print('d', d)
-    # # return
+        # print('d', d)
         if d.exists(team['name_slug']):
             d.delete(team['name_slug'])
         d.insert()
 
     return d
-
-
-# if__name__ == "__main__"
-# main()

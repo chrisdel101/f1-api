@@ -45,26 +45,19 @@ def team(team_slug):
 
 
 @app.route('/scrape-drivers')
-def test():
-    scraper_runner.scrape_drivers()
-
-
-@app.route('/scrape-drivers/<driver_slug>')
-def test1(driver_slug):
-    new_data = scraper.scrape_single_driver_stats(driver_slug)
-    print('NEW', new_data)
-    d = driver_model.Driver.new(new_data)
-    if d.exists(driver_slug):
-        d.delete(driver_slug)
-    d.insert()
-    return "hello"
+def scrape_drivers():
+    return jsonify(scraper_runner.scrape_drivers())
 
 
 @app.route('/scrape-teams')
-def test2():
-    new_data = scraper_runner.main()
-    print('NEW', new_data)
+def scrape_teams():
+    scraper_runner.scrape_teams()
     return "hello"
+
+
+@app.route('/scrape-all')
+def all():
+    scrape_drivers.main()
 
 
 if __name__ == '__main__':

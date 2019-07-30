@@ -7,7 +7,7 @@ class Team(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     full_team_name = db.Column(db.String(100), nullable=False, unique=True)
-    team_slug = db.Column(db.String(100), unique=True)
+    name_slug = db.Column(db.String(100))
     base = db.Column(db.String(100))
     team_chief = db.Column(db.String(100))
     technical_chief = db.Column(db.String(100))
@@ -27,7 +27,7 @@ class Team(db.Model):
             db.create_all()
             d = cls()
             d.full_team_name = scraper_dict.get('full_team_name')
-            d.name_slug = slugify(d.full_team_name).lower()
+            d.name_slug = scraper_dict.get('name_slug')
             d.base = scraper_dict.get('base')
             d.highest_grid_position = scraper_dict.get('highest_grid_position')
             d.team_chief = scraper_dict.get('team_chief')
@@ -38,7 +38,7 @@ class Team(db.Model):
             d.pole_positions = scraper_dict.get('main_image')
             d.fastest_lap = scraper_dict.get('fastest_lap')
             d.points = scraper_dict.get('points')
-            print('TEAMTEAM', d)
+            # print('TEAMTEAM', vars(d))
             return d
 
         except Exception as e:
@@ -64,6 +64,7 @@ class Team(db.Model):
 
     def exists(self, team_slug):
         try:
+            # print('SELF', vars(self)['name_slug'])
             if self.query.filter_by(name_slug=team_slug).first():
                 return True
             return False
