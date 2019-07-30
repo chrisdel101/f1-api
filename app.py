@@ -34,7 +34,7 @@ def driver(driver_slug):
 
 @app.route('/teams')
 def all_teams():
-    x = teams_controller.show_all_drivers
+    x = teams_controller.show_all_teams()
     print(x)
     return "hello"
 
@@ -44,12 +44,12 @@ def team(team_slug):
     return jsonify(scraper.scrape_single_drvier_stats(team_slug))
 
 
-@app.route('/test')
+@app.route('/scrape-drivers')
 def test():
     scraper_runner.scrape_drivers()
 
 
-@app.route('/test/<driver_slug>')
+@app.route('/scrape-drivers/<driver_slug>')
 def test1(driver_slug):
     new_data = scraper.scrape_single_driver_stats(driver_slug)
     print('NEW', new_data)
@@ -60,14 +60,10 @@ def test1(driver_slug):
     return "hello"
 
 
-@app.route('/test/teams')
+@app.route('/scrape-teams')
 def test2():
     new_data = scraper_runner.main()
     print('NEW', new_data)
-    # d = driver_model.Driver.new(new_data)
-    # if d.exists(driver_slug):
-    #     d.delete(driver_slug)
-    # d.insert()
     return "hello"
 
 

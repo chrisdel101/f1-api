@@ -17,24 +17,32 @@ class Team(db.Model):
     pole_positions = db.Column(db.String(25))
     fastest_lap = db.Column(db.String(25))
 
+    def __repr__(self):
+        return "{0}".format(self.full_team_name)
+
     @classmethod
     def new(cls, scraper_dict):
-        print('CREATE', scraper_dict)
-        db.create_all()
-        d = cls()
-        d.full_team_name = scraper_dict.get('full_team_name')
-        d.name_slug = slugify(d.full_team_name).lower()
-        d.base = scraper_dict.get('base')
-        d.highest_grid_position = scraper_dict.get('highest_grid_position')
-        d.team_chief = scraper_dict.get('team_chief')
-        d.technical_chief = scraper_dict.get('technical_chief')
-        d.power_unit = scraper_dict.get('power_unit')
-        d.first_team_entry = scraper_dict.get('first_team_entry')
-        d.highest_grid_position = scraper_dict.get('flag_img_url')
-        d.pole_positions = scraper_dict.get('main_image')
-        d.fastest_lap = scraper_dict.get('fastest_lap')
-        d.points = scraper_dict.get('points')
-        return d
+        try:
+            print('CREATE', scraper_dict)
+            db.create_all()
+            d = cls()
+            d.full_team_name = scraper_dict.get('full_team_name')
+            d.name_slug = slugify(d.full_team_name).lower()
+            d.base = scraper_dict.get('base')
+            d.highest_grid_position = scraper_dict.get('highest_grid_position')
+            d.team_chief = scraper_dict.get('team_chief')
+            d.technical_chief = scraper_dict.get('technical_chief')
+            d.power_unit = scraper_dict.get('power_unit')
+            d.first_team_entry = scraper_dict.get('first_team_entry')
+            d.highest_grid_position = scraper_dict.get('flag_img_url')
+            d.pole_positions = scraper_dict.get('main_image')
+            d.fastest_lap = scraper_dict.get('fastest_lap')
+            d.points = scraper_dict.get('points')
+            print('TEAMTEAM', d)
+            return d
+
+        except Exception as e:
+            print('Create error', e)
 
     def insert(self):
         try:

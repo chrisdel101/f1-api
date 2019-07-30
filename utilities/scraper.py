@@ -149,6 +149,7 @@ def scrape_all_team_names():
             name = " ".join(team.find('h2').text.split())
             team_dict['name'] = name
             teams_endpoint.append(team_dict)
+        # print("ENDPOINTS", teams_endpoint)
     return teams_endpoint
 
 
@@ -182,7 +183,7 @@ def scrape_single_team_stats(team_slug):
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text
                         continue
-            print(team_dict)
+        # print('TEAM', team_dict)
         return team_dict
 
     except ValueError:

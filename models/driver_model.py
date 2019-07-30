@@ -25,24 +25,26 @@ class Driver(db.Model):
 
     @classmethod
     def new(cls, scraper_dict):
-        print('CREATE', scraper_dict)
-        db.create_all()
-        d = cls()
-        d.driver_name = scraper_dict.get('driver_name')
-        d.name_slug = slugify(d.driver_name).lower()
-        d.country = scraper_dict.get('country')
-        d.highest_grid_position = scraper_dict.get('highest_grid_position')
-        d.driver_name = scraper_dict.get('driver_name')
-        d.date_of_birth = scraper_dict.get('date_of_birth')
-        d.driver_number = scraper_dict.get('driver_number')
-        d.place_of_birth = scraper_dict.get('place_of_birth')
-        d.flag_img_url = scraper_dict.get('flag_img_url')
-        d.main_image = scraper_dict.get('main_image')
-        d.podiums = scraper_dict.get('podiums')
-        d.points = scraper_dict.get('points')
-        d.world_championships = scraper_dict.get('world_championships')
-        d.team = scraper_dict.get('team')
-        return d
+        try:
+            print('CREATE', scraper_dict)
+            db.create_all()
+            d = cls()
+            d.driver_name = scraper_dict.get('driver_name')
+            d.name_slug = slugify(d.driver_name).lower()
+            d.country = scraper_dict.get('country')
+            d.highest_grid_position = scraper_dict.get('highest_grid_position')
+            d.driver_name = scraper_dict.get('driver_name')
+            d.date_of_birth = scraper_dict.get('date_of_birth')
+            d.driver_number = scraper_dict.get('driver_number')
+            d.place_of_birth = scraper_dict.get('place_of_birth')
+            d.flag_img_url = scraper_dict.get('flag_img_url')
+            d.main_image = scraper_dict.get('main_image')
+            d.podiums = scraper_dict.get('podiums')
+            d.points = scraper_dict.get('points')
+            d.world_championships = scraper_dict.get('world_championships')
+            return d
+        except Exception as e:
+            print('New Error', e)
 
     def insert(self):
         try:

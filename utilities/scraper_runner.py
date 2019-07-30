@@ -1,4 +1,4 @@
-from models import driver_model
+from models import driver_model, team_model
 from slugify import slugify, Slugify
 from utilities import scraper, utils
 _slugify = Slugify()
@@ -24,6 +24,7 @@ def scrape_drivers():
         new_data = scraper.scrape_single_driver_stats(driver_slug)
     # - insert on scrape into DB
         d = driver_model.Driver.new(new_data)
+        print('DD', d)
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()
@@ -34,32 +35,33 @@ def scrape_drivers():
 def scrape_teams():
     # -get all driver names
     all_teams = scraper.scrape_all_team_names()
-    # print('ALL', all_teams)
+    print('ALL', all_teams)
     # - loop over names
     for team in all_teams:
-        # remove all separators for count
+        #     # remove all separators for count
         name = utils.custom_seperators(team['name'], "_")
-        # shorten to match urls
+    #     # shorten to match urls
         name = utils.teamShortener(name)
-        # print(name)
-        # print(name)
-        # remove underscores - add dashes to match urls
+    #     # print(name)
+    #     # print(name)
+    #     # remove underscores - add dashes to match urls
         name = utils.custom_seperators(name, '_', '-')
-        # # remove whitespace - add dashes
+    #     # # remove whitespace - add dashes
         name = utils.custom_seperators(name, ' ', '-')
-        # # scrape each team
-        # print(name)
-        new_data = scraper.scrape_single_team_stats(
-            name)
-        print(new_data)
-        # return
-    # - insert on scrape into DB
-        # d = driver_model.Driver.new(new_data)
-        # if d.exists(driver_slug):
-        #     d.delete(driver_slug)
-        # d.insert()
+    #     print(name)
 
-    # return d
+    # # scrape each team
+        new_data = scraper.scrape_single_team_stats(name)
+    # print(new_data)
+    # - insert on scrape into DB
+        d = team_model.Team.new(new_data)
+        print('d', d)
+    # # return
+        if d.exists(team['name_slug']):
+            d.delete(team['name_slug'])
+        d.insert()
+
+    return d
 
 
 # if__name__ == "__main__"
