@@ -1,8 +1,6 @@
 from models import driver_model
 from utilities import utils
 
-# retutns a list
-
 
 def show_all_drivers():
     obj = utils.serialize(driver_model.Driver.query.all())

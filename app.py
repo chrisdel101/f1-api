@@ -34,8 +34,9 @@ def driver(driver_slug):
 
 @app.route('/teams')
 def all_teams():
-    drivers_controller.show_all_drivers
-    return jsonify(scraper.scrape_all_team_names())
+    x = teams_controller.show_all_drivers
+    print(x)
+    return "hello"
 
 
 @app.route('/teams/<team_slug>')

@@ -5,7 +5,7 @@ from slugify import slugify
 
 class Driver(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    driver_name = db.Column(db.String(80), nullable=False)
+    driver_name = db.Column(db.String(80), unique=True, nullable=False)
     country = db.Column(db.String(100))
     name_slug = db.Column(db.String(80), unique=True, nullable=False)
     date_of_birth = db.Column(db.String(20))
@@ -30,7 +30,7 @@ class Driver(db.Model):
         d = cls()
         d.driver_name = scraper_dict.get('driver_name')
         d.name_slug = slugify(d.driver_name).lower()
-        d.country = scraper_dict.get('coutry')
+        d.country = scraper_dict.get('country')
         d.highest_grid_position = scraper_dict.get('highest_grid_position')
         d.driver_name = scraper_dict.get('driver_name')
         d.date_of_birth = scraper_dict.get('date_of_birth')
