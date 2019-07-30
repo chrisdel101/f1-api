@@ -59,28 +59,30 @@ def serialize_row(row):
     except Exception as e:
         print("Serialize Error", e)
 
-# // shorted from Red_Bull_Racing to Red_Bull
-#   teamShortener: fullName => {
-#     if (fullName === 'Haas F1 Team') {
-#       return 'Hass'
-#     }
-#     // count whitespaces - get num of words
-#     const whiteSpaces = fullName.split(' ').length - 1
-#     // 2 words or toro rosso, etc
-#     if (whiteSpaces <= 1) {
-#       return fullName
-#     }
-#     // else more than 2 words - red bull racing etc
-#     let splitName = fullName.split('')
-#     let newName = ''
-#     let whiteSpace = 0
-#     for (let i = 0; i < splitName.length; i++) {
-#       if (splitName[i] === ' ') {
-#         whiteSpace++
-#       }
-#       if (whiteSpace >= whiteSpaces) {
-#         return newName
-#       }
-#       newName += splitName[i]
-#     }
-#   }
+
+def teamShortener(fullName):
+    # print(fullName)
+    if fullName == 'Haas F1 Team':
+        return 'Haas'
+    # count whitespaces - get num of words
+    whiteSpaces = len(fullName.split(' ')) - 1
+    # 2 words or toro rosso, etc
+    if whiteSpaces <= 1:
+        return fullName
+    #  else more than 2 words - red bull racing etc
+    splitName = list(fullName)
+    newName = ''
+    whiteSpace = 0
+    for char in splitName:
+        if char == ' ':
+            whiteSpace += 1
+        if whiteSpace >= whiteSpaces:
+            # print("here", newName)
+            return newName
+        newName += char
+
+
+def custom_seperators(word, sep_to_rem, sep_to_add=" "):
+    s = word.split(sep_to_rem)
+    s = sep_to_add.join(s)
+    return s

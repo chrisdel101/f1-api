@@ -149,7 +149,6 @@ def scrape_all_team_names():
             name = " ".join(team.find('h2').text.split())
             team_dict['name'] = name
             teams_endpoint.append(team_dict)
-    print(teams_endpoint)
     return teams_endpoint
 
 

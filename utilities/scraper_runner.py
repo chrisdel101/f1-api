@@ -1,6 +1,6 @@
 from models import driver_model
-from utilities import scraper
 from slugify import slugify, Slugify
+from utilities import scraper, utils
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
@@ -34,14 +34,23 @@ def scrape_drivers():
 def scrape_teams():
     # -get all driver names
     all_teams = scraper.scrape_all_team_names()
-    print(all_teams)
-    return
+    # print('ALL', all_teams)
     # - loop over names
     for team in all_teams:
-        # print(team)
-        # scrape each team
+        # remove all separators for count
+        name = utils.custom_seperators(team['name'], "_")
+        # shorten to match urls
+        name = utils.teamShortener(name)
+        # print(name)
+        # print(name)
+        # remove underscores - add dashes to match urls
+        name = utils.custom_seperators(name, '_', '-')
+        # # remove whitespace - add dashes
+        name = utils.custom_seperators(name, ' ', '-')
+        # # scrape each team
+        # print(name)
         new_data = scraper.scrape_single_team_stats(
-            team['name_slug'].capitalize())
+            name)
         print(new_data)
         # return
     # - insert on scrape into DB
