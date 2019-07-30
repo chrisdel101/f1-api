@@ -38,7 +38,6 @@ class Team(db.Model):
             d.pole_positions = scraper_dict.get('main_image')
             d.fastest_lap = scraper_dict.get('fastest_lap')
             d.points = scraper_dict.get('points')
-            # print('TEAMTEAM', vars(d))
             return d
 
         except Exception as e:
@@ -64,7 +63,6 @@ class Team(db.Model):
 
     def exists(self, team_slug):
         try:
-            # print('SELF', vars(self)['name_slug'])
             if self.query.filter_by(name_slug=team_slug).first():
                 return True
             return False

@@ -34,30 +34,31 @@ def driver(driver_slug):
 
 @app.route('/teams')
 def all_teams():
-    x = teams_controller.show_all_teams()
-    print(x)
-    return "hello"
+    # TODO change to have slug as key
+    return jsonify(teams_controller.show_all_teams())
 
 
 @app.route('/teams/<team_slug>')
 def team(team_slug):
-    return jsonify(scraper.scrape_single_drvier_stats(team_slug))
+    return jsonify(teams_controller.show_single_driver(team_slug))
 
 
 @app.route('/scrape-drivers')
 def scrape_drivers():
-    return jsonify(scraper_runner.scrape_drivers())
+    scraper_runner.scrape_drivers()
+    return 'Complete'
 
 
 @app.route('/scrape-teams')
 def scrape_teams():
     scraper_runner.scrape_teams()
-    return "hello"
+    return 'Complete'
 
 
 @app.route('/scrape-all')
 def all():
     scrape_drivers.main()
+    return 'Complete'
 
 
 if __name__ == '__main__':
