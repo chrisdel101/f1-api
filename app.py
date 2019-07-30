@@ -45,7 +45,7 @@ def team(team_slug):
 
 @app.route('/test')
 def test():
-    scraper_runner.scrape()
+    scraper_runner.scrape_drivers()
 
 
 @app.route('/test/<driver_slug>')
@@ -56,6 +56,17 @@ def test1(driver_slug):
     if d.exists(driver_slug):
         d.delete(driver_slug)
     d.insert()
+    return "hello"
+
+
+@app.route('/test/teams')
+def test2():
+    new_data = scraper_runner.main()
+    print('NEW', new_data)
+    # d = driver_model.Driver.new(new_data)
+    # if d.exists(driver_slug):
+    #     d.delete(driver_slug)
+    # d.insert()
     return "hello"
 
 

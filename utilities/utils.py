@@ -55,7 +55,32 @@ def serialize_row(row):
             row = dict(row)
         # remove the field causing the error
         row.pop('_sa_instance_state', None)
-        row.pop('kimi-ra-ikkapnen', None)
         return row
     except Exception as e:
         print("Serialize Error", e)
+
+# // shorted from Red_Bull_Racing to Red_Bull
+#   teamShortener: fullName => {
+#     if (fullName === 'Haas F1 Team') {
+#       return 'Hass'
+#     }
+#     // count whitespaces - get num of words
+#     const whiteSpaces = fullName.split(' ').length - 1
+#     // 2 words or toro rosso, etc
+#     if (whiteSpaces <= 1) {
+#       return fullName
+#     }
+#     // else more than 2 words - red bull racing etc
+#     let splitName = fullName.split('')
+#     let newName = ''
+#     let whiteSpace = 0
+#     for (let i = 0; i < splitName.length; i++) {
+#       if (splitName[i] === ' ') {
+#         whiteSpace++
+#       }
+#       if (whiteSpace >= whiteSpaces) {
+#         return newName
+#       }
+#       newName += splitName[i]
+#     }
+#   }

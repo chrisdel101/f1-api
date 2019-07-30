@@ -27,9 +27,9 @@ def _change_img_size(src, list_index):
     return sub
 
 
+# - scrape all drivers names of the page -
+# - return list
 def scrape_all_driver_names():
-    # - scrape all drivers names of the page -
-    # - return list
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
     drivers_list = soup.find(class_='drivers').ul
@@ -43,9 +43,9 @@ def scrape_all_driver_names():
     return drivers
 
 
+# - scrape for driver images and other info -
+# - return dict
 def _driver_images(name):
-    # - scrape for driver images and other info -
-    # - return dict
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     soup = BeautifulSoup(page.text, "html.parser")
     # # x = BeautifulSoup(soup.decode('utf-8', 'ignore'))
@@ -92,8 +92,8 @@ def _driver_images(name):
         return "An error occured creating driver images."
 
 
+# scrape for driver datas - return dict
 def scrape_single_driver_stats(name_slug):
-    # scrape for driver datas - return dict
     page = requests.get(endpoints.driver_endpoint(name_slug), headers=headers)
     # print("====", name_slug)
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -149,9 +149,11 @@ def scrape_all_team_names():
             name = " ".join(team.find('h2').text.split())
             team_dict['name'] = name
             teams_endpoint.append(team_dict)
+    print(teams_endpoint)
     return teams_endpoint
 
 
+# team slug needs to be capitalized
 def scrape_single_team_stats(team_slug):
     print('TS', endpoints.team_endpoint(team_slug))
     page = requests.get(endpoints.team_endpoint(team_slug), headers=headers)
