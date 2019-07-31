@@ -1,6 +1,6 @@
 from controllers import drivers_controller, teams_controller
 from utilities import scraper
-from models import driver_model
+from models import driver_model, team_model
 from flask import Flask
 from flask import render_template
 from flask import jsonify

@@ -2,11 +2,21 @@ from models import team_model
 from utilities import utils
 
 
+def make_slug_dict(arr):
+    result_arr = []
+    for item in arr:
+        d = {
+            'name': str(item),
+            'name_slug': slugify(str(item).lower())
+        }
+        result_arr.append(d)
+    return result_arr
+
+
 def show_all_teams():
-    # print(team_model.Team.query.all())
-    obj = utils.serialize(team_model.Team.query.all())
-    # print('OBJ', utils.make_slug_dict(obj))
-    return utils.make_slug_dict(obj)
+    obj = team_model.Team.query.all()
+    print('OBJ', obj)
+    # return utils.make_slug_dict(obj)
 
 
 def show_single_driver(name_slug):

@@ -6,8 +6,8 @@ from slugify import slugify
 class Team(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    full_team_name = db.Column(db.String(100), nullable=False, unique=True)
     name_slug = db.Column(db.String(100))
+    full_team_name = db.Column(db.String(100), nullable=False, unique=True)
     base = db.Column(db.String(100))
     team_chief = db.Column(db.String(100))
     technical_chief = db.Column(db.String(100))
@@ -18,16 +18,15 @@ class Team(db.Model):
     fastest_lap = db.Column(db.String(25))
 
     def __repr__(self):
-        return "{0}".format(self.full_team_name)
+        return "{0}".format(self.name_slug)
 
     @classmethod
     def new(cls, scraper_dict):
         try:
-            print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
-            d.full_team_name = scraper_dict.get('full_team_name')
             d.name_slug = scraper_dict.get('name_slug')
+            d.full_team_name = scraper_dict.get('full_team_name')
             d.base = scraper_dict.get('base')
             d.highest_grid_position = scraper_dict.get('highest_grid_position')
             d.team_chief = scraper_dict.get('team_chief')
