@@ -17,8 +17,14 @@ class Team(db.Model):
     pole_positions = db.Column(db.String(25))
     fastest_lap = db.Column(db.String(25))
 
+#   https://stackoverflow.com/a/44595303/5972531
     def __repr__(self):
-        return "{0}".format(self.name_slug)
+        return "<{klass} @{id:x} {attrs}>".format(
+            klass=self.__class__.__name__,
+            id=id(self) & 0xFFFFFF,
+            attrs=" ".join("{}={!r}".format(k, v)
+                           for k, v in self.__dict__.items()),
+        )
 
     @classmethod
     def new(cls, scraper_dict):

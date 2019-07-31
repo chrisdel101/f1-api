@@ -14,9 +14,16 @@ def make_slug_dict(arr):
 
 
 def show_all_teams():
-    obj = team_model.Team.query.all()
-    print('OBJ', obj)
-    # return utils.make_slug_dict(obj)
+    arr = team_model.Team.query.all()
+    results = []
+    for item in arr:
+        item = vars(item)
+        obj = {
+            'name': item['full_team_name'],
+            'name_slug': item['name_slug']
+        }
+        results.append(obj)
+    return results
 
 
 def show_single_driver(name_slug):

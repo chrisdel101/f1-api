@@ -48,12 +48,6 @@ def scrape_all_driver_names():
 def _driver_images(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     soup = BeautifulSoup(page.text, "html.parser")
-    # # x = BeautifulSoup(soup.decode('utf-8', 'ignore'))
-
-    # y = soup.find(
-    #     'h1', {"class", "driver-name"}).text.encode('ASCII').decode('utf-8')
-    # x = driver_info.find(
-    # 'h1', {"class", "driver-name"}).text
     driver_info = soup.find(
         'figcaption', class_="driver-details")
     driver_dict = {}
