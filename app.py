@@ -8,7 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from database import db
 import json
-from utilities import scraper_runner, utils
+from utilities import utils
+import scraper_runner
 
 app = Flask(__name__)
 
