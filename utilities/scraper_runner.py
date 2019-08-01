@@ -32,10 +32,8 @@ def scrape_drivers():
 def scrape_teams():
     # -get all driver names
     all_teams = scraper.scrape_all_team_names()
-    # print('ALL', all_teams)
     # - loop over names
     for team in all_teams:
-        # print('TEAM', team['name_slug'])
         # remove all separators for count
         name = utils.custom_seperators(team['name'], "_")
      # shorten to match urls

@@ -1,7 +1,5 @@
-# from utilities
 from utilities import endpoints
 from bs4 import BeautifulSoup, UnicodeDammit
-
 import requests
 import re
 from user_agent import generate_user_agent
@@ -49,12 +47,6 @@ def _driver_images(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
-    # # x = BeautifulSoup(soup.decode('utf-8', 'ignore'))
-
-    # y = soup.find(
-    #     'h1', {"class", "driver-name"}).text.encode('ASCII').decode('utf-8')
-    # x = driver_info.find(
-    # 'h1', {"class", "driver-name"}).text
     driver_info = soup.find(
         'figcaption', class_="driver-details")
     driver_dict = {}
@@ -73,8 +65,7 @@ def _driver_images(name):
         if driver_info.find('h1', {"class", "driver-name"}):
             driver_dict['driver_name'] = driver_info.find(
                 'h1', {"class", "driver-name"}).text
-            # print('++++++++++')
-            # print(driver_dict['driver_name'])
+
         else:
             print("Error: No name for driver found.")
 
@@ -99,7 +90,6 @@ def _driver_images(name):
 # scrape for driver datas - return dict
 def scrape_single_driver_stats(name_slug):
     page = requests.get(endpoints.driver_endpoint(name_slug), headers=headers)
-    # print("====", name_slug)
     soup = BeautifulSoup(page.text, 'html.parser')
     driver_details = soup.find(class_='driver-details')
     details = ['Team',

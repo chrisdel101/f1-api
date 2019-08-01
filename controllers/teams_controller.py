@@ -31,7 +31,6 @@ def show_single_team(name_slug):
     try:
         team = vars(team_model.Team.query.filter_by(
             name_slug=name_slug).first())
-        print('dri', team)
         return utils.serialize_row(team)
     except Exception as e:
         print('Error', e)

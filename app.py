@@ -11,7 +11,6 @@ import json
 from utilities import scraper_runner, utils
 
 app = Flask(__name__)
-# db.init_app(app)
 
 app.config.from_pyfile("flask.cfg")
 app.config.update(
@@ -34,7 +33,6 @@ def driver(driver_slug):
 
 @app.route('/teams')
 def all_teams():
-    # TODO change to have slug as key
     return jsonify(teams_controller.show_all_teams())
 
 
@@ -46,19 +44,19 @@ def team(team_slug):
 @app.route('/drivers/scrape-drivers')
 def scrape_drivers():
     scraper_runner.scrape_drivers()
-    return 'Complete'
+    return 'Complete\n'
 
 
 @app.route('/teams/scrape-teams')
 def scrape_teams():
     scraper_runner.scrape_teams()
-    return 'Complete'
+    return 'Complete\n'
 
 
 @app.route('/scrape-all')
 def all():
     scrape_drivers.main()
-    return 'Complete'
+    return 'Complete\n'
 
 
 if __name__ == '__main__':

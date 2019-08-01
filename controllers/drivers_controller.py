@@ -3,6 +3,7 @@ from utilities import utils
 from slugify import slugify
 
 
+# make data into arr of dicts
 def make_slug_dict(arr):
     result_arr = []
     for item in arr:
@@ -19,7 +20,7 @@ def show_all_drivers():
     return make_slug_dict(obj)
 
 
-def show_single_teams(name_slug):
+def show_single_driver(name_slug):
     driver = vars(driver_model.Driver.query.filter_by(
         name_slug=name_slug).first())
     return utils.serialize_row(driver)
