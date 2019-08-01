@@ -40,16 +40,16 @@ def all_teams():
 
 @app.route('/teams/<team_slug>')
 def team(team_slug):
-    return jsonify(teams_controller.show_single_driver(team_slug))
+    return jsonify(teams_controller.show_single_team(team_slug))
 
 
-@app.route('/scrape-drivers')
+@app.route('/drivers/scrape-drivers')
 def scrape_drivers():
     scraper_runner.scrape_drivers()
     return 'Complete'
 
 
-@app.route('/scrape-teams')
+@app.route('/teams/scrape-teams')
 def scrape_teams():
     scraper_runner.scrape_teams()
     return 'Complete'

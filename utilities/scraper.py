@@ -47,7 +47,14 @@ def scrape_all_driver_names():
 # - return dict
 def _driver_images(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
+    page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
+    # # x = BeautifulSoup(soup.decode('utf-8', 'ignore'))
+
+    # y = soup.find(
+    #     'h1', {"class", "driver-name"}).text.encode('ASCII').decode('utf-8')
+    # x = driver_info.find(
+    # 'h1', {"class", "driver-name"}).text
     driver_info = soup.find(
         'figcaption', class_="driver-details")
     driver_dict = {}
@@ -66,6 +73,8 @@ def _driver_images(name):
         if driver_info.find('h1', {"class", "driver-name"}):
             driver_dict['driver_name'] = driver_info.find(
                 'h1', {"class", "driver-name"}).text
+            # print('++++++++++')
+            # print(driver_dict['driver_name'])
         else:
             print("Error: No name for driver found.")
 
@@ -81,6 +90,7 @@ def _driver_images(name):
                 'span', {'class', 'icn-flag'}).img['src']
         else:
             print("Error: No flag-icon for driver found.")
+        # print('DICT', driver_dict)
         return driver_dict
     except ValueError:
         return "An error occured creating driver images."
