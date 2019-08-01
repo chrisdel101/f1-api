@@ -15,7 +15,7 @@ class Team(db.Model):
     first_team_entry = db.Column(db.String(25))
     highest_race_finish = db.Column(db.String(25))
     pole_positions = db.Column(db.String(25))
-    fastest_lap = db.Column(db.String(25))
+    fastest_laps = db.Column(db.String(25))
 
 #   https://stackoverflow.com/a/44595303/5972531
     def __repr__(self):
@@ -29,6 +29,7 @@ class Team(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
+            print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
             d.name_slug = scraper_dict.get('name_slug')
@@ -39,10 +40,9 @@ class Team(db.Model):
             d.technical_chief = scraper_dict.get('technical_chief')
             d.power_unit = scraper_dict.get('power_unit')
             d.first_team_entry = scraper_dict.get('first_team_entry')
-            d.highest_grid_position = scraper_dict.get('flag_img_url')
-            d.pole_positions = scraper_dict.get('main_image')
-            d.fastest_lap = scraper_dict.get('fastest_lap')
-            d.points = scraper_dict.get('points')
+            d.highest_race_finish = scraper_dict.get('highest_race_finish')
+            d.pole_positions = scraper_dict.get('pole_positions')
+            d.fastest_laps = scraper_dict.get('fastest_laps')
             return d
 
         except Exception as e:

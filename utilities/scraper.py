@@ -161,7 +161,7 @@ def scrape_single_team_stats(team_slug):
                'First Team Entry',
                'Highest Race Finish',
                'Pole Positions',
-               'Fastest Laps'
+               'Fastest Laps',
                ]
     team_dict = {}
     try:
@@ -176,7 +176,6 @@ def scrape_single_team_stats(team_slug):
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text
                         continue
-        # print('TEAM', team_dict)
         return team_dict
 
     except ValueError:
