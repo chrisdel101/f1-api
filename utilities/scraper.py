@@ -109,7 +109,6 @@ def scrape_single_driver_stats(name_slug):
         # loop in other outside values to driver_dict
         for _, (k, v) in enumerate(_driver_images(name_slug).items()):
             driver_dict[k] = v
-            print('v', v)
     except ValueError:
         return "An error occured unpacking driver images"
     # error checking
