@@ -1,9 +1,13 @@
-from utilities import endpoints
 from bs4 import BeautifulSoup, UnicodeDammit
 import requests
 import re
 from user_agent import generate_user_agent
 from slugify import slugify, Slugify
+import sys
+sys.path.insert(
+    1, '/Users/chrisdielschnieder/desktop/code_work/formula1/f1Scraper/f1scraper-flask/utilities')
+# from utilities import endpoints
+import endpoints
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
@@ -16,6 +20,7 @@ headers = {
 
 # manually add in dif sizes for imgs
 # takes url and index to choose size from list
+
 def _change_img_size(src, list_index):
     # replace scraped img size with one the sizes below
     regex = "image.img.[\d]+\.?.[\w]+"
@@ -25,107 +30,42 @@ def _change_img_size(src, list_index):
     return sub
 
 
-# - scrape all drivers names of the page -
-# - return list
-def scrape_all_driver_names():
-    page = requests.get(endpoints.drivers_endpoint(), headers=headers)
-    soup = BeautifulSoup(page.text, 'html.parser')
-    drivers_list = soup.find(class_='drivers').ul
-    drivers = []
-    drivers_list = drivers_list.find_all('li')
-    text = drivers_list[0].text
-    for driver in drivers_list:
-        # remove whitespace
-        d = ",".join(driver.text.split())
-        drivers.append(d)
-    return drivers
-
-
-# - scrape for driver images and other info -
+# -  caps team name
 # - return dict
-def _driver_images(name):
-    page = requests.get(endpoints.driver_endpoint(name), headers=headers)
+def _team_images(name):
+
+    page = requests.get(endpoints.teams_endpoint(), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
-    driver_info = soup.find(
-        'figcaption', class_="driver-details")
-    driver_dict = {}
+    print('soup')
+    team_info = soup.find('div', { 'class', 'teamteaser-details'})
+    # print(team_info('span', {'class','teamteaser-flag'}))
+    team_dict = {}
     try:
-        if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
+        if team_info('span', {'class','teamteaser-flag'}) and  team_info('span', {'class','teamteaser-flag'})[0].img:
+            flag_img_url = team_info('span', {'class','teamteaser-flag'})[0].img['src']
+            team_dict['flag_img_url'] = '{0}{1}'.format(endpoints.home_endpoint(),flag_img_url)
 
-            img_src = soup.find(class_='driver-main-image').img['src']
-            # replace img size with custom size
-            new_str = _change_img_size(img_src, 3)
-            driver_dict['main_image'] = "{0}/{1}".format(
-                endpoints.home_endpoint(), new_str)
-
-        else:
-            print("Error: No main image for driver found.")
-
-        if driver_info.find('h1', {"class", "driver-name"}):
-            driver_dict['driver_name'] = driver_info.find(
-                'h1', {"class", "driver-name"}).text
-
+        if team_info('h2', {'class', 'teamteaser-title'}):
+            title = team_info('h2', {'class', 'teamteaser-title'})[0].text
+            team_dict['title'] = title.strip()
         else:
             print("Error: No name for driver found.")
 
-        if driver_info.find('div', {'class', 'driver-number'}):
-            driver_dict['driver_number'] = driver_info.find(
-                'div', {'class', 'driver-number'}).span.text
-        else:
-            print("Error: No number for driver found.")
-
-        if driver_info.find('span', {'class', 'icn-flag'}) and driver_info.find(
-                'span', {'class', 'icn-flag'}).img.has_attr('src'):
-            driver_dict['flag_img_url'] = driver_info.find(
-                'span', {'class', 'icn-flag'}).img['src']
+        if team_info('ul'):
+            drivers = []
+            for driver in team_info.find_all('li'):
+                drivers.append(driver.text)
+            team_dict['drivers'] = drivers
         else:
             print("Error: No flag-icon for driver found.")
-        # print('DICT', driver_dict)
-        return driver_dict
+        print('DICT', team_dict)
+        return team_dict
     except ValueError:
         return "An error occured creating driver images."
 
 
-# scrape for driver datas - return dict
-def scrape_single_driver_stats(name_slug):
-    page = requests.get(endpoints.driver_endpoint(name_slug), headers=headers)
-    soup = BeautifulSoup(page.text, 'html.parser')
-    driver_details = soup.find(class_='driver-details')
-    details = ['Team',
-               'Country',
-               'Podiums',
-               'Points',
-               'Grand Prix entered',
-               'World Championships',
-               'Higest race finish',
-               'Highest grid position',
-               'Date of birth',
-               'Place of birth'
-               ]
-    driver_dict = {}
-    _driver_images(name_slug)
-    try:
-        # loop in other outside values to driver_dict
-        for _, (k, v) in enumerate(_driver_images(name_slug).items()):
-            driver_dict[k] = v
-    except ValueError:
-        return "An error occured unpacking driver images"
-    # error checking
-    try:
-        if driver_details.find_all('tr'):
-            # loop over html
-            for driver in driver_details.find_all('tr'):
-                # loop over all wanted details
-                for detail in details:
-                    # if they match add to driver object
-                    if driver.span and driver.span.text == detail:
-                        driver_dict[_slugify(driver.span.text)
-                                    ] = driver.td.text
-                        continue
-            return driver_dict
-    except ValueError:
-        return "An error occured creating driver data."
+_team_images('Mercedes')
 
 
 def scrape_all_team_names():

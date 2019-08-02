@@ -16,4 +16,5 @@ def teams_endpoint():
 
 
 def team_endpoint(team):
+    print("https://www.formula1.com/en/teams/{0}.html".format(team))
     return "https://www.formula1.com/en/teams/{0}.html".format(team)
