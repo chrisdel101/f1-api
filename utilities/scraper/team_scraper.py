@@ -1,13 +1,10 @@
 from bs4 import BeautifulSoup, UnicodeDammit
 import requests
-import re
+from utilities import endpoints, utils
 from user_agent import generate_user_agent
 from slugify import slugify, Slugify
 import sys
-sys.path.insert(
-    1, '/Users/chrisdielschnieder/desktop/code_work/formula1/f1Scraper/f1scraper-flask/utilities')
-# from utilities import endpoints
-import endpoints
+import re
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
@@ -20,52 +17,73 @@ headers = {
 
 # manually add in dif sizes for imgs
 # takes url and index to choose size from list
-
-def _change_img_size(src, list_index):
+def _change_team_img_size(src, list_index):
     # replace scraped img size with one the sizes below
-    regex = "image.img.[\d]+\.?.[\w]+"
+    regex = "image[\d]+x[\d]+.img.[\d]+.(medium|small|large)"
     sizes = ['320', '640', '768', '1536']
-    r = "image.img.{0}.medium".format(sizes[list_index])
+    r = "image16x9.img.{0}.medium".format(sizes[list_index])
     sub = re.sub(regex, r, src)
     return sub
 
-
 # -  caps team name
 # - return dict
+
+
 def _team_images(name):
 
     page = requests.get(endpoints.teams_endpoint(), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
     print('soup')
-    team_info = soup.find('div', { 'class', 'teamteaser-details'})
+    team_info = soup.find('div', {'class', 'teamteaser-details'})
     # print(team_info('span', {'class','teamteaser-flag'}))
     team_dict = {}
     try:
-        if team_info('span', {'class','teamteaser-flag'}) and  team_info('span', {'class','teamteaser-flag'})[0].img:
-            flag_img_url = team_info('span', {'class','teamteaser-flag'})[0].img['src']
-            team_dict['flag_img_url'] = '{0}{1}'.format(endpoints.home_endpoint(),flag_img_url)
-
+        # flag img
+        if team_info('span', {'class', 'teamteaser-flag'}) and team_info('span', {'class', 'teamteaser-flag'})[0].img:
+            flag_img_url = team_info(
+                'span', {'class', 'teamteaser-flag'})[0].img['src']
+            team_dict['flag_img_url'] = '{0}{1}'.format(
+                endpoints.home_endpoint(), flag_img_url)
+        else:
+            print('Warning: No flag-img for team found.')
+        # team title
         if team_info('h2', {'class', 'teamteaser-title'}):
             title = team_info('h2', {'class', 'teamteaser-title'})[0].text
             team_dict['title'] = title.strip()
         else:
-            print("Error: No name for driver found.")
-
+            print("Warning: No title for team found.")
+        # driver names
         if team_info('ul'):
             drivers = []
             for driver in team_info.find_all('li'):
                 drivers.append(driver.text)
             team_dict['drivers'] = drivers
         else:
-            print("Error: No flag-icon for driver found.")
-        print('DICT', team_dict)
+            print("Warning: No drivers for team found.")
+
+        if team_info('div', {'class', 'teamteaser-sponsor'}) and team_info('div', {'class', 'teamteaser-sponsor'})[0].img:
+            team_logo_src = team_info(
+                'div', {'class', 'teamteaser-sponsor'})[0].img['src']
+            team_logo = '{0}{1}'.format(
+                endpoints.home_endpoint(), team_logo_src)
+            team_dict['logo'] = team_logo
+        else:
+            print('Warning: No logo for team found.')
+
+        if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
+            img_src = soup.find(
+                'div', {'class', 'teamteaser-image'}).img['src']
+            new_str = _change_team_img_size(img_src, 3)
+            team_dict['main_image'] = "{0}/{1}".format(
+                endpoints.home_endpoint(), new_str)
+        else:
+            print('Warning: No main-image for team found.')
+
+        # print('DICT', team_dict)
         return team_dict
     except ValueError:
         return "An error occured creating driver images."
-
-
-_team_images('Mercedes')
 
 
 def scrape_all_team_names():

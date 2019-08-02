@@ -11,6 +11,7 @@ import json
 from utilities import utils
 import scraper_runner
 
+
 app = Flask(__name__)
 
 app.config.from_pyfile("flask.cfg")
@@ -58,6 +59,12 @@ def scrape_teams():
 def all():
     scrape_drivers.main()
     return 'Complete\n'
+
+
+@app.route('/test')
+def test():
+    return scraper.team_scraper._team_images('Mercedes')
+    # scraper.driver_scraper._driver_images('lewis-hamilton')
 
 
 if __name__ == '__main__':

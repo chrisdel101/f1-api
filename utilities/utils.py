@@ -1,3 +1,4 @@
+import re
 from slugify import slugify, Slugify
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'

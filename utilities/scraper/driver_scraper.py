@@ -1,4 +1,4 @@
-from utilities import endpoints
+from utilities import endpoints, utils
 from bs4 import BeautifulSoup, UnicodeDammit
 import requests
 import re
@@ -14,9 +14,9 @@ headers = {
 }
 
 
-# manually add in dif sizes for imgs
-# takes url and index to choose size from list
-def _change_img_size(src, list_index):
+# # manually add in dif sizes for imgs
+# # takes url and index to choose size from list
+def _change_driver_img_size(src, list_index):
     # replace scraped img size with one the sizes below
     regex = "image.img.[\d]+\.?.[\w]+"
     sizes = ['320', '640', '768', '1536']
@@ -55,7 +55,7 @@ def _driver_images(name):
 
             img_src = soup.find(class_='driver-main-image').img['src']
             # replace img size with custom size
-            new_str = _change_img_size(img_src, 3)
+            new_str = _change_driver_img_size(img_src, 3)
             driver_dict['main_image'] = "{0}/{1}".format(
                 endpoints.home_endpoint(), new_str)
 
