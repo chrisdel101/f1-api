@@ -43,48 +43,73 @@ def scrape_all_driver_names():
 
 # - scrape for driver images and other info -
 # - return dict
-def _driver_images(name):
+def driver_page_scrape(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
-    driver_info = soup.find(
-        'figcaption', class_="driver-details")
-    driver_dict = {}
-    try:
-        if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
+    return soup
 
+
+def get_main_image(name):
+    try:
+        soup = driver_page_scrape(name)
+        if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
             img_src = soup.find(class_='driver-main-image').img['src']
             # replace img size with custom size
             new_str = _change_driver_img_size(img_src, 3)
-            driver_dict['main_image'] = "{0}/{1}".format(
+            main_image = "{0}/{1}".format(
                 endpoints.home_endpoint(), new_str)
-
+            return main_image
         else:
-            print("Error: No main image for driver found.")
+            print("Warning: No main image for driver found.")
 
+    except Exception as e:
+        print('An error in main_image', e)
+
+
+def get_driver_name(name):
+    try:
+        soup = driver_page_scrape(name)
+        driver_info = soup.find(
+            'figcaption', class_="driver-details")
         if driver_info.find('h1', {"class", "driver-name"}):
-            driver_dict['driver_name'] = driver_info.find(
+            driver_name = driver_info.find(
                 'h1', {"class", "driver-name"}).text
-
+            return driver_name
         else:
-            print("Error: No name for driver found.")
+            print("Warning: No name for driver found.")
+    except Exception as e:
+        print("An error in getting driver name", e)
 
+
+def get_driver_number(name):
+    try:
+        soup = driver_page_scrape(name)
+        driver_info = soup.find(
+            'figcaption', class_="driver-details")
         if driver_info.find('div', {'class', 'driver-number'}):
-            driver_dict['driver_number'] = driver_info.find(
+            driver_number = driver_info.find(
                 'div', {'class', 'driver-number'}).span.text
+            return driver_number
         else:
-            print("Error: No number for driver found.")
+            print("Warning: No number for driver found.")
+    except Exception as e:
+        print("An error on getting driver number", e)
 
-        if driver_info.find('span', {'class', 'icn-flag'}) and driver_info.find(
-                'span', {'class', 'icn-flag'}).img.has_attr('src'):
-            driver_dict['flag_img_url'] = driver_info.find(
+
+def get_driver_flag(name):
+    try:
+        soup = driver_page_scrape(name)
+        driver_info = soup.find(
+            'figcaption', class_="driver-details")
+        if driver_info.find('span', {'class', 'icn-flag'}) and driver_info.find('span', {'class', 'icn-flag'}).img.has_attr('src'):
+            flag_img_url = driver_info.find(
                 'span', {'class', 'icn-flag'}).img['src']
+            return "{0}/{1}".format(endpoints.home_endpoint(), flag_img_url)
         else:
-            print("Error: No flag-icon for driver found.")
-        # print('DICT', driver_dict)
-        return driver_dict
-    except ValueError:
-        return "An error occured creating driver images."
+            print("Warning: No flag-icon for driver found.")
+    except Exception as e:
+        print("An error in getting driver flag", e)
 
 
 # scrape for driver datas - return dict
