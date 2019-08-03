@@ -51,6 +51,8 @@ def driver_page_scrape(name):
 
 
 def get_main_image(name):
+    if type(name) is not str:
+        raise TypeError('get_main_img must take a string.')
     try:
         soup = driver_page_scrape(name)
         if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
@@ -68,6 +70,8 @@ def get_main_image(name):
 
 
 def get_driver_name(name):
+    if type(name) is not str:
+        raise TypeError('get_driver_name must take a string.')
     try:
         soup = driver_page_scrape(name)
         driver_info = soup.find(
@@ -83,6 +87,8 @@ def get_driver_name(name):
 
 
 def get_driver_number(name):
+    if type(name) is not str:
+        raise TypeError('get_driver_number must take a string.')
     try:
         soup = driver_page_scrape(name)
         driver_info = soup.find(
@@ -98,6 +104,8 @@ def get_driver_number(name):
 
 
 def get_driver_flag(name):
+    if type(name) is not str:
+        raise TypeError('get_driver_flag must take a string.')
     try:
         soup = driver_page_scrape(name)
         driver_info = soup.find(
