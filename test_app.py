@@ -57,6 +57,13 @@ class TestDriverMethods(unittest.TestCase):
             raise ValueError(
                 "Unknown driver attributes added to driver markup.")
 
+    def test_check_complete_driver_data(self):
+        result = driver_scraper.get_complete_driver_data('sebastian-vettel')
+        self.assertTrue(type(result) == dict)
+        self.assertEqual(
+            result['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium.jpg/1554818962683.jpg')
+        self.assertEqual(result['country'], 'Germany')
+
 
 if __name__ == '__main__':
     unittest.main()
