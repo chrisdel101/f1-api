@@ -17,7 +17,7 @@ class TestDriverMethods(unittest.TestCase):
         app.app_context().push()  # this does the binding
         return app
 
-    def test_get_main_image(self):
+    def test_get_main_image_url(self):
         self.assertEqual(
             driver_scraper.get_main_image("sergio-perez"), 'https://www.formula1.com//content/fom-website/en/drivers/sergio-perez/_jcr_content/image.img.1536.medium.jpg/1554818944774.jpg')
         self.assertRaises(TypeError, driver_scraper.get_main_image, 4)
@@ -36,15 +36,27 @@ class TestDriverMethods(unittest.TestCase):
             "lewis-hamilton"), "44")
         self.assertRaises(TypeError, driver_scraper.get_driver_number, True)
 
-    def test_get_driver_flag(self):
+    def test_get_driver_flag_url(self):
         self.assertEqual(driver_scraper.get_driver_flag(
             "lance-stroll"), "https://www.formula1.com//content/fom-website/en/drivers/lance-stroll/_jcr_content/countryFlag.img.jpg/1422627083354.jpg")
         self.assertEqual(driver_scraper.get_driver_flag(
             "george-russell"), "https://www.formula1.com//content/fom-website/en/drivers/george-russell/_jcr_content/countryFlag.img.jpg/1422627084440.jpg")
         self.assertRaises(TypeError, driver_scraper.get_driver_number, 33)
 
+    def test_scrape_driver_details(self):
+        result1 = driver_scraper.scrape_driver_details("alexander-albon")
+        self.assertEqual(result1[1]['country'], 'Thailand')
+        self.assertEqual(result1[1]['date_of_birth'], '23/03/1996')
+        self.assertEqual(result1[1]['place_of_birth'], 'London, England')
 
-        # self.assertEqual(driver_scraper.get_driver_flag(
-        # "george-russel"),
+    def test_check_any_new_driver_attrs(self):
+        result1 = driver_scraper.scrape_driver_details("alexander-albon")
+        try:
+            self.assertTrue(len(result1[0]) == 0)
+        except Exception as e:
+            raise ValueError(
+                "Unknown driver attributes added to driver markup.")
+
+
 if __name__ == '__main__':
     unittest.main()

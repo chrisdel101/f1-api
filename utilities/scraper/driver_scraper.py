@@ -43,18 +43,18 @@ def scrape_all_driver_names():
 
 # - scrape for driver images and other info -
 # - return dict
-def driver_page_scrape(name):
+def _driver_page_scrape(name):
     page = requests.get(endpoints.driver_endpoint(name), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
     return soup
 
 
-def get_main_image(name):
-    if type(name) is not str:
+def get_main_image(name_slug):
+    if type(name_slug) is not str:
         raise TypeError('get_main_img must take a string.')
     try:
-        soup = driver_page_scrape(name)
+        soup = _driver_page_scrape(name_slug)
         if soup.find(class_='driver-main-image') and soup.find(class_='driver-main-image').img:
             img_src = soup.find(class_='driver-main-image').img['src']
             # replace img size with custom size
@@ -69,11 +69,11 @@ def get_main_image(name):
         print('An error in main_image', e)
 
 
-def get_driver_name(name):
-    if type(name) is not str:
+def get_driver_name(name_slug):
+    if type(name_slug) is not str:
         raise TypeError('get_driver_name must take a string.')
     try:
-        soup = driver_page_scrape(name)
+        soup = _driver_page_scrape(name_slug)
         driver_info = soup.find(
             'figcaption', class_="driver-details")
         if driver_info.find('h1', {"class", "driver-name"}):
@@ -86,11 +86,11 @@ def get_driver_name(name):
         print("An error in getting driver name", e)
 
 
-def get_driver_number(name):
-    if type(name) is not str:
+def get_driver_number(name_slug):
+    if type(name_slug) is not str:
         raise TypeError('get_driver_number must take a string.')
     try:
-        soup = driver_page_scrape(name)
+        soup = _driver_page_scrape(name_slug)
         driver_info = soup.find(
             'figcaption', class_="driver-details")
         if driver_info.find('div', {'class', 'driver-number'}):
@@ -103,11 +103,11 @@ def get_driver_number(name):
         print("An error on getting driver number", e)
 
 
-def get_driver_flag(name):
-    if type(name) is not str:
+def get_driver_flag(name_slug):
+    if type(name_slug) is not str:
         raise TypeError('get_driver_flag must take a string.')
     try:
-        soup = driver_page_scrape(name)
+        soup = _driver_page_scrape(name_slug)
         driver_info = soup.find(
             'figcaption', class_="driver-details")
         if driver_info.find('span', {'class', 'icn-flag'}) and driver_info.find('span', {'class', 'icn-flag'}).img.has_attr('src'):
@@ -120,7 +120,49 @@ def get_driver_flag(name):
         print("An error in getting driver flag", e)
 
 
-# scrape for driver datas - return dict
+def scrape_driver_details(name_slug):
+    soup = _driver_page_scrape(name_slug)
+    driver_details = soup.find(class_='driver-details')
+    details = ['Team',
+               'Country',
+               'Podiums',
+               'Points',
+               'Grands Prix entered',
+               'World Championships',
+               'Highest race finish',
+               'Highest grid position',
+               'Date of birth',
+               'Place of birth',
+               ]
+    # if len is more than zero then added unknown markup changes
+    unknown_attr = []
+    driver_dict = {}
+    try:
+        if driver_details.find_all('tr'):
+            # loop over html
+            for driver in driver_details.find_all('tr'):
+                # loop over all wanted details
+                found = False
+                for i, detail in enumerate(details):
+                    # if they match add to driver object
+                    if driver.span and driver.span.text == detail:
+                        driver_dict[_slugify(driver.span.text)
+                                    ] = driver.td.text
+                        found = True
+                        # del item so not loop over again
+                        del details[i]
+                        break
+                if not found:
+                    print("Warning: match not found", detail)
+                    unknown_attr.appped(detail)
+        return {
+            0: unknown_attr,
+            1: driver_dict
+        }
+    except Exception as e:
+        return("An error occured creating driver data.", e)
+
+
 def scrape_single_driver_stats(name_slug):
     page = requests.get(endpoints.driver_endpoint(name_slug), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
