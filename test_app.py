@@ -83,12 +83,11 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue(len(result) >= 1)
 
     def test_get_main_image(self):
-        d = {'full_team_name': 'ROKiT Williams Racing', 'base': 'Grove, United Kingdom', 'team_chief': 'Frank Williams', 'technical_chief': 'TBC', 'power_unit': 'Mercedes',
-             'first_team_entry': '1978', 'highest_race_finish': '1 (x114)', 'pole_positions': '129', 'fastest_laps': '133', 'name_slug': 'williams', 'url_name_slug': 'Williams'}
-        team_scraper.get_main_image(d)
-        # self.assertEqual(
-        # team_scraper.get_main_image('toro-rosso'), 'https://www.formula1.com//content/fom-website/en/drivers/sergio-perez/_jcr_content/image.img.1536.medium.jpg/1554818944774.jpg')
-        # self.assertRaises(TypeError, team_scraper.get_main_image, 4)
+        team_dict = {'full_team_name': 'ROKiT Williams Racing', 'base': 'Grove, United Kingdom', 'team_chief': 'Frank Williams', 'technical_chief': 'TBC', 'power_unit': 'Mercedes',
+                     'first_team_entry': '1978', 'highest_race_finish': '1 (x114)', 'pole_positions': '129', 'fastest_laps': '133', 'name_slug': 'williams', 'url_name_slug': 'Williams'}
+        self.assertFalse('main_image' in team_dict)
+        team_dict = team_scraper.get_main_image(team_dict)
+        self.assertTrue('main_image' in team_dict)
 
     def test_images(self):
         pass

@@ -58,8 +58,6 @@ def get_main_image(scraper_dict):
     try:
         soup = _team_page_scrape()
         all_teams = soup.find('ul', {'class', 'teamindex-teamteasers'})
-        url_name_slug = None
-        main_img = None
         # loop over all teams on the page
         for li in all_teams.find_all('li'):
             # get name on each team a-href
