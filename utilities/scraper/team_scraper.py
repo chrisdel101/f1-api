@@ -15,6 +15,13 @@ headers = {
 }
 
 
+def _team_page_scrape():
+    page = requests.get(endpoints.teams_endpoint(), headers=headers)
+    page.encoding = 'utf-8'
+    soup = BeautifulSoup(page.text, "html.parser")
+    return soup
+
+
 # manually add in dif sizes for imgs
 # takes url and index to choose size from list
 def _change_team_img_size(src, list_index):
@@ -25,16 +32,74 @@ def _change_team_img_size(src, list_index):
     sub = re.sub(regex, r, src)
     return sub
 
-# -  caps team name
-# - return dict
+
+def scrape_all_team_names():
+    soup = _team_page_scrape()
+    ul_teams_list = soup.find('ul', {'class', 'teamindex-teamteasers'})
+    li_team_list = ul_teams_list.find_all('li')
+    teams_endpoint = []
+    for team in li_team_list:
+        if team.find('h2'):
+            team_dict = {}
+            name_slug = "".join(_slugify(team.find('h2').text).split())
+            team_dict['name_slug'] = name_slug
+            name = " ".join(team.find('h2').text.split())
+            team_dict['name'] = name
+            teams_endpoint.append(team_dict)
+        # print("ENDPOINTS", teams_endpoint)
+    return teams_endpoint
 
 
-def _team_images(name):
+def get_main_image(name_slug):
+    if type(name_slug) is not str:
+        raise TypeError('get_main_image must take a string.')
+    try:
+        soup = _team_page_scrape()
+        all_teams = soup.find('ul', {'class', 'teamindex-teamteasers'})
+        teams = [
+            'Mercedes',
+            'Ferrari'
+            'Williams',
+            'Alfa-Romeo',
+            'Hass',
+            'Racing-Point',
+            'Renault',
+            'Toro-Rosso',
+            'McLaren',
+            'Red-Bull',
+        ]
+        for li in all_teams.find_all('li'):
+            if li.find('a'):
+                team_name = li.find('a')['href']
+                team_name = team_name.split('/')[-1]
+                team_name = team_name.replace('.html', '')
+                # print('\n')
+                print(team_name.strip() == teams[0])
+                # print(len(team÷))
+                # for team in teams:
+                #     print('\n')
+                #     print(team_name, team)
+                #     # print(team)
+                #     # break
+                #     if str(team_name.strip()) == str(team):
+                #         print('Match')
 
+        # if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
+        #     img_src = soup.find(
+        #         'div', {'class', 'teamteaser-image'}).img['src']
+        #     new_str = _change_team_img_size(img_src, 3)
+        #     return "{0}/{1}".format(
+        #         endpoints.home_endpoint(), new_str)
+        # else:
+        #     print('Warning: No main-image for team found.')
+    except Exception as e:
+        print('error in team main_image', e)
+
+
+def _team_images():
     page = requests.get(endpoints.teams_endpoint(), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, "html.parser")
-    print('soup')
     team_info = soup.find('div', {'class', 'teamteaser-details'})
     # print(team_info('span', {'class','teamteaser-flag'}))
     team_dict = {}
@@ -70,7 +135,7 @@ def _team_images(name):
             team_dict['logo'] = team_logo
         else:
             print('Warning: No logo for team found.')
-
+        # main
         if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
             img_src = soup.find(
                 'div', {'class', 'teamteaser-image'}).img['src']
@@ -84,24 +149,6 @@ def _team_images(name):
         return team_dict
     except ValueError:
         return "An error occured creating driver images."
-
-
-def scrape_all_team_names():
-    page = requests.get(endpoints.teams_endpoint(), headers=headers)
-    soup = BeautifulSoup(page.text, 'html.parser')
-    ul_teams_list = soup.find('ul', {'class', 'teamindex-teamteasers'})
-    li_team_list = ul_teams_list.find_all('li')
-    teams_endpoint = []
-    for team in li_team_list:
-        if team.find('h2'):
-            team_dict = {}
-            name_slug = "".join(_slugify(team.find('h2').text).split())
-            team_dict['name_slug'] = name_slug
-            name = " ".join(team.find('h2').text.split())
-            team_dict['name'] = name
-            teams_endpoint.append(team_dict)
-        # print("ENDPOINTS", teams_endpoint)
-    return teams_endpoint
 
 
 # team slug needs to be capitalized

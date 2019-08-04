@@ -66,7 +66,7 @@ def get_main_image(name_slug):
             print("Warning: No main image for driver found.")
 
     except Exception as e:
-        print('An error in main_image', e)
+        print('An error in driver main_image', e)
 
 
 def get_driver_name(name_slug):
@@ -121,6 +121,8 @@ def get_driver_flag(name_slug):
 
 
 def scrape_driver_details(name_slug):
+    if type(name_slug) is not str:
+        raise TypeError('scrape_driver_details must take a string.')
     soup = _driver_page_scrape(name_slug)
     driver_details = soup.find(class_='driver-details')
     details = ['Team',
@@ -164,6 +166,8 @@ def scrape_driver_details(name_slug):
 
 
 def get_complete_driver_data(name_slug):
+    if type(name_slug) is not str:
+        raise TypeError('get_complete_driver_data must take a string.')
     try:
         driver_dict = {
             'main_image': get_main_image(name_slug),

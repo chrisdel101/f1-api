@@ -2,11 +2,12 @@ from flask import Flask
 import unittest
 # don't pass in the app object yet
 from database import db
-from utilities.scraper import driver_scraper
+from utilities.scraper import driver_scraper, team_scraper
 import requests_mock
 
 
-class TestDriverMethods(unittest.TestCase):
+# @unittest.skip("showing class skipping")
+class TestDriverScraper(unittest.TestCase):
     def create_test_app(self):
         app = Flask(__name__)
         app.config['TESTING'] = True
@@ -73,6 +74,23 @@ class TestDriverMethods(unittest.TestCase):
         self.assertEqual(
             result['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium.jpg/1554818962683.jpg')
         self.assertEqual(result['country'], 'Germany')
+
+
+class TestTeamScraper(unittest.TestCase):
+    def test_scrape_all_team_names(self):
+        result = team_scraper.scrape_all_team_names()
+        self.assertTrue(type(result) == list)
+        self.assertTrue(len(result) >= 1)
+
+    def test_get_main_image(self):
+        print(team_scraper.get_main_image('toro-rosso'))
+        # self.assertEqual(
+        # team_scraper.get_main_image('toro-rosso'), 'https://www.formula1.com//content/fom-website/en/drivers/sergio-perez/_jcr_content/image.img.1536.medium.jpg/1554818944774.jpg')
+        # self.assertRaises(TypeError, team_scraper.get_main_image, 4)
+
+    def test_images(self):
+        pass
+        # print(team_scraper.)
 
 
 if __name__ == '__main__':
