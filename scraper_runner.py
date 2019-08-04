@@ -42,11 +42,13 @@ def scrape_teams():
         # remove underscores - add dashes to match urls
         name = utils.custom_seperators(name, '_', '-')
      # remove whitespace - add dashes
-        name = utils.custom_seperators(name, ' ', '-')
+        url_name_slug = utils.custom_seperators(name, ' ', '-')
      # scrape each team
-        new_data = team_scraper.scrape_single_team_stats(name)
-        # add slug
+        new_data = team_scraper.scrape_single_team_stats(url_name_slug)
+        # add slug to model
         new_data['name_slug'] = team['name_slug']
+        # add url slug to model
+        new_data['url_name_slug'] = url_name_slug
     # - insert on scrape into DB
         d = team_model.Team.new(new_data)
         if d.exists(team['name_slug']):

@@ -50,40 +50,33 @@ def scrape_all_team_names():
     return teams_endpoint
 
 
-def get_main_image(name_slug):
-    if type(name_slug) is not str:
-        raise TypeError('get_main_image must take a string.')
+# takes dict of teams adds main image to each team
+# outputs altered dict
+def get_main_image(scraper_dict):
+    if type(scraper_dict) is not dict:
+        raise TypeError('get_main_image must take a dict.')
     try:
         soup = _team_page_scrape()
         all_teams = soup.find('ul', {'class', 'teamindex-teamteasers'})
-        teams = [
-            'Mercedes',
-            'Ferrari'
-            'Williams',
-            'Alfa-Romeo',
-            'Hass',
-            'Racing-Point',
-            'Renault',
-            'Toro-Rosso',
-            'McLaren',
-            'Red-Bull',
-        ]
+        # loop over all teams
         for li in all_teams.find_all('li'):
+            # get name on each team a-href
             if li.find('a'):
+                # strip all text to get matching url_name_slug
                 team_name = li.find('a')['href']
                 team_name = team_name.split('/')[-1]
-                team_name = team_name.replace('.html', '')
-                # print('\n')
-                print(team_name.strip() == teams[0])
-                # print(len(team÷))
-                # for team in teams:
-                #     print('\n')
-                #     print(team_name, team)
-                #     # print(team)
-                #     # break
-                #     if str(team_name.strip()) == str(team):
-                #         print('Match')
-
+                url_name_slug = team_name.replace('.html', '').strip()
+                # find main team img
+                if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
+                    print('\n')
+                    main_img_src = li.find(
+                        'div', {'class', 'teamteaser-image'}).find('img')['src']
+                    # resize img
+                    main_img_src = _change_team_img_size(main_img_src, 3)
+                    main_img = "{0}/{1}".format(
+                        endpoints.home_endpoint(), main_img_src)
+                    # add to team dict
+                    print(scraper_dict)
         # if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
         #     img_src = soup.find(
         #         'div', {'class', 'teamteaser-image'}).img['src']
