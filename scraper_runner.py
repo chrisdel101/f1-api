@@ -21,7 +21,7 @@ def scrape_drivers():
         # slugify name
         driver_slug = slugify(driver).lower()
         # scrape each driver
-        new_data = driver_scraper.scrape_single_driver_stats(driver_slug)
+        new_data = driver_scraper.get_complete_driver_data(driver_slug)
     # - insert on scrape into DB
         d = driver_model.Driver.new(new_data)
         if d.exists(driver_slug):

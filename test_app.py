@@ -17,6 +17,16 @@ class TestDriverMethods(unittest.TestCase):
         app.app_context().push()  # this does the binding
         return app
 
+    def test_change_driver_image_size(self):
+        res = driver_scraper._change_driver_img_size(
+            "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.320.medium.jpg/1554818962683.jpg", 2)
+        self.assertEqual(
+            res, "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.768.medium.jpg/1554818962683.jpg")
+
+    def test_scrape_all_driver_names(self):
+        self.assertTrue(type(driver_scraper.scrape_all_driver_names()) == list)
+        self.assertTrue(len(driver_scraper.scrape_all_driver_names()) >= 1)
+
     def test_get_main_image_url(self):
         self.assertEqual(
             driver_scraper.get_main_image("sergio-perez"), 'https://www.formula1.com//content/fom-website/en/drivers/sergio-perez/_jcr_content/image.img.1536.medium.jpg/1554818944774.jpg')

@@ -14,6 +14,15 @@ headers = {
 }
 
 
+# - scrape for driver images and other info -
+# - return dict
+def _driver_page_scrape(name):
+    page = requests.get(endpoints.driver_endpoint(name), headers=headers)
+    page.encoding = 'utf-8'
+    soup = BeautifulSoup(page.text, "html.parser")
+    return soup
+
+
 # # manually add in dif sizes for imgs
 # # takes url and index to choose size from list
 def _change_driver_img_size(src, list_index):
@@ -39,15 +48,6 @@ def scrape_all_driver_names():
         d = ",".join(driver.text.split())
         drivers.append(d)
     return drivers
-
-
-# - scrape for driver images and other info -
-# - return dict
-def _driver_page_scrape(name):
-    page = requests.get(endpoints.driver_endpoint(name), headers=headers)
-    page.encoding = 'utf-8'
-    soup = BeautifulSoup(page.text, "html.parser")
-    return soup
 
 
 def get_main_image(name_slug):
@@ -174,13 +174,6 @@ def get_complete_driver_data(name_slug):
         }
         for key, value in scrape_driver_details(name_slug)[1].items():
             driver_dict[key] = value
-        print(driver_dict)
         return driver_dict
     except Exception as e:
         return ValueError, e
-    # try:
-    #         # loop in other outside values to driver_dict
-    #         for _, (k, v) in enumerate(_driver_images(name_slug).items()):
-    #             driver_dict[k] = v
-    # except ValueError:
-    #     return "An error occured unpacking driver images"
