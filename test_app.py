@@ -5,6 +5,7 @@ import unittest
 from database import db
 from utilities.scraper import driver_scraper, team_scraper
 from utilities import utils
+from bs4 import BeautifulSoup
 
 
 @unittest.skip("showing class skipping")
@@ -84,11 +85,17 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue(len(result) >= 1)
 
     def test_get_main_image(self):
-        team_dict = {'full_team_name': 'ROKiT Williams Racing', 'base': 'Grove, United Kingdom', 'team_chief': 'Frank Williams', 'technical_chief': 'TBC', 'power_unit': 'Mercedes',
-                     'first_team_entry': '1978', 'highest_race_finish': '1 (x114)', 'pole_positions': '129', 'fastest_laps': '133', 'name_slug': 'williams', 'url_name_slug': 'Williams'}
-        self.assertFalse('main_image' in team_dict)
-        team_dict = team_scraper.get_main_image(team_dict)
-        self.assertTrue('main_image' in team_dict)
+        soup = team_scraper._team_page_scrape()
+        # first one in list is currently Mercedes - will fail if markup changes
+        li = soup.find('li', {'class', 'teamindex-teamteaser'})
+        team_dict1 = {'full_team_name': 'ROKiT Williams Racing', 'base': 'Grove, United Kingdom', 'team_chief': 'Frank Williams', 'technical_chief': 'TBC', 'power_unit': 'Mercedes',
+                      'first_team_entry': '1978', 'highest_race_finish': '1 (x114)', 'pole_positions': '129', 'fastest_laps': '133', 'name_slug': 'williams', 'url_name_slug': 'Williams'}
+        team_dict2 = {'full_team_name': 'Mercedes AMG Petronas Motorsport', 'base': 'Brackley, United Kingdom', 'team_chief': 'Toto Wolff', 'technical_chief': 'James Allison', 'power_unit': 'Mercedes', 'first_team_entry': '1970', 'highest_race_finish':
+                      '1 (x87)', 'pole_positions': '101', 'fastest_laps': '61', 'name_slug': 'mercedes', 'url_name_slug': 'Mercedes', 'main_image': 'https://www.formula1.com//content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg'}
+        d2 = team_scraper.get_main_image(team_dict2, li)
+        self.assertTrue('main_image' in d2)
+        d1 = team_scraper.get_main_image(team_dict1, li)
+        self.assertFalse('main_image' in d1)
 
     def test_images(self):
         pass

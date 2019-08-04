@@ -38,15 +38,16 @@ def scrape_teams():
         # convert to url_slug
         url_name_slug = utils.create_url_name_slug(team)
         # scrape each team
-        new_data = team_scraper.scrape_single_team_stats(url_name_slug)
+        new_dict = team_scraper.scrape_single_team_stats(url_name_slug)
         # add slug to model
-        new_data['name_slug'] = team['name_slug']
+        new_dict['name_slug'] = team['name_slug']
         # add url slug to model
-        new_data['url_name_slug'] = url_name_slug
+        new_dict['url_name_slug'] = url_name_slug
         # add main_ing to current team obj
-        new_data = team_scraper.get_main_image(new_data)
+        new_dict = team_scraper.team_iterator(new_dict)
+        print('ND', new_dict)
     # - insert on scrape into DB
-        d = team_model.Team.new(new_data)
+        d = team_model.Team.new(new_dict)
         if d.exists(team['name_slug']):
             d.delete(team['name_slug'])
         d.insert()

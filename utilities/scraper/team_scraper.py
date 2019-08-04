@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup, UnicodeDammit
+from bs4 import BeautifulSoup
 import requests
 from utilities import endpoints, utils
 from user_agent import generate_user_agent
@@ -50,39 +50,67 @@ def scrape_all_team_names():
     return teams_endpoint
 
 
-# takes dict of teams adds main image to each team
-# outputs altered dict
-def get_main_image(scraper_dict):
+def get_main_image(scraper_dict, li):
+    print('HERE', scraper_dict)
     if type(scraper_dict) is not dict:
-        raise TypeError('get_main_image must take a dict.')
+        ValueError('Warning: get_main_image must take a dict.')
+    if 'main_image' in scraper_dict:
+        print('Already there')
+        return scraper_dict
+    # get name on each team a-href
+    print('past error')
+    if li.find('a'):
+        # strip all text to get matching url_name_slug
+        team_name = li.find('a')['href']
+        team_name = team_name.split('/')[-1]
+        url_name_slug = team_name.replace('.html', '').strip()
+        print('SLUG', url_name_slug)
+        # find main team img
+        if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
+            # print('\n')
+            main_img_src = li.find(
+                'div', {'class', 'teamteaser-image'}).find('img')['src']
+            # resize img
+            main_img_src = _change_team_img_size(main_img_src, 3)
+            main_img = "{0}/{1}".format(
+                endpoints.home_endpoint(), main_img_src)
+            # print(url_name_slug)
+            # attach main_img to current team
+            if scraper_dict['url_name_slug'] == url_name_slug:
+                scraper_dict['main_image'] = main_img
+                print("ADDED", scraper_dict)
+            print('return')
+            return scraper_dict
+ # takes dict of teams adds main image to each team
+# outputs altered dict
+
+
+def team_iterator(scraper_dict):
+    print('\n')
+    print('Change DICT', scraper_dict)
+    if type(scraper_dict) is not dict:
+        return
+    # print('ITR DICT', scraper_dict)
+    # print('ITR TYPE', type(scraper_dict))
     try:
         soup = _team_page_scrape()
         all_teams = soup.find('ul', {'class', 'teamindex-teamteasers'})
         # loop over all teams on the page
+        # if match scraper_dict team_name to list li
         for li in all_teams.find_all('li'):
-            # get name on each team a-href
             if li.find('a'):
                 # strip all text to get matching url_name_slug
                 team_name = li.find('a')['href']
                 team_name = team_name.split('/')[-1]
                 url_name_slug = team_name.replace('.html', '').strip()
-                # find main team img
-                if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
-                    # print('\n')
-                    main_img_src = li.find(
-                        'div', {'class', 'teamteaser-image'}).find('img')['src']
-                    # resize img
-                    main_img_src = _change_team_img_size(main_img_src, 3)
-                    main_img = "{0}/{1}".format(
-                        endpoints.home_endpoint(), main_img_src)
-                    # print(url_name_slug)
-                    # attach main_img to current team
-                    if scraper_dict['url_name_slug'] == url_name_slug:
-                        scraper_dict['main_image'] = main_img
-        # print(scraper_dict)
+                print('list name', url_name_slug)
+                scraper_dict = get_main_image(scraper_dict, li)
+
+        print('LATER SD', scraper_dict)
         return scraper_dict
+
     except Exception as e:
-        print('error in team main_image', e)
+        print('error in team_iterator', e)
 
 
 def _team_images():
@@ -142,7 +170,7 @@ def _team_images():
 
 # team slug needs to be capitalized
 def scrape_single_team_stats(team_slug):
-    print('TS', endpoints.team_endpoint(team_slug))
+    # print('TS', endpoints.team_endpoint(team_slug))
     page = requests.get(endpoints.team_endpoint(team_slug), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
     team_details = soup.find('section', {'class', 'stats'})
