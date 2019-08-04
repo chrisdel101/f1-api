@@ -1,12 +1,13 @@
+import requests_mock
 from flask import Flask
 import unittest
 # don't pass in the app object yet
 from database import db
 from utilities.scraper import driver_scraper, team_scraper
-import requests_mock
+from utilities import utils
 
 
-# @unittest.skip("showing class skipping")
+@unittest.skip("showing class skipping")
 class TestDriverScraper(unittest.TestCase):
     def create_test_app(self):
         app = Flask(__name__)
@@ -92,6 +93,16 @@ class TestTeamScraper(unittest.TestCase):
     def test_images(self):
         pass
         # print(team_scraper.)
+
+
+class TestUtils(unittest.TestCase):
+    def test_create_url_slug_name(self):
+        dic1 = {'name_slug': 'haas_f1_team', 'name': 'Haas_F1_Team'}
+        dic2 = {'name_slug': 'alfa_romeo_racing', 'name': 'Alfa_Romeo_Racing'}
+        url_slug1 = utils.create_url_name_slug(dic1)
+        url_slug2 = utils.create_url_name_slug(dic2)
+        self.assertEqual(url_slug1, 'Haas')
+        self.assertEqual(url_slug2, 'Alfa-Romeo')
 
 
 if __name__ == '__main__':

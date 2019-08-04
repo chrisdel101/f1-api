@@ -31,19 +31,13 @@ def scrape_drivers():
 
 # scrape and add to DB
 def scrape_teams():
-    # -get all driver names
+    # -get all driver names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
     # - loop over names
     for team in all_teams:
-        # remove all separators for count
-        name = utils.custom_seperators(team['name'], "_")
-     # shorten to match urls
-        name = utils.teamShortener(name)
-        # remove underscores - add dashes to match urls
-        name = utils.custom_seperators(name, '_', '-')
-     # remove whitespace - add dashes
-        url_name_slug = utils.custom_seperators(name, ' ', '-')
-     # scrape each team
+        # convert to url_slug
+        url_name_slug = utils.create_url_name_slug(team)
+        # scrape each team
         new_data = team_scraper.scrape_single_team_stats(url_name_slug)
         # add slug to model
         new_data['name_slug'] = team['name_slug']
