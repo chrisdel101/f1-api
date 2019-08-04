@@ -58,7 +58,9 @@ def get_main_image(scraper_dict):
     try:
         soup = _team_page_scrape()
         all_teams = soup.find('ul', {'class', 'teamindex-teamteasers'})
-        # loop over all teams
+        url_name_slug = None
+        main_img = None
+        # loop over all teams on the page
         for li in all_teams.find_all('li'):
             # get name on each team a-href
             if li.find('a'):
@@ -68,23 +70,19 @@ def get_main_image(scraper_dict):
                 url_name_slug = team_name.replace('.html', '').strip()
                 # find main team img
                 if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
-                    print('\n')
+                    # print('\n')
                     main_img_src = li.find(
                         'div', {'class', 'teamteaser-image'}).find('img')['src']
                     # resize img
                     main_img_src = _change_team_img_size(main_img_src, 3)
                     main_img = "{0}/{1}".format(
                         endpoints.home_endpoint(), main_img_src)
-                    # add to team dict
-                    print(scraper_dict)
-        # if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
-        #     img_src = soup.find(
-        #         'div', {'class', 'teamteaser-image'}).img['src']
-        #     new_str = _change_team_img_size(img_src, 3)
-        #     return "{0}/{1}".format(
-        #         endpoints.home_endpoint(), new_str)
-        # else:
-        #     print('Warning: No main-image for team found.')
+                    # print(url_name_slug)
+                    # attach main_img to current team
+                    if scraper_dict['url_name_slug'] == url_name_slug:
+                        scraper_dict['main_image'] = main_img
+        # print(scraper_dict)
+        return scraper_dict
     except Exception as e:
         print('error in team main_image', e)
 

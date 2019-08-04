@@ -49,6 +49,7 @@ def scrape_teams():
         new_data['name_slug'] = team['name_slug']
         # add url slug to model
         new_data['url_name_slug'] = url_name_slug
+        print('ND', new_data)
     # - insert on scrape into DB
         d = team_model.Team.new(new_data)
         if d.exists(team['name_slug']):
