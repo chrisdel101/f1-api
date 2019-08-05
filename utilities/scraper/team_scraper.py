@@ -53,7 +53,6 @@ def scrape_all_team_names():
 def get_main_image(scraper_dict, li, url_name_slug):
     # print('HERE', scraper_dict)
     # print('SLUG', url_name_slug)
-
     if type(scraper_dict) is not dict:
         # print('ERROR')
         ValueError('Warning: get_main_image must take a dict.')
@@ -91,16 +90,40 @@ def get_flag_img_url(scraper_dict, li, url_name_slug):
         # print('ALREADY THERE')
         # return unchanged dict
         return scraper_dict
-    if li.find('span', {'class', 'teamteaser-flag'}) and li.find('img'):
-        if scraper_dict['url_name_slug'] == url_name_slug:
-            flag_src = li.find('img')['src']
-            flag_img = "{0}/{1}".format(endpoints.home_endpoint(), flag_src)
-            scraper_dict['flag_img_url'] = flag_img
-            # print("FLAG ADDED")
+    if li.find('span', {'class', 'teamteaser-flag'}):
+        l = li.find('span', {'class', 'teamteaser-flag'})
+        if(l.find('img')):
+            if scraper_dict['url_name_slug'] == url_name_slug:
+                flag_src = li.find('img')['src']
+                flag_img = "{0}/{1}".format(
+                    endpoints.home_endpoint(), flag_src)
+                scraper_dict['flag_img_url'] = flag_img
+                # print("FLAG ADDED")
         return scraper_dict
-
     else:
         print('Warning: No flag_img found.')
+        return scraper_dict
+
+
+def get_logo_url(scraper_dict, li, url_name_slug):
+    if type(scraper_dict) is not dict:
+        ValueError('Warning: get_logo_url must take a dict.')
+    if 'logo_url' in scraper_dict:
+        # return unchanged dict
+        return scraper_dict
+    # print('LOGO', li.find('div', {'class', 'teamteaser-sponsor'}))
+    if li.find('div', {'class', 'teamteaser-sponsor'}):
+        if scraper_dict['url_name_slug'] == url_name_slug:
+            l = li.find('div', {'class', 'teamteaser-sponsor'})
+            if l.find('img'):
+                logo_src = l.find('img')['src']
+                logo_img = "{0}/{1}".format(
+                    endpoints.home_endpoint(), logo_src)
+                scraper_dict['logo_url'] = logo_img
+            print("LOGO ADDED")
+        return scraper_dict
+    else:
+        print('Warning: No logo_img found.')
         return scraper_dict
 
 # takes dict of teams adds main image to each team
@@ -132,6 +155,7 @@ def iterate_teams_markup(scraper_dict):
                 # # print('RETURN scraper dict', scraper_dict)
                 scraper_dict = get_flag_img_url(
                     scraper_dict, li, url_name_slug)
+                scraper_dict = get_logo_url(scraper_dict, li, url_name_slug)
                 # print('RETURN flag dict', scraper_dict)
                 # return
 
@@ -150,14 +174,14 @@ def _team_images():
     # print(team_info('span', {'class','teamteaser-flag'}))
     team_dict = {}
     try:
-        # flag img
-        if team_info('span', {'class', 'teamteaser-flag'}) and team_info('span', {'class', 'teamteaser-flag'})[0].img:
-            flag_img_url = team_info(
-                'span', {'class', 'teamteaser-flag'})[0].img['src']
-            team_dict['flag_img_url'] = '{0}{1}'.format(
-                endpoints.home_endpoint(), flag_img_url)
-        else:
-            print('Warning: No flag-img for team found.')
+        # # flag img
+        # if team_info('span', {'class', 'teamteaser-flag'}) and team_info('span', {'class', 'teamteaser-flag'})[0].img:
+        #     flag_img_url = team_info(
+        #         'span', {'class', 'teamteaser-flag'})[0].img['src']
+        #     team_dict['flag_img_url'] = '{0}{1}'.format(
+        #         endpoints.home_endpoint(), flag_img_url)
+        # else:
+        #     print('Warning: No flag-img for team found.')
         # team title
         if team_info('h2', {'class', 'teamteaser-title'}):
             title = team_info('h2', {'class', 'teamteaser-title'})[0].text
@@ -182,14 +206,14 @@ def _team_images():
         else:
             print('Warning: No logo for team found.')
         # main
-        if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
-            img_src = soup.find(
-                'div', {'class', 'teamteaser-image'}).img['src']
-            new_str = _change_team_img_size(img_src, 3)
-            team_dict['main_image'] = "{0}/{1}".format(
-                endpoints.home_endpoint(), new_str)
-        else:
-            print('Warning: No main-image for team found.')
+        # if soup.find('div', {'class', 'teamteaser-image'}) and soup.find('div', {'class', 'teamteaser-image'}).img:
+        #     img_src = soup.find(
+        #         'div', {'class', 'teamteaser-image'}).img['src']
+        #     new_str = _change_team_img_size(img_src, 3)
+        #     team_dict['main_image'] = "{0}/{1}".format(
+        #         endpoints.home_endpoint(), new_str)
+        # else:
+        #     print('Warning: No main-image for team found.')
 
         # print('DICT', team_dict)
         return team_dict

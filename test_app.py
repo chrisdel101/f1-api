@@ -98,6 +98,7 @@ class TestTeamScraper(unittest.TestCase):
         d2 = team_scraper.get_main_image(team_dict2, li, 'Williams')
         self.assertTrue('main_image' in d2)
 
+    # @unittest.skip
     def test_get_driver_flag_url(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -109,6 +110,14 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue('flag_img_url' in team_dict1)
         team_scraper.get_flag_img_url(team_dict2, li, 'Mercedes')
         self.assertTrue('flag_img_url' in team_dict2)
+
+    def test_get_logo_url(self):
+        soup = team_scraper._team_page_scrape()
+        li = soup.find('li', {'class', 'teamindex-teamteaser'})
+        team_dict1 = {'full_team_name': 'Rich Energy Haas F1 Team', 'base': 'Kannapolis, United States', 'team_chief': 'Guenther Steiner', 'technical_chief': 'Rob Taylor', 'power_unit': 'Ferrari', 'first_team_entry': '2016', 'highest_race_finish':
+                      '4 (x1)', 'pole_positions': 'N/A', 'fastest_laps': '1', 'name_slug': 'haas_f1_team', 'url_name_slug': 'Haas', 'main_image': 'https://www.formula1.com//content/fom-website/en/teams/Haas/_jcr_content/image16x9.img.1536.medium.jpg/1561196026039.jpg', 'flag_img_url': 'https://www.formula1.com//content/fom-website/en/teams/Haas/_jcr_content/countryFlag.img.jpg/1422627086486.jpg'}
+        team_scraper.get_logo_url(team_dict1, li, 'Haas')
+        self.assertTrue('logo_url' in team_dict1)
 
 
 class TestUtils(unittest.TestCase):
