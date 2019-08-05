@@ -22,6 +22,8 @@ class Team(db.Model):
     main_image = db.Column(db.String(200))
     flag_img_url = db.Column(db.String(200))
     logo_url = db.Column(db.String(200))
+    podium_finishes = db.Column(db.String(25))
+    championship_titles = db.Column(db.String(25))
 
 #   https://stackoverflow.com/a/44595303/5972531
     def __repr__(self):
@@ -53,6 +55,8 @@ class Team(db.Model):
             d.main_image = scraper_dict.get('main_image')
             d.flag_img_url = scraper_dict.get('flag_img_url')
             d.logo_url = scraper_dict.get('logo_url')
+            d.podium_finishes = scraper_dict.get('podium_finishes')
+            d.championship_titles = scraper_dict.get('championship_titles')
             return d
 
         except Exception as e:

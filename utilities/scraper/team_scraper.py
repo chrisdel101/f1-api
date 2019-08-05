@@ -126,10 +126,49 @@ def get_logo_url(scraper_dict, li, url_name_slug):
         print('Warning: No logo_img found.')
         return scraper_dict
 
+
+def get_podium_finishes(scraper_dict, li, url_name_slug):
+    if type(scraper_dict) is not dict:
+        ValueError('Warning: get_podium_finishes must take a dict.')
+    if 'podium_finishes' in scraper_dict:
+        # return unchanged dict
+        return scraper_dict
+    # print('LOGO', li.find('div', {'class', 'teamteaser-sponsor'}))
+    if li.find('table', {'class', 'stat-list'}):
+        print('SLUG', url_name_slug)
+        if scraper_dict['url_name_slug'] == url_name_slug:
+            t = li.find('table', {'class', 'stat-list'})
+            if t.find_all('td', {'class', 'stat-value'})[0].text:
+                scraper_dict['podium_finishes'] = t.find(
+                    'td', {'class', 'stat-value'}).text
+        return scraper_dict
+    else:
+        print('Warning: No podium_finishes found.')
+        return scraper_dict
+
+
+def get_championship_titles(scraper_dict, li, url_name_slug):
+    if type(scraper_dict) is not dict:
+        ValueError('Warning: get_championship_titles must take a dict.')
+    if 'championship_titles' in scraper_dict:
+        # return unchanged dict
+        return scraper_dict
+    if li.find('table', {'class', 'stat-list'}):
+        if scraper_dict['url_name_slug'] == url_name_slug:
+            print('LOGO')
+            t = li.find('table', {'class', 'stat-list'})
+            # print('CHAMP SLUG', t.find_all('td', {'class', 'stat-value'}))
+            if t.find_all('td', {'class', 'stat-value'})[1].text:
+                scraper_dict['championship_titles'] = t.find_all(
+                    'td', {'class', 'stat-value'})[1].text
+        return scraper_dict
+    else:
+        print('Warning: No championship_titles found.')
+        return scraper_dict
+
+
 # takes dict of teams adds main image to each team
 # outputs altered dict
-
-
 def iterate_teams_markup(scraper_dict):
     print('\n')
     print('Change DICT', scraper_dict)
@@ -156,6 +195,10 @@ def iterate_teams_markup(scraper_dict):
                 scraper_dict = get_flag_img_url(
                     scraper_dict, li, url_name_slug)
                 scraper_dict = get_logo_url(scraper_dict, li, url_name_slug)
+                scraper_dict = get_podium_finishes(
+                    scraper_dict, li, url_name_slug)
+                scraper_dict = get_championship_titles(
+                    scraper_dict, li, url_name_slug)
                 # print('RETURN flag dict', scraper_dict)
                 # return
 
