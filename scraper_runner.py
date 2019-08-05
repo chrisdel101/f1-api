@@ -44,8 +44,8 @@ def scrape_teams():
         # add url slug to model
         new_dict['url_name_slug'] = url_name_slug
         # add main_ing to current team obj
-        new_dict = team_scraper.team_iterator(new_dict)
-        print('ND', new_dict)
+        new_dict = team_scraper.iterate_teams_markup(new_dict)
+
     # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
         if d.exists(team['name_slug']):
