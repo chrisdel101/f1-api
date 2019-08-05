@@ -50,50 +50,58 @@ def scrape_all_team_names():
     return teams_endpoint
 
 
-def get_main_image(scraper_dict, li):
-    print('HERE', scraper_dict)
+def get_main_image(scraper_dict, li, url_name_slug):
+    # print('HERE', scraper_dict)
+    # print('SLUG', url_name_slug)
+
     if type(scraper_dict) is not dict:
+        # print('ERROR')
         ValueError('Warning: get_main_image must take a dict.')
     if 'main_image' in scraper_dict:
+        # print('MAIN IMAGE')
         # return unchanged dict
         return scraper_dict
-    # get name on each team a-href
-    if li.find('a'):
-        # strip all text to get matching url_name_slug
-        team_name = li.find('a')['href']
-        team_name = team_name.split('/')[-1]
-        url_name_slug = team_name.replace('.html', '').strip()
-        # print('SLUG', url_name_slug)
         # find main team img
-        if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
-            # print('\n')
-            main_img_src = li.find(
-                'div', {'class', 'teamteaser-image'}).find('img')['src']
-            # resize img
-            main_img_src = _change_team_img_size(main_img_src, 3)
-            main_img = "{0}/{1}".format(
-                endpoints.home_endpoint(), main_img_src)
-            # attach main_img to current team
-            if scraper_dict['url_name_slug'] == url_name_slug:
-                scraper_dict['main_image'] = main_img
-                print("ADDED", scraper_dict)
-            print('return')
-            return scraper_dict
+    if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
+        # print('\n')
+        main_img_src = li.find(
+            'div', {'class', 'teamteaser-image'}).find('img')['src']
+        # resize img
+        main_img_src = _change_team_img_size(main_img_src, 3)
+        main_img = "{0}/{1}".format(
+            endpoints.home_endpoint(), main_img_src)
+        # if slug param matches slug of scraperx_dict-
+        # - attach main_img to current team
+        if scraper_dict['url_name_slug'] == url_name_slug:
+            scraper_dict['main_image'] = main_img
+            # print("ADDED", scraper_dict)
+        # print('return')
+        return scraper_dict
+    else:
+        print("Warning: No main_img found")
+        return scaper_dict
 
 
-def get_flag_img_url(scraper_dict, li):
-    print('HERE', scraper_dict)
+def get_flag_img_url(scraper_dict, li, url_name_slug):
+    print('FLAG', scraper_dict)
+    # print('SLUG', url_name_slug)
     if type(scraper_dict) is not dict:
         ValueError('Warning: get_flag_img_url must take a dict.')
-    if 'flag_img_image' in scraper_dict:
+    if 'flag_img_url' in scraper_dict:
+        # print('ALREADY THERE')
         # return unchanged dict
         return scraper_dict
     if li.find('span', {'class', 'teamteaser-flag'}) and li.find('img'):
-        flag_src = li.find('img')['src']
-        flag_img = "{0}/{1}".format(endpoints.home_endpoint(), flag_src)
+        if scraper_dict['url_name_slug'] == url_name_slug:
+            flag_src = li.find('img')['src']
+            flag_img = "{0}/{1}".format(endpoints.home_endpoint(), flag_src)
+            scraper_dict['flag_img_url'] = flag_img
+            # print("FLAG ADDED")
+        return scraper_dict
 
     else:
         print('Warning: No flag_img found.')
+        return scraper_dict
 
 # takes dict of teams adds main image to each team
 # outputs altered dict
@@ -113,16 +121,21 @@ def iterate_teams_markup(scraper_dict):
         # if match scraper_dict team_name to list li
         for li in all_teams.find_all('li'):
             if li.find('a'):
-                # strip all text to get matching url_name_slug
+
+                # # strip all text to get matching url_name_slug
                 team_name = li.find('a')['href']
                 team_name = team_name.split('/')[-1]
                 url_name_slug = team_name.replace('.html', '').strip()
-                print('list name', url_name_slug)
+                print('LIST', url_name_slug)
 
-                # scraper_dict = get_main_image(scraper_dict, li)
-                get_flag_img_url(scraper, li)
+                scraper_dict = get_main_image(scraper_dict, li, url_name_slug)
+                # # print('RETURN scraper dict', scraper_dict)
+                scraper_dict = get_flag_img_url(
+                    scraper_dict, li, url_name_slug)
+                # print('RETURN flag dict', scraper_dict)
+                # return
 
-        print('LATER SD', scraper_dict)
+        # print('LATER SD', scraper_dict)
         return scraper_dict
 
     except Exception as e:
