@@ -51,3 +51,10 @@ def scrape_teams():
         if d.exists(team['name_slug']):
             d.delete(team['name_slug'])
         d.insert()
+
+
+def tester():
+    print("\n")
+    x = team_model.Team.query.filter_by(name_slug="williams").one()
+    print(x.drivers[0])
+    print("\n")

@@ -8,7 +8,7 @@ from utilities import utils
 from bs4 import BeautifulSoup
 
 
-# @unittest.skip("showing class skipping")
+@unittest.skip("showing class skipping")
 class TestDriverScraper(unittest.TestCase):
     def create_test_app(self):
         app = Flask(__name__)
@@ -79,12 +79,16 @@ class TestDriverScraper(unittest.TestCase):
 
 
 class TestTeamScraper(unittest.TestCase):
+    def test_team_page_scrape(test):
+        print(team_scraper._team_page_scrape())
+
+    @unittest.skip
     def test_scrape_all_team_names(self):
         result = team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_main_image(self):
         soup = team_scraper._team_page_scrape()
         # first one in list is currently Mercedes - will fail if markup changes
@@ -98,7 +102,7 @@ class TestTeamScraper(unittest.TestCase):
         d2 = team_scraper.get_main_image(team_dict2, li, 'Williams')
         self.assertTrue('main_image' in d2)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_driver_flag_url(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -111,7 +115,7 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_flag_img_url(team_dict2, li, 'Mercedes')
         self.assertTrue('flag_img_url' in team_dict2)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_logo_url(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -120,17 +124,16 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_logo_url(team_dict1, li, 'Haas')
         self.assertTrue('logo_url' in team_dict1)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_podium_finishes(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
         team_dict1 = {'full_team_name': 'Rich Energy Haas F1 Team', 'base': 'Kannapolis, United States', 'team_chief': 'Guenther Steiner', 'technical_chief': 'Rob Taylor', 'power_unit': 'Ferrari', 'first_team_entry': '2016', 'highest_race_finish':
                       '4 (x1)', 'pole_positions': 'N/A', 'fastest_laps': '1', 'name_slug': 'haas_f1_team', 'url_name_slug': 'Haas', 'main_image': 'https://www.formula1.com//content/fom-website/en/teams/Haas/_jcr_content/image16x9.img.1536.medium.jpg/1561196026039.jpg', 'flag_img_url': 'https://www.formula1.com//content/fom-website/en/teams/Haas/_jcr_content/countryFlag.img.jpg/1422627086486.jpg'}
         team_scraper.get_podium_finishes(team_dict1, li, 'Haas')
-        print(team_dict1)
         self.assertTrue('podium_finishes' in team_dict1)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_championship_titles(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -138,6 +141,8 @@ class TestTeamScraper(unittest.TestCase):
                       '4 (x1)', 'pole_positions': 'N/A', 'fastest_laps': 'N/A', 'name_slug': 'racing_point', 'url_name_slug': 'Racing-Point', 'main_image': 'https://www.formula1.com//content/fom-website/en/teams/Racing-Point/_jcr_content/image16x9.img.1536.medium.jpg/1561122994100.jpg', 'flag_img_url': 'https://www.formula1.com//content/fom-website/en/teams/Racing-Point/_jcr_content/countryFlag.img.jpg/1422627084440.jpg', 'logo_url': 'https://www.formula1.com//content/fom-website/en/teams/Racing-Point/_jcr_content/logo.img.jpg/1552473335851.jpg'}
         team_scraper.get_championship_titles(team_dict1, li, 'Racing-Point')
         self.assertTrue('championship_titles' in team_dict1)
+        team_scraper.get_championship_titles(team_dict1, li, 'Haas')
+        self.assertFalse('championship_titles' in team_dict1)
 
 
 class TestUtils(unittest.TestCase):

@@ -63,8 +63,9 @@ def all():
 
 @app.route('/test')
 def test():
-    # return scraper.team_scraper._team_images('Mercedes')
-    print(scraper.driver_scraper.get_driver_flag('lewis-hamilton'))
+    scraper_runner.tester()
+    # print(scraper.driver_scraper.get_driver_flag('lewis-hamilton'))
+    # print(scraper.driver_scraper.get_driver_flag('lewis-hamilton'))
 
 
 if __name__ == '__main__':

@@ -24,6 +24,7 @@ class Team(db.Model):
     logo_url = db.Column(db.String(200))
     podium_finishes = db.Column(db.String(25))
     championship_titles = db.Column(db.String(25))
+    drivers = db.Column(db.PickleType)
 
 #   https://stackoverflow.com/a/44595303/5972531
     def __repr__(self):
@@ -57,6 +58,7 @@ class Team(db.Model):
             d.logo_url = scraper_dict.get('logo_url')
             d.podium_finishes = scraper_dict.get('podium_finishes')
             d.championship_titles = scraper_dict.get('championship_titles')
+            d.drivers = scraper_dict.get('drivers')
             return d
 
         except Exception as e:
