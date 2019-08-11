@@ -18,7 +18,7 @@ def get_team_list(team_name, soup):
                     return li
 
 
-@unittest.skip("showing class skipping")
+# @unittest.skip("showing class skipping")
 class TestDriverScraper(unittest.TestCase):
     def create_test_app(self):
         app = Flask(__name__)
@@ -81,11 +81,19 @@ class TestDriverScraper(unittest.TestCase):
                 "Unknown driver attributes added to driver markup.")
 
     def test_check_complete_driver_data(self):
-        result = driver_scraper.get_complete_driver_data('sebastian-vettel')
-        self.assertTrue(type(result) == dict)
+        result1 = driver_scraper.get_complete_driver_data('sebastian-vettel')
+        self.assertTrue(type(result1) == dict)
         self.assertEqual(
-            result['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium.jpg/1554818962683.jpg')
-        self.assertEqual(result['country'], 'Germany')
+            result1['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium.jpg/1554818962683.jpg')
+        self.assertEqual(result1['country'], 'Germany')
+        # test all manual additions
+        result2 = driver_scraper.get_complete_driver_data('romain-grosjean')
+        self.assertEqual(
+            result2['flag_img_url'], 'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/countryFlag.img.gif/1423762801429.gif')
+        self.assertEqual(
+            result2['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/image.img.1536.medium.jpg/1554818978139.jpg')
+        self.assertEqual(result2['driver_name'], 'Romain Grosjean')
+        self.assertEqual(result2['driver_number'], '8')
 
 
 @unittest.skip

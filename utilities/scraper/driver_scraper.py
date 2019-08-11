@@ -173,8 +173,7 @@ def get_complete_driver_data(name_slug):
             'main_image': get_main_image(name_slug),
             'driver_name': get_driver_name(name_slug),
             'driver_number': get_driver_number(name_slug),
-            'team': get_driver_flag(name_slug),
-            'driver_flag_img': get_driver_flag(name_slug)
+            'flag_img_url': get_driver_flag(name_slug)
         }
         for key, value in scrape_driver_details(name_slug)[1].items():
             driver_dict[key] = value
