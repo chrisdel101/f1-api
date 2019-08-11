@@ -8,6 +8,16 @@ from utilities import utils
 from bs4 import BeautifulSoup
 
 
+def get_team_list(team_name, soup):
+    lis = soup.find_all('li')
+    for li in lis:
+        s = li.find('section')
+        if s:
+            if s.find('a') and s.find('a')['href']:
+                if team_name in s.find('a')['href']:
+                    return li
+
+
 @unittest.skip("showing class skipping")
 class TestDriverScraper(unittest.TestCase):
     def create_test_app(self):
@@ -80,17 +90,13 @@ class TestDriverScraper(unittest.TestCase):
 
 @unittest.skip
 class TestTeamScraper(unittest.TestCase):
-    def test_team_page_scrape(test):
-        pass
-        # print(team_scraper._team_page_scrape())
-
-    # @unittest.skip
+    @unittest.skip
     def test_scrape_all_team_names(self):
         result = team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_main_image(self):
         soup = team_scraper._team_page_scrape()
         # first one in list is currently Mercedes - will fail if markup changes
@@ -107,17 +113,15 @@ class TestTeamScraper(unittest.TestCase):
     # @unittest.skip
     def test_get_driver_flag_url(self):
         soup = team_scraper._team_page_scrape()
-        li = soup.find('li', {'class', 'teamindex-teamteaser'})
-        team_dict1 = {'full_team_name': 'ROKiT Williams Racing', 'base': 'Grove, United Kingdom', 'team_chief': 'Frank Williams', 'technical_chief': 'TBC', 'power_unit': 'Mercedes',
-                      'first_team_entry': '1978', 'highest_race_finish': '1 (x114)', 'pole_positions': '129', 'fastest_laps': '133', 'name_slug': 'williams', 'url_name_slug': 'Williams'}
-        team_dict2 = {'full_team_name': 'Mercedes AMG Petronas Motorsport', 'base': 'Brackley, United Kingdom', 'team_chief': 'Toto Wolff', 'technical_chief': 'James Allison', 'power_unit': 'Mercedes', 'first_team_entry': '1970', 'highest_race_finish':
-                      '1 (x87)', 'pole_positions': '101', 'fastest_laps': '61', 'name_slug': 'mercedes', 'url_name_slug': 'Mercedes'}
-        team_scraper.get_flag_img_url(team_dict1, li, 'Williams')
-        self.assertTrue('flag_img_url' in team_dict1)
-        team_scraper.get_flag_img_url(team_dict2, li, 'Mercedes')
-        self.assertTrue('flag_img_url' in team_dict2)
+        williamsList = get_team_list('Williams', soup)
+        williams_dict = {
+            'url_name_slug': 'Williams'
+        }
+        team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
+        print(williams_dict)
+        self.assertTrue('flag_img_url' in williams_dict)
 
-    # @unittest.skip
+    @unittest.skip
     def test_get_logo_url(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -126,18 +130,10 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_logo_url(team_dict1, li, 'Haas')
         self.assertTrue('logo_url' in team_dict1)
 
+    @unittest.skip
     def test_get_championship_titles(self):
         soup = team_scraper._team_page_scrape()
-        lis = soup.find_all('li')
-        racingPointList = None
-        # scrape only racing point data
-        for li in lis:
-            s = li.find('section')
-            if s:
-                if s.find('a') and s.find('a')['href']:
-                    if "Racing-Point" in s.find('a')['href']:
-                        racingPointList = li
-
+        racingPointList = get_team_list('Racing-Point', soup)
         racing_point_data = {
             'url_name_slug': "Racing-Point",
         }
@@ -145,13 +141,7 @@ class TestTeamScraper(unittest.TestCase):
             racing_point_data, racingPointList, 'Racing-Point')
         self.assertTrue('championship_titles' in racing_point_data)
         # scrape only mercedes data
-        MercedesList = None
-        for li in lis:
-            s = li.find('section')
-            if s:
-                if s.find('a') and s.find('a')['href']:
-                    if "Mercedes" in s.find('a')['href']:
-                        MercedesList = li
+        MercedesList = get_team_list('Mercedes', soup)
         mercedes_data = {
             'url_name_slug': "Mercedes"
         }
