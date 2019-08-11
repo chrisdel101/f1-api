@@ -135,6 +135,7 @@ def get_podium_finishes(scraper_dict, li, url_name_slug):
 def get_championship_titles(scraper_dict, li, url_name_slug):
     if type(scraper_dict) is not dict:
         ValueError('Warning: get_championship_titles must take a dict.')
+        # if already there return
     if 'championship_titles' in scraper_dict:
         # return unchanged dict
         return scraper_dict
@@ -144,6 +145,7 @@ def get_championship_titles(scraper_dict, li, url_name_slug):
             if t.find_all('td', {'class', 'stat-value'})[1].text:
                 scraper_dict['championship_titles'] = t.find_all(
                     'td', {'class', 'stat-value'})[1].text
+        # print('SC', scraper_dict)
         return scraper_dict
     else:
         print('Warning: No championship_titles found.')

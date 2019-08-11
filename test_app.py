@@ -78,17 +78,19 @@ class TestDriverScraper(unittest.TestCase):
         self.assertEqual(result['country'], 'Germany')
 
 
+@unittest.skip
 class TestTeamScraper(unittest.TestCase):
     def test_team_page_scrape(test):
-        print(team_scraper._team_page_scrape())
+        pass
+        # print(team_scraper._team_page_scrape())
 
-    @unittest.skip
+    # @unittest.skip
     def test_scrape_all_team_names(self):
         result = team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
-    @unittest.skip
+    # @unittest.skip
     def test_get_main_image(self):
         soup = team_scraper._team_page_scrape()
         # first one in list is currently Mercedes - will fail if markup changes
@@ -102,7 +104,7 @@ class TestTeamScraper(unittest.TestCase):
         d2 = team_scraper.get_main_image(team_dict2, li, 'Williams')
         self.assertTrue('main_image' in d2)
 
-    @unittest.skip
+    # @unittest.skip
     def test_get_driver_flag_url(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -115,7 +117,7 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_flag_img_url(team_dict2, li, 'Mercedes')
         self.assertTrue('flag_img_url' in team_dict2)
 
-    @unittest.skip
+    # @unittest.skip
     def test_get_logo_url(self):
         soup = team_scraper._team_page_scrape()
         li = soup.find('li', {'class', 'teamindex-teamteaser'})
@@ -123,6 +125,39 @@ class TestTeamScraper(unittest.TestCase):
                       '4 (x1)', 'pole_positions': 'N/A', 'fastest_laps': '1', 'name_slug': 'haas_f1_team', 'url_name_slug': 'Haas', 'main_image': 'https://www.formula1.com//content/fom-website/en/teams/Haas/_jcr_content/image16x9.img.1536.medium.jpg/1561196026039.jpg', 'flag_img_url': 'https://www.formula1.com//content/fom-website/en/teams/Haas/_jcr_content/countryFlag.img.jpg/1422627086486.jpg'}
         team_scraper.get_logo_url(team_dict1, li, 'Haas')
         self.assertTrue('logo_url' in team_dict1)
+
+    def test_get_championship_titles(self):
+        soup = team_scraper._team_page_scrape()
+        lis = soup.find_all('li')
+        racingPointList = None
+        # scrape only racing point data
+        for li in lis:
+            s = li.find('section')
+            if s:
+                if s.find('a') and s.find('a')['href']:
+                    if "Racing-Point" in s.find('a')['href']:
+                        racingPointList = li
+
+        racing_point_data = {
+            'url_name_slug': "Racing-Point",
+        }
+        team_scraper.get_championship_titles(
+            racing_point_data, racingPointList, 'Racing-Point')
+        self.assertTrue('championship_titles' in racing_point_data)
+        # scrape only mercedes data
+        MercedesList = None
+        for li in lis:
+            s = li.find('section')
+            if s:
+                if s.find('a') and s.find('a')['href']:
+                    if "Mercedes" in s.find('a')['href']:
+                        MercedesList = li
+        mercedes_data = {
+            'url_name_slug': "Mercedes"
+        }
+        team_scraper.get_championship_titles(
+            mercedes_data, MercedesList, 'Mercedes')
+        self.assertTrue('championship_titles' in mercedes_data)
 
     @unittest.skip
     def test_get_podium_finishes(self):
@@ -133,22 +168,16 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_podium_finishes(team_dict1, li, 'Haas')
         self.assertTrue('podium_finishes' in team_dict1)
 
-    @unittest.skip
-    def test_get_championship_titles(self):
-        soup = team_scraper._team_page_scrape()
-        li = soup.find('li', {'class', 'teamindex-teamteaser'})
-        team_dict1 = {'full_team_name': 'SportPesa Racing Point F1 Team', 'base': 'Silverstone, United Kingdom', 'team_chief': 'Otmar Szafnauer', 'technical_chief': 'Andrew Green', 'power_unit': 'BWT Mercedes', 'first_team_entry': 'N/A', 'highest_race_finish':
-                      '4 (x1)', 'pole_positions': 'N/A', 'fastest_laps': 'N/A', 'name_slug': 'racing_point', 'url_name_slug': 'Racing-Point', 'main_image': 'https://www.formula1.com//content/fom-website/en/teams/Racing-Point/_jcr_content/image16x9.img.1536.medium.jpg/1561122994100.jpg', 'flag_img_url': 'https://www.formula1.com//content/fom-website/en/teams/Racing-Point/_jcr_content/countryFlag.img.jpg/1422627084440.jpg', 'logo_url': 'https://www.formula1.com//content/fom-website/en/teams/Racing-Point/_jcr_content/logo.img.jpg/1552473335851.jpg'}
-        team_scraper.get_championship_titles(team_dict1, li, 'Racing-Point')
-        self.assertTrue('championship_titles' in team_dict1)
-        team_scraper.get_championship_titles(team_dict1, li, 'Haas')
-        self.assertFalse('championship_titles' in team_dict1)
+    # @unittest.skip
 
 
 class TestUtils(unittest.TestCase):
+
+    @unittest.skip
     def test_create_url_slug_name(self):
         dic1 = {'name_slug': 'haas_f1_team', 'name': 'Haas_F1_Team'}
-        dic2 = {'name_slug': 'alfa_romeo_racing', 'name': 'Alfa_Romeo_Racing'}
+        dic2 = {'name_slug': 'alfa_romeo_racing',
+                'name': 'Alfa_Romeo_Racing'}
         url_slug1 = utils.create_url_name_slug(dic1)
         url_slug2 = utils.create_url_name_slug(dic2)
         self.assertEqual(url_slug1, 'Haas')
