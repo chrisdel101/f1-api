@@ -37,8 +37,18 @@ class TestDriverScraper(unittest.TestCase):
             res, "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.768.medium.jpg/1554818962683.jpg")
 
     def test_scrape_all_driver_names(self):
-        self.assertTrue(type(driver_scraper.scrape_all_driver_names()) == list)
-        self.assertTrue(len(driver_scraper.scrape_all_driver_names()) >= 1)
+        result = driver_scraper.scrape_all_driver_names()
+        self.assertTrue(type(result) == list)
+        self.assertTrue(len(result) >= 1)
+
+    def test_scrape_all_driver_standings(self):
+        result = driver_scraper.scrape_all_drivers_standings()
+        self.assertTrue(type(result) is list)
+        self.assertTrue(len(result) > 0)
+        res1 = result[0]
+        self.assertTrue('points' in res1)
+        self.assertTrue('position' in res1)
+        self.assertEqual(res1['position'], '1')
 
     def test_get_main_image_url(self):
         self.assertEqual(
@@ -172,7 +182,6 @@ class TestTeamScraper(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-
     @unittest.skip
     def test_create_url_slug_name(self):
         dic1 = {'name_slug': 'haas_f1_team', 'name': 'Haas_F1_Team'}
@@ -182,6 +191,9 @@ class TestUtils(unittest.TestCase):
         url_slug2 = utils.create_url_name_slug(dic2)
         self.assertEqual(url_slug1, 'Haas')
         self.assertEqual(url_slug2, 'Alfa-Romeo')
+
+
+class TestScraperRunner(unittest.TestCase):
 
 
 if __name__ == '__main__':

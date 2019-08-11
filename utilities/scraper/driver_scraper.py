@@ -34,8 +34,21 @@ def _change_driver_img_size(src, list_index):
     return sub
 
 
+def _extract_name_from_url(url):
+    # revese the string
+    rev = url[::-1]
+    regex = "^lmth\.[a-z]+\-[a-z]+\/"
+    ex = re.findall(regex, rev)
+    # remove first chars
+    name = ex[0][5:]
+    # remove trailing / and reverse
+    name = name[:-1][::-1]
+    return name
+
 # - scrape all drivers names of the page -
 # - return list
+
+
 def scrape_all_driver_names():
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -43,10 +56,42 @@ def scrape_all_driver_names():
     drivers = []
     drivers_list = drivers_list.find_all('li')
     text = drivers_list[0].text
+
     for driver in drivers_list:
         # remove whitespace
         d = ",".join(driver.text.split())
         drivers.append(d)
+    return drivers
+
+
+def scrape_all_drivers_standings():
+    page = requests.get(endpoints.standings_endpoint(), headers=headers)
+    page.encoding = 'utf-8'
+    soup = BeautifulSoup(page.text, 'html.parser')
+    standings_list = soup.find(class_='resultsarchive-table')
+    rows = standings_list.find_all('tr')
+    drivers = []
+    for row in rows:
+        if row.find('a'):
+            # get url with name
+            href = row.find('a')['href']
+            # extract name slug
+            name_slug = _extract_name_from_url(href)
+            # split slug on dash
+            name = name_slug.split('-')
+
+            a = row.find('a')
+            driver_last_name = a.find(
+                'span', {'class', 'hide-for-mobile'}).text
+            points = row.find('td', {'class', 'bold'}).text
+            position = row.find('td', {'class', 'dark'}).text
+            drivers.append(
+                {
+                    'name_slug': name_slug,
+                    'points': points,
+                    'position': position
+                }
+            )
     return drivers
 
 
@@ -120,9 +165,9 @@ def get_driver_flag(name_slug):
         print("An error in getting driver flag", e)
 
 
-def scrape_driver_details(name_slug):
+def scrape_driver_details_set1(name_slug):
     if type(name_slug) is not str:
-        raise TypeError('scrape_driver_details must take a string.')
+        raise TypeError('scrape_driver_details_set1 must take a string.')
     soup = _driver_page_scrape(name_slug)
     driver_details = soup.find(class_='driver-details')
     details = ['Team',
@@ -157,6 +202,7 @@ def scrape_driver_details(name_slug):
                 if not found:
                     print("Warning: match not found", detail)
                     unknown_attr.appped(detail)
+        # add any unknown attributes to add later
         return {
             0: unknown_attr,
             1: driver_dict
@@ -165,18 +211,24 @@ def scrape_driver_details(name_slug):
         return("An error occured creating driver data.", e)
 
 
-def get_complete_driver_data(name_slug):
+def apply_scraper_set1_complete_driver(name_slug):
     if type(name_slug) is not str:
         raise TypeError('get_complete_driver_data must take a string.')
+    driver_dict = {}
     try:
-        driver_dict = {
-            'main_image': get_main_image(name_slug),
-            'driver_name': get_driver_name(name_slug),
-            'driver_number': get_driver_number(name_slug),
-            'flag_img_url': get_driver_flag(name_slug)
-        }
-        for key, value in scrape_driver_details(name_slug)[1].items():
+        for key, value in scrape_driver_details_set1(name_slug)[1].items():
             driver_dict[key] = value
         return driver_dict
     except Exception as e:
-        return ValueError, e
+        return('Error in apply_scraper_set1_complete_driver', e)
+
+
+def apply_scraper_set2_complete_driver(name_slug, driver_dict):
+    try:
+        driver_dict['main_image'] = get_main_image(name_slug)
+        driver_dict['driver_name'] = get_driver_name(name_slug)
+        driver_dict['driver_number'] = get_driver_number(name_slug)
+        driver_dict['flag_img_url'] = get_driver_flag(name_slug)
+        return driver_dict
+    except Exception as e:
+        return('Error in apply_scraper_set2_complete_driver', e)

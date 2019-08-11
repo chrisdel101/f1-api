@@ -16,20 +16,37 @@ def main():
 def scrape_drivers():
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
+    # print(alldrivers)
     # - loop over names
+
     for driver in all_drivers:
         # slugify name
         driver_slug = slugify(driver).lower()
         # scrape each driver
-        new_data = driver_scraper.get_complete_driver_data(driver_slug)
-    # - insert on scrape into DB
-        d = driver_model.Driver.new(new_data)
-        if d.exists(driver_slug):
-            d.delete(driver_slug)
-        d.insert()
+        new_driver_dict = driver_scraper.apply_scraper_set1_complete_driver(
+            driver_slug)
+        # add etxra data to obj
+        new_driver_dict = driver_scraper.apply_scraper_set2_complete_driver(
+            driver_slug, new_driver_dict)
+        # print(new_driver_dict)
+        name_slug = slugify(new_driver_dict.get('driver_name').lower())
+        # print(name_slug)
+        for item in driver_scraper.scrape_all_drivers_standings():
+            if name_slug == item.get('name_slug'):
+
+                new_driver_dict['points'] = item.get('points')
+                new_driver_dict['position'] = item.get('position')
+                # if new_driver_dict['']
+                print(new_driver_dict['points'])
+                # - insert on scrape into DB
+                # d = driver_model.Driver.new(new_data)
+                # if d.exists(driver_slug):
+                #     d.delete(driver_slug)
+                # d.insert()
+
+                # scrape and add to DB
 
 
-# scrape and add to DB
 def scrape_teams():
     # -get all driver names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
