@@ -20,6 +20,8 @@ app.config.update(
     SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
 )
 db = SQLAlchemy(app)
+with app.app_context():
+    from models import *
 migrate = Migrate(app, db)
 
 

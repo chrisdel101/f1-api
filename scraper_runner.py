@@ -17,8 +17,8 @@ def scrape_drivers():
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
     # print(alldrivers)
+    standings = driver_scraper.scrape_all_drivers_standings()
     # - loop over names
-
     for driver in all_drivers:
         # slugify name
         driver_slug = slugify(driver).lower()
@@ -30,21 +30,32 @@ def scrape_drivers():
             driver_slug, new_driver_dict)
         # print(new_driver_dict)
         name_slug = slugify(new_driver_dict.get('driver_name').lower())
-        # print(name_slug)
-        for item in driver_scraper.scrape_all_drivers_standings():
-            if name_slug == item.get('name_slug'):
+        i = 0
+        # match standing with current driver
+        while standings:
+            # print('before', len(standings))
+            # print(standings[i])
+            # print('name', name_slug)
+            # print(i)
+            if name_slug == standings[i].get('name_slug'):
+                new_driver_dict['points'] = standings[i].get('points')
+                new_driver_dict['position'] = standings[i].get('position')
+                # remove item from list so not looped over again
+                standings.pop(i)
+                # print('after', len(standings))
+                # print('REMOVE', standings[i])
+                i = 0
+                print('\n')
+                break
+            i = i + 1
+        # print(new_driver_dict)
+        # - insert on scrape into DB
+        d = driver_model.Driver.new(new_driver_dict)
+        if d.exists(driver_slug):
+            d.delete(driver_slug)
+        d.insert()
 
-                new_driver_dict['points'] = item.get('points')
-                new_driver_dict['position'] = item.get('position')
-                # if new_driver_dict['']
-                print(new_driver_dict['points'])
-                # - insert on scrape into DB
-                # d = driver_model.Driver.new(new_data)
-                # if d.exists(driver_slug):
-                #     d.delete(driver_slug)
-                # d.insert()
-
-                # scrape and add to DB
+        # scrape and add to DB
 
 
 def scrape_teams():

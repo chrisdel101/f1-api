@@ -18,6 +18,8 @@ class Driver(db.Model):
     world_championships = db.Column(db.String(10))
     team = db.Column(db.String(50))
     highest_grid_position = db.Column(db.String(10))
+    points = db.Column(db.String(10))
+    position = db.Column(db.String(10))
 
     def __repr__(self):
         return "{0}".format(self.driver_name)
@@ -42,6 +44,9 @@ class Driver(db.Model):
             d.points = scraper_dict.get('points')
             d.world_championships = scraper_dict.get('world_championships')
             d.team = scraper_dict.get('team')
+            d.points = scraper_dict.get('points')
+            d.podiums = scraper_dict.get('podiums')
+
             return d
         except Exception as e:
             print('New Error', e)
