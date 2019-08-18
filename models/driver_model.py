@@ -29,6 +29,7 @@ class Driver(db.Model):
         try:
             print('CREATE', scraper_dict)
             db.create_all()
+            print('hello')
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
             d.name_slug = slugify(d.driver_name).lower()

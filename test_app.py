@@ -1,11 +1,13 @@
-import requests_mock
 from flask import Flask
 import unittest
-# don't pass in the app object yet
+from unittest import mock
+from unittest.mock import patch
 from database import db
 from utilities.scraper import driver_scraper, team_scraper
+import scraper_runner
 from utilities import utils
 from bs4 import BeautifulSoup
+from models import driver_model, team_model
 
 
 def get_team_list(team_name, soup):
@@ -18,17 +20,38 @@ def get_team_list(team_name, soup):
                     return li
 
 
+def create_app():
+    app = Flask(__name__)
+    app.config.from_pyfile("flask.cfg")
+    app.config.update(
+        SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
+        TEST_DB_URI=app.config['TEST_DB_URI'],
+    )
+    print('config', app.config)
+    db.init_app(app)
+    print(db)
+    return app
+
+
+def app_context(app, new_dict):
+    with app.app_context():
+        driver = driver_model.Driver.new(new_dict)
+        driver.insert()
+
+
+# def create_test_app(self):
+#     app = Flask(__name__)
+#     app.config['TESTING'] = True
+#     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://localhost/f1"
+#     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+#     # Dynamically bind SQLAlch      emy to application
+#     db.init_app(app)
+#     app.app_context().push()  # this does the binding
+#     return app
 # @unittest.skip("showing class skipping")
+
+
 class TestDriverScraper(unittest.TestCase):
-    def create_test_app(self):
-        app = Flask(__name__)
-        app.config['TESTING'] = True
-        app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://localhost/f1"
-        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-        # Dynamically bind SQLAlchemy to application
-        db.init_app(app)
-        app.app_context().push()  # this does the binding
-        return app
 
     def test_change_driver_image_size(self):
         res = driver_scraper._change_driver_img_size(
@@ -194,6 +217,23 @@ class TestUtils(unittest.TestCase):
 
 
 class TestScraperRunner(unittest.TestCase):
+    @patch("scraper_runner.scrape_drivers")
+    def test_scraper_drivers(self, mod1):
+        scraper_runner.scrape_drivers()
+        assert mod1 is scraper_runner.scrape_drivers
+        assert mod1.called
+        assert mod1.assert_called_once_with(1, 2, 3)
+
+
+class TestDriverModel(unittest.TestCase):
+
+    def test_driver_new(self):
+        dic = {
+            "name_slug": "test_slug",
+            "driver_name": "Test Slug"
+        }
+        app = create_app()
+        app_context(app, dic)
 
 
 if __name__ == '__main__':

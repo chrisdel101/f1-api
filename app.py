@@ -14,15 +14,34 @@ import scraper_runner
 
 app = Flask(__name__)
 
-app.config.from_pyfile("flask.cfg")
-app.config.update(
-    SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
-    SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
-)
-db = SQLAlchemy(app)
-with app.app_context():
-    from models import *
-migrate = Migrate(app, db)
+
+def create_app(app):
+    app.config.from_pyfile("flask.cfg")
+    app.config.update(
+        SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
+        SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
+    )
+    db.init_app(app)
+    print('config', app.config)
+
+    migrate = Migrate(app, db)
+    print(db)
+    return app
+
+
+app = create_app(app)
+# app.config.from_pyfile("flask.cfg")
+# app.config.update(
+#     SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
+#     SQLALCHEMY_DATABASE_URI=app.config['SQLALCHEMY_DATABASE_URI']
+# )
+# print('config', app.config)
+
+# db = SQLAlchemy(app)
+# with app.app_context():
+#     from models import *
+# migrate = Migrate(app, db)
+# print(db)
 
 
 @app.route('/drivers')
