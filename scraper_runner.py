@@ -42,6 +42,7 @@ def scrape_drivers():
         print(new_driver_dict)
         # - insert on scrape into DB
         d = driver_model.Driver.new(new_driver_dict)
+        print('here')
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()

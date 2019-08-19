@@ -28,8 +28,8 @@ class Driver(db.Model):
     def new(cls, scraper_dict):
         try:
             print('CREATE', scraper_dict)
+            print('db', db)
             db.create_all()
-            print('hello')
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
             d.name_slug = slugify(d.driver_name).lower()
@@ -72,6 +72,7 @@ class Driver(db.Model):
 
     def exists(self, driver_slug):
         try:
+            print('SLUG', driver_slug)
             if self.query.filter_by(name_slug=driver_slug).first():
                 return True
             return False

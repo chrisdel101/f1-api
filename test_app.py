@@ -1,13 +1,15 @@
 from flask import Flask
+import sqlite3
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from database import db
+from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
 from bs4 import BeautifulSoup
 from models import driver_model, team_model
+from flask_migrate import Migrate
 
 
 def get_team_list(team_name, soup):
@@ -18,37 +20,6 @@ def get_team_list(team_name, soup):
             if s.find('a') and s.find('a')['href']:
                 if team_name in s.find('a')['href']:
                     return li
-
-
-def create_app():
-    app = Flask(__name__)
-    app.config.from_pyfile("flask.cfg")
-    app.config.update(
-        SQLALCHEMY_TRACK_MODIFICATIONS=app.config['SQLALCHEMY_TRACK_MODIFICATIONS'],
-        TEST_DB_URI=app.config['TEST_DB_URI'],
-    )
-    print('config', app.config)
-    db.init_app(app)
-    print(db)
-    return app
-
-
-def app_context(app, new_dict):
-    with app.app_context():
-        driver = driver_model.Driver.new(new_dict)
-        driver.insert()
-
-
-# def create_test_app(self):
-#     app = Flask(__name__)
-#     app.config['TESTING'] = True
-#     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://localhost/f1"
-#     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-#     # Dynamically bind SQLAlch      emy to application
-#     db.init_app(app)
-#     app.app_context().push()  # this does the binding
-#     return app
-# @unittest.skip("showing class skipping")
 
 
 class TestDriverScraper(unittest.TestCase):
@@ -227,12 +198,60 @@ class TestScraperRunner(unittest.TestCase):
 
 class TestDriverModel(unittest.TestCase):
 
+    def create_test_app():
+        app = Flask(__name__)
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+        db = SQLAlchemy(app)
+        # migrate = Migrate(app, db)
+        return {
+            'app': app,
+            'db': db
+        }
+
+    def setUp(self):
+            # creates a test client
+        self.app = app.test_client()
+        # propagate the exceptions to the test client
+        self.app.testing = True
+
+    DATABASE = 'database.db'
+
+    def get_db():
+        db = getattr(g, '_database', None)
+        if db is None:
+            db = g._database = sqlite3.connect(DATABASE)
+        return db
+
+    # @app.teardown_appcontext
+    # def close_connection(exception):
+    #     db = getattr(g, '_database', None)
+    #     if db is not None:
+    #         db.close()
+
+    def app_context(app, new_dict):
+        print('dict', new_dict)
+        with app.app_context():
+            db = get_db
+            driver = driver_model.Driver.new(new_dict)
+            exists = driver.exists(new_dict['name_slug'])
+            print('here', exists)
+            if exists:
+                driver.delete(new_dict['name_slug'])
+            driver.insert()
+            # driver.insert()
+            # print(driver.query.all())
+
+    # run python file
+
+    def migrate()
+
     def test_driver_new(self):
         dic = {
-            "name_slug": "test_slug",
-            "driver_name": "Test Slug"
+            "name_slug": "test_slug2",
+            "driver_name": "Test Slug2"
         }
-        app = create_app()
+        app = create_test_app()['app']
         app_context(app, dic)
 
 
