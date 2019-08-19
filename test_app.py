@@ -10,6 +10,8 @@ from utilities import utils
 from bs4 import BeautifulSoup
 from models import driver_model, team_model
 from flask_migrate import Migrate
+from flask_testing import TestCase
+from database import db
 
 
 def get_team_list(team_name, soup):
@@ -198,7 +200,7 @@ class TestScraperRunner(unittest.TestCase):
 
 class TestDriverModel(unittest.TestCase):
 
-    def create_test_app():
+    def create_test_app(self):
         app = Flask(__name__)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
@@ -209,19 +211,24 @@ class TestDriverModel(unittest.TestCase):
             'db': db
         }
 
-    def setUp(self):
+    def create_test_client(self):
             # creates a test client
-        self.app = app.test_client()
-        # propagate the exceptions to the test client
-        self.app.testing = True
+        app = self.create_test_app()['app']
+        app.testing = True
+        return app.test_client()
+
+    def test_one(self):
+        client = self.create_test_client()
+        rv = client.get('/drivers')
+        print(rv)
 
     DATABASE = 'database.db'
 
-    def get_db():
-        db = getattr(g, '_database', None)
-        if db is None:
-            db = g._database = sqlite3.connect(DATABASE)
-        return db
+    # def get_db():
+    #     db = getattr(g, '_database', None)
+    #     if db is None:
+    #         db = g._database = sqlite3.connect(DATABASE)
+    #     return db
 
     # @app.teardown_appcontext
     # def close_connection(exception):
@@ -229,30 +236,77 @@ class TestDriverModel(unittest.TestCase):
     #     if db is not None:
     #         db.close()
 
-    def app_context(app, new_dict):
-        print('dict', new_dict)
+    # def app_context(app, new_dict):
+    #     print('dict', new_dict)
+    #     with app.app_context():
+    #         db = get_db
+    #         driver = driver_model.Driver.new(new_dict)
+    #         exists = driver.exists(new_dict['name_slug'])
+    #         print('here', exists)
+    #         if exists:
+    #             driver.delete(new_dict['name_slug'])
+    #         driver.insert()
+    #         # driver.insert()
+    #         # print(driver.query.all())
+
+    # # run python file
+
+    # def migrate()
+
+    # def test_driver_new(self):
+    #     dic = {
+    #         "name_slug": "test_slug2",
+    #         "driver_name": "Test Slug2"
+    #     }
+    #     app = create_test_app()['app']
+    #     app.testing = True
+    #     app_context(app, dic)
+
+
+# @unittest.skip
+class TestConfig(TestCase):
+    print()
+    # def create_app(self):
+    #     # SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
+    #     # TESTING = True
+    #     # db = SQLAlchemy(app)
+    #     # migrate = Migrate(app, db)
+    #     app = Flask(__name__)
+    #     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    #     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+    #     return app
+
+    # def setUp(self):
+    #     db.create_all()
+
+    # print('DB', db)
+    # def tearDown(self):
+
+    #     db.session.remove()
+    #     db.drop_all()
+
+
+class SomeTest(unittest.TestCase):
+
+    def test_driver_added_to_db(self):
+        app = Flask(__name__)
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
         with app.app_context():
-            db = get_db
-            driver = driver_model.Driver.new(new_dict)
-            exists = driver.exists(new_dict['name_slug'])
-            print('here', exists)
-            if exists:
-                driver.delete(new_dict['name_slug'])
-            driver.insert()
-            # driver.insert()
-            # print(driver.query.all())
 
-    # run python file
+            db.init_app(app)
+            db.create_all()
+            # db.drop_all()
+            user = driver_model.Driver(
+                driver_name="Test Driver", name_slug="test_driver")
+            db.session.add(user)
+            db.session.commit()
 
-    def migrate()
+        # # this works
+            assert user in db.session
 
-    def test_driver_new(self):
-        dic = {
-            "name_slug": "test_slug2",
-            "driver_name": "Test Slug2"
-        }
-        app = create_test_app()['app']
-        app_context(app, dic)
+            db.session.remove()
+            db.drop_all()
 
 
 if __name__ == '__main__':
