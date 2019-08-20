@@ -27,7 +27,8 @@ def get_team_list(team_name, soup):
 def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+    app.config['TESTING'] = True
     return app
 
 
@@ -209,20 +210,54 @@ class TestUtils(unittest.TestCase):
 
 
 class TestScraperRunner(unittest.TestCase):
-    pass
-    # @patch("scraper_runner.scrape_drivers")
-    # def test_scraper_drivers(self, mod1):
-    #     scraper_runner.scrape_drivers()
-    #     assert mod1 is scraper_runner.scrape_drivers
-    #     assert mod1.called
-    #     assert mod1.assert_called_once_with(1, 2, 3)
+
+    def test_driver_runner(self):
+        # create app instance
+        app = create_app()
+        # add to context
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            scraper_runner.scrape_drivers()
+
+            drivers = driver_model.Driver.query.all()
+            # self.assertTrue(type(drivers) == list)
+            # self.assertTrue(len(drivers) == 20)
+
+            hamilton = driver_model.Driver.query.filter_by(
+                name_slug='lewis-hamilton').first()
+            albon = driver_model.Driver.query.filter_by(
+                name_slug='alexander-albon').first()
+            self.assertEqual(hamilton.name_slug, 'lewis-hamilton')
+            self.assertEqual(hamilton.place_of_birth, 'Stevenage, England')
+            self.assertEqual(hamilton.country, 'United Kingdom')
+
+            self.assertEqual(albon.name_slug, 'alexander-albon')
+            self.assertEqual(albon.place_of_birth, 'London, England')
+            self.assertEqual(albon.date_of_birth, '23/03/1996')
+
+            db.session.remove()
+            db.drop_all()
+
+    def test_team_runner(self):
+        # create app instance
+        app = create_app()
+        # add to context
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            scraper_runner.scrape_teams()
+            db.session.remove()
+            db.drop_all()
 
 
 class TestDriverModel(unittest.TestCase):
     def create_new_driver(self):
         driver = driver_model.Driver.new(
             {
-                "driver_name": "Test Driver"
+                "driver_name": "Test Driver",
+                "country": "test country",
+                "base": "test base"
             }
         )
         return driver
@@ -236,6 +271,7 @@ class TestDriverModel(unittest.TestCase):
             db.init_app(app)
             # create driver instance
             driver = self.create_new_driver()
+            print('D', driver)
             self.assertEqual(driver.driver_name, 'Test Driver')
             self.assertEqual(driver.name_slug, 'test-driver')
             # drop db

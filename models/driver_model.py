@@ -22,7 +22,12 @@ class Driver(db.Model):
     position = db.Column(db.String(10))
 
     def __repr__(self):
-        return "{0}".format(self.driver_name)
+            return "<{klass} @{id:x} {attrs}>".format(
+                klass=self.__class__.__name__,
+                id=id(self) & 0xFFFFFF,
+                attrs=" ".join("{}={!r}".format(k, v)
+                               for k, v in self.__dict__.items()),
+            )
 
     @classmethod
     def new(cls, scraper_dict):

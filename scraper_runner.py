@@ -23,10 +23,10 @@ def scrape_drivers():
         # slugify name
         driver_slug = slugify(driver).lower()
         # scrape each driver
-        new_driver_dict = driver_scraper.apply_scraper_set1_complete_driver(
+        new_driver_dict = driver_scraper.apply_scraper_func1_complete_driver(
             driver_slug)
         # add etxra data to obj
-        new_driver_dict = driver_scraper.apply_scraper_set2_complete_driver(
+        new_driver_dict = driver_scraper.apply_scraper_func2_complete_driver(
             driver_slug, new_driver_dict)
         i = 0
         # match standing with current driver
@@ -46,6 +46,8 @@ def scrape_drivers():
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()
+        # if(new_driver_dict['driver_name'] == "Alexander Albon"):
+        #     return
 
 
 def scrape_teams():
@@ -69,10 +71,3 @@ def scrape_teams():
         if d.exists(team['name_slug']):
             d.delete(team['name_slug'])
         d.insert()
-
-
-def tester():
-    print("\n")
-    x = team_model.Team.query.filter_by(name_slug="williams").one()
-    print(x.drivers[0])
-    print("\n")
