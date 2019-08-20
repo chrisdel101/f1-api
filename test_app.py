@@ -96,16 +96,16 @@ class TestDriverScraper(unittest.TestCase):
     def test_apply_scraper_func2_complete_driver(self):
         result1 = driver_scraper.apply_scraper_func2_complete_driver(
             'sebastian-vettel', {
-            'driver_name': 'Sebastian Vettel'
-        })
+                'driver_name': 'Sebastian Vettel'
+            })
         self.assertTrue(type(result1) == dict)
         self.assertEqual(
             result1['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium.jpg/1554818962683.jpg')
         # test all manual additions
         result2 = driver_scraper.apply_scraper_func2_complete_driver(
             'romain-grosjean', {
-            'driver_name': 'Romain Grosjean'
-        })
+                'driver_name': 'Romain Grosjean'
+            })
         self.assertEqual(
             result2['flag_img_url'], 'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/countryFlag.img.gif/1423762801429.gif')
         self.assertEqual(
@@ -121,49 +121,45 @@ class TestDriverScraper(unittest.TestCase):
         self.assertEqual(result1['country'], 'Germany')
         # test all manual additions
         result2 = driver_scraper.apply_scraper_func1_complete_driver(
-            'romain-grosjean' 
+            'romain-grosjean'
         )
         self.assertEqual(result2['country'], 'France')
         self.assertEqual(result2['date_of_birth'], '17/04/1986')
 
 
-# @unittest.skip
 class TestTeamScraper(unittest.TestCase):
-    # @unittest.skip
+
     def test_scrape_all_team_names(self):
-        result=team_scraper.scrape_all_team_names()
+        result = team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
-    # @unittest.skip
     def test_get_main_image(self):
-        soup=team_scraper._team_page_scrape()
-        ferrariList=get_team_list('Ferrari', soup)
-        ferrari_data={
+        soup = team_scraper._team_page_scrape()
+        ferrariList = get_team_list('Ferrari', soup)
+        ferrari_data = {
             'url_name_slug': "Ferrari",
         }
         team_scraper.get_main_image(
             ferrari_data, ferrariList, 'Ferrari')
         self.assertTrue('main_image' in ferrari_data)
-        williamsList=get_team_list('Williams', soup)
-        williams_data={
+        williamsList = get_team_list('Williams', soup)
+        williams_data = {
             'url_name_slug': "Williams",
         }
         team_scraper.get_main_image(
             williams_data, williamsList, 'Williams')
         self.assertTrue('main_image' in williams_data)
 
-    # @unittest.skip
     def test_get_driver_flag_url(self):
-        soup=team_scraper._team_page_scrape()
-        williamsList=get_team_list('Williams', soup)
-        williams_dict={
+        soup = team_scraper._team_page_scrape()
+        williamsList = get_team_list('Williams', soup)
+        williams_dict = {
             'url_name_slug': 'Williams'
         }
         team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
         self.assertTrue('flag_img_url' in williams_dict)
 
-    # @unittest.skip
     def test_get_logo_url(self):
         soup = team_scraper._team_page_scrape()
         haasList = get_team_list('Haas', soup)
@@ -173,7 +169,6 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_logo_url(haas_data, haasList, 'Haas')
         self.assertTrue('logo_url' in haas_data)
 
-    # @unittest.skip
     def test_get_championship_titles(self):
         soup = team_scraper._team_page_scrape()
         racingPointList = get_team_list('Racing-Point', soup)
@@ -183,19 +178,18 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_championship_titles(
             racing_point_data, racingPointList, 'Racing-Point')
         self.assertTrue('championship_titles' in racing_point_data)
-        MercedesList=get_team_list('Mercedes', soup)
-        mercedes_data={
+        MercedesList = get_team_list('Mercedes', soup)
+        mercedes_data = {
             'url_name_slug': "Mercedes"
         }
         team_scraper.get_championship_titles(
             mercedes_data, MercedesList, 'Mercedes')
         self.assertTrue('championship_titles' in mercedes_data)
 
-    # @unittest.skip
     def test_get_podium_finishes(self):
-        soup=team_scraper._team_page_scrape()
-        renaultList=get_team_list('Renault', soup)
-        renault_data={
+        soup = team_scraper._team_page_scrape()
+        renaultList = get_team_list('Renault', soup)
+        renault_data = {
             'url_name_slug': 'Haas'
         }
         team_scraper.get_podium_finishes(renault_data, renaultList, 'Haas')
@@ -203,7 +197,7 @@ class TestTeamScraper(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-    # @unittest.skip
+
     def test_create_url_slug_name(self):
         dic1 = {'name_slug': 'haas_f1_team', 'name': 'Haas_F1_Team'}
         dic2 = {'name_slug': 'alfa_romeo_racing',
@@ -308,41 +302,87 @@ class TestDriverModel(unittest.TestCase):
             db.drop_all()
 
 
-class TestDatabase(unittest.TestCase):
+class TestTeamModel(unittest.TestCase):
+    def create_new_team(self):
+        team = team_model.Team.new(
+            {
+                "full_team_name": "Test Team",
+                "name_slug": "test_team"
+            }
+        )
+        return team
 
-    def test_driver_added_to_db(self):
-
+    def test_driver_new(self):
+        # create app instance
+        app = create_app()
+        # add to context
         with app.app_context():
+            # init db
             db.init_app(app)
-            db.create_all()
-
-            driver = driver_model.Driver(
-                driver_name="Test Driver", name_slug="test_driver")
-            db.session.add(driver)
-            db.session.commit()
-
-            assert driver in db.session
-
+            # create driver instance
+            team = self.create_new_team()
+            self.assertEqual(team.full_team_name, 'Test Team')
+            self.assertEqual(team.name_slug, 'test_team')
+            # drop db
             db.session.remove()
             db.drop_all()
 
-    def test_driver_added_to_db(self):
-        app = Flask(__name__)
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+    def test_team_insert(self):
+        app = create_app()
         with app.app_context():
-
             db.init_app(app)
-            db.create_all()
-            # db.drop_all()
-            driver = driver_model.Driver(
-                driver_name="Test Driver", name_slug="test_driver")
-            db.session.add(driver)
-            db.session.commit()
+            team = self.create_new_team()
+            self.assertEqual(team.full_team_name, 'Test Team')
+            team.insert()
+            assert team in db.session
+            db.session.remove()
+            db.drop_all()
 
-        # # this works
-            assert driver in db.session
+    def test_team_does_not_exists(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            team = self.create_new_team()
+            self.assertEqual(team.full_team_name, 'Test Team')
+            exists = team.exists(team.name_slug)
+            self.assertFalse(exists)
+            db.session.remove()
+            db.drop_all()
 
+    def test_team_does_exist(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            team = self.create_new_team()
+            self.assertEqual(team.full_team_name, 'Test Team')
+            team.insert()
+            exists = team.exists(team.name_slug)
+            self.assertTrue(exists)
+            db.session.remove()
+            db.drop_all()
+
+    def test_team_delete(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            team = self.create_new_team()
+            self.assertEqual(team.full_team_name, 'Test Team')
+            team.insert()
+            team.delete(team.name_slug)
+            assert team not in db.session
+            db.session.remove()
+            db.drop_all()
+
+    def test_team_not_exists_after_delete(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            team = self.create_new_team()
+            self.assertEqual(team.full_team_name, 'Test Team')
+            team.insert()
+            team.delete(team.name_slug)
+            exists = team.exists(team.name_slug)
+            self.assertFalse(exists)
             db.session.remove()
             db.drop_all()
 

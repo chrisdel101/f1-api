@@ -7,7 +7,7 @@ class Team(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     # underscored name
-    name_slug = db.Column(db.String(100))
+    name_slug = db.Column(db.String(100), nullable=False)
     # name with hypens
     url_name_slug = db.Column(db.String(100))
     full_team_name = db.Column(db.String(100), nullable=False, unique=True)
