@@ -24,6 +24,13 @@ def get_team_list(team_name, soup):
                     return li
 
 
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+    return app
+
+
 class TestDriverScraper(unittest.TestCase):
 
     def test_change_driver_image_size(self):
@@ -199,94 +206,106 @@ class TestScraperRunner(unittest.TestCase):
 
 
 class TestDriverModel(unittest.TestCase):
+    def create_new_driver(self):
+        driver = driver_model.Driver.new(
+            {
+                "driver_name": "Test Driver"
+            }
+        )
+        return driver
 
-    def create_test_app(self):
-        app = Flask(__name__)
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
-        db = SQLAlchemy(app)
-        # migrate = Migrate(app, db)
-        return {
-            'app': app,
-            'db': db
-        }
+    def test_driver_new(self):
+        # create app instance
+        app = create_app()
+        # add to context
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # create driver instance
+            driver = self.create_new_driver()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            self.assertEqual(driver.name_slug, 'test-driver')
+            # drop db
+            db.session.remove()
+            db.drop_all()
 
-    def create_test_client(self):
-            # creates a test client
-        app = self.create_test_app()['app']
-        app.testing = True
-        return app.test_client()
+    def test_driver_insert(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            driver.insert()
+            assert driver in db.session
+            db.session.remove()
+            db.drop_all()
 
-    def test_one(self):
-        client = self.create_test_client()
-        rv = client.get('/drivers')
-        print(rv)
+    def test_driver_does_not_exists(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            exists = driver.exists(driver.name_slug)
+            self.assertFalse(exists)
+            db.session.remove()
+            db.drop_all()
 
-    DATABASE = 'database.db'
+    def test_driver_does_exists(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            driver.insert()
+            exists = driver.exists(driver.name_slug)
+            self.assertTrue(exists)
+            db.session.remove()
+            db.drop_all()
 
-    # def get_db():
-    #     db = getattr(g, '_database', None)
-    #     if db is None:
-    #         db = g._database = sqlite3.connect(DATABASE)
-    #     return db
+    def test_driver_delete(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            driver.insert()
+            driver.delete(driver.name_slug)
+            assert driver not in db.session
+            db.session.remove()
+            db.drop_all()
 
-    # @app.teardown_appcontext
-    # def close_connection(exception):
-    #     db = getattr(g, '_database', None)
-    #     if db is not None:
-    #         db.close()
-
-    # def app_context(app, new_dict):
-    #     print('dict', new_dict)
-    #     with app.app_context():
-    #         db = get_db
-    #         driver = driver_model.Driver.new(new_dict)
-    #         exists = driver.exists(new_dict['name_slug'])
-    #         print('here', exists)
-    #         if exists:
-    #             driver.delete(new_dict['name_slug'])
-    #         driver.insert()
-    #         # driver.insert()
-    #         # print(driver.query.all())
-
-    # # run python file
-
-    # def migrate()
-
-    # def test_driver_new(self):
-    #     dic = {
-    #         "name_slug": "test_slug2",
-    #         "driver_name": "Test Slug2"
-    #     }
-    #     app = create_test_app()['app']
-    #     app.testing = True
-    #     app_context(app, dic)
-
-
-# @unittest.skip
-class TestConfig(TestCase):
-    print()
-    # def create_app(self):
-    #     # SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
-    #     # TESTING = True
-    #     # db = SQLAlchemy(app)
-    #     # migrate = Migrate(app, db)
-    #     app = Flask(__name__)
-    #     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    #     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
-    #     return app
-
-    # def setUp(self):
-    #     db.create_all()
-
-    # print('DB', db)
-    # def tearDown(self):
-
-    #     db.session.remove()
-    #     db.drop_all()
+    def test_driver_not_exists_after_delete(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            driver.insert()
+            driver.delete(driver.name_slug)
+            exists = driver.exists(driver.name_slug)
+            self.assertFalse(exists)
+            db.session.remove()
+            db.drop_all()
 
 
-class SomeTest(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
+
+    def test_driver_added_to_db(self):
+
+        with app.app_context():
+            db.init_app(app)
+            db.create_all()
+
+            driver = driver_model.Driver(
+                driver_name="Test Driver", name_slug="test_driver")
+            db.session.add(driver)
+            db.session.commit()
+
+            assert driver in db.session
+
+            db.session.remove()
+            db.drop_all()
 
     def test_driver_added_to_db(self):
         app = Flask(__name__)
@@ -297,13 +316,13 @@ class SomeTest(unittest.TestCase):
             db.init_app(app)
             db.create_all()
             # db.drop_all()
-            user = driver_model.Driver(
+            driver = driver_model.Driver(
                 driver_name="Test Driver", name_slug="test_driver")
-            db.session.add(user)
+            db.session.add(driver)
             db.session.commit()
 
         # # this works
-            assert user in db.session
+            assert driver in db.session
 
             db.session.remove()
             db.drop_all()

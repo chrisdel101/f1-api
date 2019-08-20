@@ -28,7 +28,6 @@ class Driver(db.Model):
     def new(cls, scraper_dict):
         try:
             print('CREATE', scraper_dict)
-            print('db', db)
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
