@@ -165,9 +165,9 @@ def get_driver_flag(name_slug):
         print("An error in getting driver flag", e)
 
 
-def scrape_driver_details_set1(name_slug):
+def scrape_driver_details_func1(name_slug):
     if type(name_slug) is not str:
-        raise TypeError('scrape_driver_details_set1 must take a string.')
+        raise TypeError('scrape_driver_details_func1 must take a string.')
     soup = _driver_page_scrape(name_slug)
     driver_details = soup.find(class_='driver-details')
     details = ['Team',
@@ -211,19 +211,19 @@ def scrape_driver_details_set1(name_slug):
         return("An error occured creating driver data.", e)
 
 
-def apply_scraper_set1_complete_driver(name_slug):
+def apply_scraper_func1_complete_driver(name_slug):
     if type(name_slug) is not str:
         raise TypeError('get_complete_driver_data must take a string.')
     driver_dict = {}
     try:
-        for key, value in scrape_driver_details_set1(name_slug)[1].items():
+        for key, value in scrape_driver_details_func1(name_slug)[1].items():
             driver_dict[key] = value
         return driver_dict
     except Exception as e:
         return('Error in apply_scraper_set1_complete_driver', e)
 
 
-def apply_scraper_set2_complete_driver(name_slug, driver_dict):
+def apply_scraper_func2_complete_driver(name_slug, driver_dict):
     try:
         driver_dict['main_image'] = get_main_image(name_slug)
         driver_dict['driver_name'] = get_driver_name(name_slug)
