@@ -1,15 +1,11 @@
 from flask import Flask
 import sqlite3
 import unittest
-from unittest import mock
-from unittest.mock import patch
 from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
-from bs4 import BeautifulSoup
 from models import driver_model, team_model
-from flask_migrate import Migrate
 from flask_testing import TestCase
 from database import db
 
@@ -221,8 +217,8 @@ class TestScraperRunner(unittest.TestCase):
             scraper_runner.scrape_drivers()
 
             drivers = driver_model.Driver.query.all()
-            # self.assertTrue(type(drivers) == list)
-            # self.assertTrue(len(drivers) == 20)
+            self.assertTrue(type(drivers) == list)
+            self.assertTrue(len(drivers) == 20)
 
             hamilton = driver_model.Driver.query.filter_by(
                 name_slug='lewis-hamilton').first()
@@ -240,13 +236,25 @@ class TestScraperRunner(unittest.TestCase):
             db.drop_all()
 
     def test_team_runner(self):
-        # create app instance
         app = create_app()
-        # add to context
         with app.app_context():
-            # init db
             db.init_app(app)
             scraper_runner.scrape_teams()
+            ferrari = team_model.Team.query.filter_by(
+                name_slug='ferrari').first()
+            haas = team_model.Team.query.filter_by(
+                name_slug='haas_f1_team').first()
+
+            self.assertEqual(ferrari.full_team_name,
+                             'Scuderia Ferrari Mission Winnow')
+            self.assertEqual(ferrari.base, 'Maranello, Italy')
+            self.assertEqual(ferrari.power_unit, 'Ferrari')
+
+            self.assertEqual(haas.full_team_name,
+                             'Rich Energy Haas F1 Team')
+            self.assertEqual(haas.base, 'Kannapolis, United States')
+            self.assertEqual(haas.power_unit, 'Ferrari')
+
             db.session.remove()
             db.drop_all()
 
@@ -271,7 +279,6 @@ class TestDriverModel(unittest.TestCase):
             db.init_app(app)
             # create driver instance
             driver = self.create_new_driver()
-            print('D', driver)
             self.assertEqual(driver.driver_name, 'Test Driver')
             self.assertEqual(driver.name_slug, 'test-driver')
             # drop db

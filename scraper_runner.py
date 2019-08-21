@@ -46,8 +46,6 @@ def scrape_drivers():
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()
-        # if(new_driver_dict['driver_name'] == "Alexander Albon"):
-        #     return
 
 
 def scrape_teams():
@@ -71,3 +69,5 @@ def scrape_teams():
         if d.exists(team['name_slug']):
             d.delete(team['name_slug'])
         d.insert()
+        # if(new_dict['name_slug'] == 'ferrari'):
+        #     return
