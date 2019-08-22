@@ -373,6 +373,21 @@ class TestTeamModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
+    def test_add_drivers(self):
+         # create app instance
+        app = create_app()
+        # add to context
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # create driver instance
+            drivers = driver_model.Driver.query.all()
+            print(drivers)
+            d = self.team_model.Team.add_drivers()
+            # drop db
+            db.session.remove()
+            db.drop_all()
+
     def test_team_insert(self):
         app = create_app()
         with app.app_context():

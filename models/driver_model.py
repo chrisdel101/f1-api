@@ -1,6 +1,5 @@
 from database import db
 from sqlalchemy import text
-from .team_model import Team
 from slugify import slugify, Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
@@ -8,8 +7,9 @@ _slugify.separator = '_'
 
 
 class Driver(db.Model):
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    driver_name = db.Column(db.String(80), unique=True, nullable=False)
+    driver_name = db.Column(db.String(80), nullable=False)
     country = db.Column(db.String(100))
     name_slug = db.Column(db.String(80), unique=True, nullable=False)
     date_of_birth = db.Column(db.String(20))
@@ -25,9 +25,9 @@ class Driver(db.Model):
     position = db.Column(db.String(10))
     # name of team - string with spaces
     team = db.Column(db.String(50), nullable=False)
-    # name with underscores
-    team_slug = db.Column(db.String(50), db.ForeignKey(
-        'team.name_slug'), nullable=False)
+    # url name with underscores
+    team_name_slug = db.Column(db.Integer, db.ForeignKey(
+        'team.id'), nullable=False)
 
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
@@ -57,10 +57,11 @@ class Driver(db.Model):
             d.points = scraper_dict.get('points')
             d.world_championships = scraper_dict.get('world_championships')
             d.team = scraper_dict.get('team')
-            d.team_slug = _slugify(d.team)
+            # url name with underscores
+            d.team_name_slug = _slugify(d.team)
             d.points = scraper_dict.get('points')
             d.podiums = scraper_dict.get('podiums')
-            print(d)
+            # print(d.team_name_slug)
             return d
         except Exception as e:
             print('New Error', e)

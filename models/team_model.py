@@ -1,5 +1,6 @@
 from database import db
 from sqlalchemy import text
+from .driver_model import Driver
 from slugify import slugify, Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
@@ -10,7 +11,8 @@ class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_team_name = db.Column(db.String(100), nullable=False, unique=True)
     # underscored name
-    name_slug = db.Column(db.String(100), nullable=False)
+    team_name_slug = db.Column(
+        db.String(100), nullable=False, unique=True)
     # name with hypens for urls
     url_name_slug = db.Column(db.String(100))
     base = db.Column(db.String(100))
@@ -26,12 +28,11 @@ class Team(db.Model):
     logo_url = db.Column(db.String(200))
     podium_finishes = db.Column(db.String(25))
     championship_titles = db.Column(db.String(25))
-    drivers = db.Column(db.PickleType)
-    driver_rel = db.relationship('Driver', backref='team_rel', lazy=True)
+    drivers_scraped = db.Column(db.PickleType)
+    drivers_list = db.relationship('Driver', backref='team_name', lazy=True)
 
 
 #   https://stackoverflow.com/a/44595303/5972531
-
 
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
@@ -47,7 +48,7 @@ class Team(db.Model):
             print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
-            d.name_slug = scraper_dict.get('name_slug')
+            d.team_name_slug = scraper_dict.get('team_name_slug')
             d.url_name_slug = scraper_dict.get('url_name_slug')
             d.full_team_name = scraper_dict.get('full_team_name')
             d.base = scraper_dict.get('base')
@@ -64,11 +65,17 @@ class Team(db.Model):
             d.logo_url = scraper_dict.get('logo_url')
             d.podium_finishes = scraper_dict.get('podium_finishes')
             d.championship_titles = scraper_dict.get('championship_titles')
-            d.drivers = scraper_dict.get('drivers')
+            d.drivers_scraped = scraper_dict.get('drivers')
+            # d.drivers_list = self.add_drivers()
             return d
 
         except Exception as e:
             print('Create error', e)
+
+    def add_drivers(self, drivers_list):
+        # loop over and find matching team slug
+        for driver in drivers:
+            print(driver)
 
     def insert(self):
         try:
@@ -79,8 +86,8 @@ class Team(db.Model):
             print('RollBack', e)
             db.session.rollback()
 
-    def delete(self, team_slug):
-        d = self.query.filter_by(name_slug=team_slug).first()
+    def delete(self, team_name_slug):
+        d = self.query.filter_by(team_name_slug=team_name_slug).first()
         try:
             db.session.delete(d)
             db.session.commit()
@@ -88,9 +95,9 @@ class Team(db.Model):
         except Exception as e:
             print('Delete Error', e)
 
-    def exists(self, team_slug):
+    def exists(self, team_name_slug):
         try:
-            if self.query.filter_by(name_slug=team_slug).first():
+            if self.query.filter_by(team_name_slug=team_name_slug).first():
                 return True
             return False
         except Exception as e:

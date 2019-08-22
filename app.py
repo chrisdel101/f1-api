@@ -61,7 +61,7 @@ def scrape_teams():
 
 @app.route('/scrape-all')
 def all():
-    scrape_drivers.main()
+    scraper_runner.main()
     return 'Complete\n'
 
 

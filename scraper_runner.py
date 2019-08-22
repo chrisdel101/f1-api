@@ -9,7 +9,7 @@ _slugify.separator = '_'
 
 def main():
     scrape_teams()
-    scrapte_drivers()
+    scrape_drivers()
 
 
 # - scrapes all drivers & inserts into DB
@@ -39,10 +39,15 @@ def scrape_drivers():
                 i = 0
                 break
             i = i + 1
-        print(new_driver_dict)
+        # print(new_driver_dict)
         # - insert on scrape into DB
         d = driver_model.Driver.new(new_driver_dict)
-        print('here')
+        # print()
+        # get team foreign key
+        drivers_match = team_model.Team.query.filter_by(
+            team_name_slug="red_bull_racing")
+        print(drivers_match)
+        return
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()
@@ -51,23 +56,25 @@ def scrape_drivers():
 def scrape_teams():
     # -get all driver names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
+    print(all_teams)
     # - loop over names
     for team in all_teams:
+        # comes with all drivers list
+        team_name_slug = team['name_slug']
         # convert to url_slug
         url_name_slug = utils.create_url_name_slug(team)
         # scrape each team
         new_dict = team_scraper.scrape_single_team_stats(url_name_slug)
         # add slug to model
-        new_dict['name_slug'] = team['name_slug']
+        new_dict['team_name_slug'] = team_name_slug
         # add url slug to model
         new_dict['url_name_slug'] = url_name_slug
         # add main_ing to current team obj
         new_dict = team_scraper.iterate_teams_markup(new_dict)
-
     # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
-        if d.exists(team['name_slug']):
-            d.delete(team['name_slug'])
+        if d.exists(team_name_slug):
+            d.delete(team_name_slug)
         d.insert()
         # if(new_dict['name_slug'] == 'ferrari'):
         #     return
