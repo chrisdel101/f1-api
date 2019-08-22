@@ -7,17 +7,19 @@ from slugify import slugify
 def make_slug_dict(arr):
     result_arr = []
     for item in arr:
+        print(item.driver_name)
+        print('\n')
         d = {
-            'name': str(item),
-            'name_slug': slugify(str(item).lower())
+            'name': str(item.driver_name),
+            'name_slug': slugify(str(item.driver_name).lower())
         }
         result_arr.append(d)
     return result_arr
 
 
 def show_all_drivers():
-    obj = driver_model.Driver.query.all()
-    return make_slug_dict(obj)
+    arr = driver_model.Driver.query.all()
+    return make_slug_dict(arr)
 
 
 def show_single_driver(name_slug):

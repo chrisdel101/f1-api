@@ -265,7 +265,8 @@ class TestDriverModel(unittest.TestCase):
             {
                 "driver_name": "Test Driver",
                 "country": "test country",
-                "base": "test base"
+                "base": "test base",
+                "team": "Test Team Racing"
             }
         )
         return driver
@@ -281,7 +282,9 @@ class TestDriverModel(unittest.TestCase):
             driver = self.create_new_driver()
             self.assertEqual(driver.driver_name, 'Test Driver')
             self.assertEqual(driver.name_slug, 'test-driver')
+            self.assertEqual(driver.team_slug, 'test_team_racing')
             # drop db
+            print(driver)
             db.session.remove()
             db.drop_all()
 

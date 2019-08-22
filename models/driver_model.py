@@ -1,6 +1,10 @@
 from database import db
 from sqlalchemy import text
-from slugify import slugify
+from .team_model import Team
+from slugify import slugify, Slugify
+_slugify = Slugify()
+_slugify = Slugify(to_lower=True)
+_slugify.separator = '_'
 
 
 class Driver(db.Model):
@@ -16,18 +20,22 @@ class Driver(db.Model):
     podiums = db.Column(db.String(10))
     points = db.Column(db.String(10))
     world_championships = db.Column(db.String(10))
-    team = db.Column(db.String(50))
     highest_grid_position = db.Column(db.String(10))
     points = db.Column(db.String(10))
     position = db.Column(db.String(10))
+    # name of team - string with spaces
+    team = db.Column(db.String(50), nullable=False)
+    # name with underscores
+    team_slug = db.Column(db.String(50), db.ForeignKey(
+        'team.name_slug'), nullable=False)
 
     def __repr__(self):
-            return "<{klass} @{id:x} {attrs}>".format(
-                klass=self.__class__.__name__,
-                id=id(self) & 0xFFFFFF,
-                attrs=" ".join("{}={!r}".format(k, v)
-                               for k, v in self.__dict__.items()),
-            )
+        return "<{klass} @{id:x} {attrs}>".format(
+            klass=self.__class__.__name__,
+            id=id(self) & 0xFFFFFF,
+            attrs=" ".join("{}={!r}".format(k, v)
+                           for k, v in self.__dict__.items()),
+        )
 
     @classmethod
     def new(cls, scraper_dict):
@@ -49,9 +57,10 @@ class Driver(db.Model):
             d.points = scraper_dict.get('points')
             d.world_championships = scraper_dict.get('world_championships')
             d.team = scraper_dict.get('team')
+            d.team_slug = _slugify(d.team)
             d.points = scraper_dict.get('points')
             d.podiums = scraper_dict.get('podiums')
-
+            print(d)
             return d
         except Exception as e:
             print('New Error', e)

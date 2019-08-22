@@ -1,16 +1,18 @@
 from database import db
 from sqlalchemy import text
-from slugify import slugify
+from slugify import slugify, Slugify
+_slugify = Slugify()
+_slugify = Slugify(to_lower=True)
 
 
 class Team(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
+    full_team_name = db.Column(db.String(100), nullable=False, unique=True)
     # underscored name
     name_slug = db.Column(db.String(100), nullable=False)
-    # name with hypens
+    # name with hypens for urls
     url_name_slug = db.Column(db.String(100))
-    full_team_name = db.Column(db.String(100), nullable=False, unique=True)
     base = db.Column(db.String(100))
     team_chief = db.Column(db.String(100))
     technical_chief = db.Column(db.String(100))
@@ -25,8 +27,12 @@ class Team(db.Model):
     podium_finishes = db.Column(db.String(25))
     championship_titles = db.Column(db.String(25))
     drivers = db.Column(db.PickleType)
+    driver_rel = db.relationship('Driver', backref='team_rel', lazy=True)
+
 
 #   https://stackoverflow.com/a/44595303/5972531
+
+
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
             klass=self.__class__.__name__,
