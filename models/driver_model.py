@@ -26,7 +26,8 @@ class Driver(db.Model):
     # name of team - string with spaces
     team = db.Column(db.String(50), nullable=False)
     # url name with underscores
-    team_name_slug = db.Column(db.Integer, db.ForeignKey(
+    team_name_slug = db.Column(db.String(50), nullable=False)
+    team_id = db.Column(db.Integer, db.ForeignKey(
         'team.id'), nullable=False)
 
     def __repr__(self):
@@ -45,6 +46,12 @@ class Driver(db.Model):
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
             d.name_slug = slugify(d.driver_name).lower()
+            # short version with spaces
+            d.team = scraper_dict.get('team')
+            # url name with underscores
+            d.team_name_slug = _slugify(d.team)
+            # ForeignKey
+            d.team_id = scraper_dict.get('team_id')
             d.country = scraper_dict.get('country')
             d.highest_grid_position = scraper_dict.get('highest_grid_position')
             d.driver_name = scraper_dict.get('driver_name')
@@ -56,12 +63,9 @@ class Driver(db.Model):
             d.podiums = scraper_dict.get('podiums')
             d.points = scraper_dict.get('points')
             d.world_championships = scraper_dict.get('world_championships')
-            d.team = scraper_dict.get('team')
-            # url name with underscores
-            d.team_name_slug = _slugify(d.team)
             d.points = scraper_dict.get('points')
             d.podiums = scraper_dict.get('podiums')
-            # print(d.team_name_slug)
+            # print('DD', d)
             return d
         except Exception as e:
             print('New Error', e)
