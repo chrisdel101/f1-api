@@ -42,9 +42,10 @@ def all_teams():
     return jsonify(teams_controller.show_all_teams())
 
 
-@app.route('/teams/<team_slug>')
-def team(team_slug):
-    return jsonify(teams_controller.show_single_team(team_slug))
+# takes a slug or an id
+@app.route('/teams/<team_indetifier>')
+def team(team_indetifier):
+    return jsonify(teams_controller.show_single_team(team_indetifier))
 
 
 @app.route('/drivers/scrape-drivers')

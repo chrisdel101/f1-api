@@ -21,16 +21,27 @@ def show_all_teams():
         item = vars(item)
         obj = {
             'name': item['full_team_name'],
-            'name_slug': item['name_slug']
+            'name_slug': item['team_name_slug']
         }
         results.append(obj)
     return results
 
 
-def show_single_team(name_slug):
-    try:
-        team = vars(team_model.Team.query.filter_by(
-            name_slug=name_slug).first())
-        return utils.serialize_row(team)
-    except Exception as e:
-        print('Error', e)
+# takes either the team_name_slug or the team ID
+def show_single_team(identifier):
+    # check if it's ID
+    if type(identifier) == int:
+        try:
+            team = vars(team_model.Team.query.filter_by(
+                id=identifier).first())
+            return utils.serialize_row(team)
+        except Exception as e:
+            print('Error', e)
+    # or if it's name_slug
+    else:
+        try:
+            team = vars(team_model.Team.query.filter_by(
+                team_name_slug=identifier).first())
+            return utils.serialize_row(team)
+        except Exception as e:
+            print('Error', e)

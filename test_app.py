@@ -6,6 +6,7 @@ from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
 from models import driver_model, team_model
+from controllers import drivers_controller, teams_controller
 from flask_testing import TestCase
 from database import db
 
@@ -20,10 +21,18 @@ def get_team_list(team_name, soup):
                     return li
 
 
-def create_app():
+def create_test_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+    app.config['TESTING'] = True
+    return app
+
+
+def create_real_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/f1'
     app.config['TESTING'] = True
     return app
 
@@ -209,7 +218,7 @@ class TestScraperRunner(unittest.TestCase):
     @unittest.skip
     def test_driver_runner(self):
         # create app instance
-        app = create_app()
+        app = create_test_app()
         # add to context
         with app.app_context():
             # init db
@@ -237,7 +246,7 @@ class TestScraperRunner(unittest.TestCase):
 
     def test_team_runner(self):
 
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             scraper_runner.scrape_teams()
@@ -290,7 +299,7 @@ class TestDriverModel(unittest.TestCase):
 
     def test_driver_new(self):
         # create app instance
-        app = create_app()
+        app = create_test_app()
         # add to context
         with app.app_context():
             # init db
@@ -306,7 +315,7 @@ class TestDriverModel(unittest.TestCase):
 
      # should pass with all constraints
     def test_driver_insert_pass(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             driver_pass = self.create_new_driver_pass()
@@ -318,7 +327,7 @@ class TestDriverModel(unittest.TestCase):
 
     def test_driver_insert_fail(self):
         # should fail missing contstrainta
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             driver_fail = self.create_new_driver_fail()
@@ -329,7 +338,7 @@ class TestDriverModel(unittest.TestCase):
             db.drop_all()
 
     def test_driver_does_not_exist(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             driver = self.create_new_driver_pass()
@@ -340,7 +349,7 @@ class TestDriverModel(unittest.TestCase):
             db.drop_all()
 
     def test_driver_does_exists(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             driver = self.create_new_driver_pass()
@@ -352,7 +361,7 @@ class TestDriverModel(unittest.TestCase):
             db.drop_all()
 
     def test_driver_delete(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             driver = self.create_new_driver_pass()
@@ -364,7 +373,7 @@ class TestDriverModel(unittest.TestCase):
             db.drop_all()
 
     def test_driver_not_exists_after_delete(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             driver = self.create_new_driver_pass()
@@ -397,7 +406,7 @@ class TestTeamModel(unittest.TestCase):
 
     def test_driver_new(self):
         # create app instance
-        app = create_app()
+        app = create_test_app()
         # add to context
         with app.app_context():
             # init db
@@ -411,7 +420,7 @@ class TestTeamModel(unittest.TestCase):
             db.drop_all()
 
     def test_team_insert_pass(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_pass()
@@ -422,7 +431,7 @@ class TestTeamModel(unittest.TestCase):
             db.drop_all()
 
     def test_team_insert_fail(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_fail()
@@ -433,7 +442,7 @@ class TestTeamModel(unittest.TestCase):
             db.drop_all()
 
     def test_team_does_not_exists(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_pass()
@@ -444,7 +453,7 @@ class TestTeamModel(unittest.TestCase):
             db.drop_all()
 
     def test_team_does_exist(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_pass()
@@ -456,7 +465,7 @@ class TestTeamModel(unittest.TestCase):
             db.drop_all()
 
     def test_team_delete(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_pass()
@@ -468,7 +477,7 @@ class TestTeamModel(unittest.TestCase):
             db.drop_all()
 
     def test_team_not_exists_after_delete(self):
-        app = create_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_pass()
@@ -479,6 +488,24 @@ class TestTeamModel(unittest.TestCase):
             self.assertFalse(exists)
             db.session.remove()
             db.drop_all()
+
+
+class TestTeamController(unittest.TestCase):
+    def test_show_single_team_w_id(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            team = teams_controller.show_single_team(1)
+            self.assertAlmostEqual(team['team_name_slug'], 'mercedes')
+
+    def test_show_single_team_w_slug(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            team = teams_controller.show_single_team('red_bull_racing')
+            print(team)
+            self.assertEqual(team['team_name_slug'], 'red_bull_racing')
+            self.assertEqual(team['id'], 3)
 
 
 if __name__ == '__main__':
