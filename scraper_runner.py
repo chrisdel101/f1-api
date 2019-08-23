@@ -47,25 +47,27 @@ def scrape_drivers():
         # team_match_driver = team_model.Team.query.filter_by(
         #     team_name_slug=d.team_name_slug).first()
 
-        # match driver team_name_slug to actual team
+        # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
+        # get matching team name slug - both driver and team need the same one
         team_name_slug = team_match_driver.team_name_slug
-        print('match', team_name_slug)
-
+        print(team_match_driver)
         # print('\n')
-        # get team id from team lookup
-        # team_id = team_match_driver.id
-        # add foreign key to driver
-        # new_driver_dict['team_id'] = team_id
+        # error check
+        if team_match_driver:
+            # get team id from team lookup
+            team_id = team_match_driver.id
+            # add foreign key to driver
+            new_driver_dict['team_id'] = team_id
         # reinstansiate driver with foriegn key
-        # print('DICT',  new_driver_dict)
-        # print('TEAM SLUG', d.team_name_slug)
-        # d = driver_model.Driver.new(new_driver_dict)
+        d = driver_model.Driver.new(new_driver_dict)
+        print('ID', d.team_id)
+        print('\n')
         # print(d.team_id)
-        # if d.exists(driver_slug):
-        #     d.delete(driver_slug)
-        # d.insert()
+        if d.exists(driver_slug):
+            d.delete(driver_slug)
+        d.insert()
         # return
 
 
