@@ -66,7 +66,6 @@ class Team(db.Model):
             d.podium_finishes = scraper_dict.get('podium_finishes')
             d.championship_titles = scraper_dict.get('championship_titles')
             d.drivers_scraped = scraper_dict.get('drivers')
-            # d.drivers_list = self.add_drivers()
             return d
 
         except Exception as e:

@@ -42,18 +42,12 @@ def scrape_drivers():
         print(new_driver_dict)
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
-        # print('TEAM SLUG', d.team_name_slug)
-        # find team matching team_name_slug
-        # team_match_driver = team_model.Team.query.filter_by(
-        #     team_name_slug=d.team_name_slug).first()
-
         # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
         # get matching team name slug - both driver and team need the same one
         team_name_slug = team_match_driver.team_name_slug
         print(team_match_driver)
-        # print('\n')
         # error check
         if team_match_driver:
             # get team id from team lookup
@@ -62,13 +56,11 @@ def scrape_drivers():
             new_driver_dict['team_id'] = team_id
         # reinstansiate driver with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
-        print('ID', d.team_id)
-        print('\n')
-        # print(d.team_id)
+        # add driver to team drivers_list
+        # print('ID', team_match_driver.drivers_list)
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()
-        # return
 
 
 def scrape_teams():
@@ -89,7 +81,7 @@ def scrape_teams():
         new_dict['url_name_slug'] = url_name_slug
         # add main_ing to current team obj
         new_dict = team_scraper.iterate_teams_markup(new_dict)
-    # - insert on scrape into DB
+        # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
