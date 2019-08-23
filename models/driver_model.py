@@ -9,8 +9,10 @@ _slugify.separator = '_'
 class Driver(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
+    # full name with spaces
     driver_name = db.Column(db.String(80), nullable=False)
     country = db.Column(db.String(100))
+    # slug with hyphens
     name_slug = db.Column(db.String(80), unique=True, nullable=False)
     date_of_birth = db.Column(db.String(20))
     driver_number = db.Column(db.String(10))

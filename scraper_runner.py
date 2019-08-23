@@ -1,3 +1,5 @@
+import os
+import app
 from models import driver_model, team_model
 from slugify import slugify, Slugify
 from utilities import utils
@@ -13,6 +15,7 @@ def main():
 
 
 # - scrapes all drivers & inserts into DB
+# - teams must be scraped first - driver depends on team model
 def scrape_drivers():
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
@@ -39,25 +42,27 @@ def scrape_drivers():
                 i = 0
                 break
             i = i + 1
-        print(new_driver_dict)
+
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
         # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
         # get matching team name slug - both driver and team need the same one
+        print('TTTTTTTTTTTTTT', team_match_driver)
         team_name_slug = team_match_driver.team_name_slug
-        print(team_match_driver)
+        # print(team_match_driver)
         # error check
         if team_match_driver:
             # get team id from team lookup
             team_id = team_match_driver.id
             # add foreign key to driver
             new_driver_dict['team_id'] = team_id
-        # reinstansiate driver with foriegn key
+        # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
         # print('ID', team_match_driver.drivers_list)
+        print(new_driver_dict)
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()

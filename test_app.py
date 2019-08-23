@@ -206,7 +206,7 @@ class TestUtils(unittest.TestCase):
 
 
 class TestScraperRunner(unittest.TestCase):
-
+    @unittest.skip
     def test_driver_runner(self):
         # create app instance
         app = create_app()
@@ -236,14 +236,15 @@ class TestScraperRunner(unittest.TestCase):
             db.drop_all()
 
     def test_team_runner(self):
+
         app = create_app()
         with app.app_context():
             db.init_app(app)
             scraper_runner.scrape_teams()
             ferrari = team_model.Team.query.filter_by(
-                name_slug='ferrari').first()
+                team_name_slug='ferrari').first()
             haas = team_model.Team.query.filter_by(
-                name_slug='haas_f1_team').first()
+                team_name_slug='haas_f1_team').first()
 
             self.assertEqual(ferrari.full_team_name,
                              'Scuderia Ferrari Mission Winnow')
@@ -260,13 +261,29 @@ class TestScraperRunner(unittest.TestCase):
 
 
 class TestDriverModel(unittest.TestCase):
-    def create_new_driver(self):
+    def create_new_driver_pass(self):
         driver = driver_model.Driver.new(
             {
                 "driver_name": "Test Driver",
+                "name_slug": "test-driver",
                 "country": "test country",
                 "base": "test base",
-                "team": "Test Team Racing"
+                "team": "Test Team Racing",
+                "team_name_slug": "test_team_racing",
+                "team_id": 1
+            }
+        )
+        return driver
+
+    def create_new_driver_fail(self):
+        driver = driver_model.Driver.new(
+            {
+                "driver_name": "Test Driver",
+                "name_slug": "test-driver",
+                "country": "test country",
+                "base": "test base",
+                "team": "Test Team Racing",
+                "team_name_slug": "test_team_racing"
             }
         )
         return driver
@@ -279,31 +296,43 @@ class TestDriverModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance
-            driver = self.create_new_driver()
+            driver = self.create_new_driver_pass()
             self.assertEqual(driver.driver_name, 'Test Driver')
             self.assertEqual(driver.name_slug, 'test-driver')
-            self.assertEqual(driver.team_slug, 'test_team_racing')
+            self.assertEqual(driver.team_name_slug, 'test_team_racing')
             # drop db
-            print(driver)
             db.session.remove()
             db.drop_all()
 
-    def test_driver_insert(self):
+     # should pass with all constraints
+    def test_driver_insert_pass(self):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            driver = self.create_new_driver()
-            self.assertEqual(driver.driver_name, 'Test Driver')
-            driver.insert()
-            assert driver in db.session
+            driver_pass = self.create_new_driver_pass()
+            self.assertEqual(driver_pass.driver_name, 'Test Driver')
+            driver_pass.insert()
+            assert driver_pass in db.session
             db.session.remove()
             db.drop_all()
 
-    def test_driver_does_not_exists(self):
+    def test_driver_insert_fail(self):
+        # should fail missing contstrainta
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            driver = self.create_new_driver()
+            driver_fail = self.create_new_driver_fail()
+            driver_fail.insert()
+            assert driver_fail not in db.session
+            self.assertRaises(AssertionError, driver_fail.insert())
+            db.session.remove()
+            db.drop_all()
+
+    def test_driver_does_not_exist(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver_pass()
             self.assertEqual(driver.driver_name, 'Test Driver')
             exists = driver.exists(driver.name_slug)
             self.assertFalse(exists)
@@ -314,7 +343,7 @@ class TestDriverModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            driver = self.create_new_driver()
+            driver = self.create_new_driver_pass()
             self.assertEqual(driver.driver_name, 'Test Driver')
             driver.insert()
             exists = driver.exists(driver.name_slug)
@@ -326,7 +355,7 @@ class TestDriverModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            driver = self.create_new_driver()
+            driver = self.create_new_driver_pass()
             self.assertEqual(driver.driver_name, 'Test Driver')
             driver.insert()
             driver.delete(driver.name_slug)
@@ -338,7 +367,7 @@ class TestDriverModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            driver = self.create_new_driver()
+            driver = self.create_new_driver_pass()
             self.assertEqual(driver.driver_name, 'Test Driver')
             driver.insert()
             driver.delete(driver.name_slug)
@@ -349,11 +378,19 @@ class TestDriverModel(unittest.TestCase):
 
 
 class TestTeamModel(unittest.TestCase):
-    def create_new_team(self):
+    def create_new_team_pass(self):
         team = team_model.Team.new(
             {
                 "full_team_name": "Test Team",
-                "name_slug": "test_team"
+                "team_name_slug": "test_team"
+            }
+        )
+        return team
+
+    def create_new_team_fail(self):
+        team = team_model.Team.new(
+            {
+                "full_team_name": "Test Team",
             }
         )
         return team
@@ -366,36 +403,32 @@ class TestTeamModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance
-            team = self.create_new_team()
+            team = self.create_new_team_pass()
             self.assertEqual(team.full_team_name, 'Test Team')
-            self.assertEqual(team.name_slug, 'test_team')
+            self.assertEqual(team.team_name_slug, 'test_team')
             # drop db
             db.session.remove()
             db.drop_all()
 
-    def test_add_drivers(self):
-         # create app instance
-        app = create_app()
-        # add to context
-        with app.app_context():
-            # init db
-            db.init_app(app)
-            # create driver instance
-            drivers = driver_model.Driver.query.all()
-            print(drivers)
-            d = self.team_model.Team.add_drivers()
-            # drop db
-            db.session.remove()
-            db.drop_all()
-
-    def test_team_insert(self):
+    def test_team_insert_pass(self):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            team = self.create_new_team()
+            team = self.create_new_team_pass()
             self.assertEqual(team.full_team_name, 'Test Team')
             team.insert()
             assert team in db.session
+            db.session.remove()
+            db.drop_all()
+
+    def test_team_insert_fail(self):
+        app = create_app()
+        with app.app_context():
+            db.init_app(app)
+            team = self.create_new_team_fail()
+            team.insert()
+            assert team not in db.session
+            self.assertRaises(AssertionError, team.insert())
             db.session.remove()
             db.drop_all()
 
@@ -403,9 +436,9 @@ class TestTeamModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            team = self.create_new_team()
+            team = self.create_new_team_pass()
             self.assertEqual(team.full_team_name, 'Test Team')
-            exists = team.exists(team.name_slug)
+            exists = team.exists(team.team_name_slug)
             self.assertFalse(exists)
             db.session.remove()
             db.drop_all()
@@ -414,10 +447,10 @@ class TestTeamModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            team = self.create_new_team()
+            team = self.create_new_team_pass()
             self.assertEqual(team.full_team_name, 'Test Team')
             team.insert()
-            exists = team.exists(team.name_slug)
+            exists = team.exists(team.team_name_slug)
             self.assertTrue(exists)
             db.session.remove()
             db.drop_all()
@@ -426,10 +459,10 @@ class TestTeamModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            team = self.create_new_team()
+            team = self.create_new_team_pass()
             self.assertEqual(team.full_team_name, 'Test Team')
             team.insert()
-            team.delete(team.name_slug)
+            team.delete(team.team_name_slug)
             assert team not in db.session
             db.session.remove()
             db.drop_all()
@@ -438,11 +471,11 @@ class TestTeamModel(unittest.TestCase):
         app = create_app()
         with app.app_context():
             db.init_app(app)
-            team = self.create_new_team()
+            team = self.create_new_team_pass()
             self.assertEqual(team.full_team_name, 'Test Team')
             team.insert()
-            team.delete(team.name_slug)
-            exists = team.exists(team.name_slug)
+            team.delete(team.team_name_slug)
+            exists = team.exists(team.team_name_slug)
             self.assertFalse(exists)
             db.session.remove()
             db.drop_all()
