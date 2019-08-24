@@ -43,10 +43,9 @@ def all_teams():
 
 
 # takes a slug or an id
-@app.route('/teams/<team_indetifier>')
-def team(team_indetifier):
-    print('ID', team_indetifier)
-    return jsonify(teams_controller.show_single_team(team_indetifier))
+@app.route('/teams/<team_indentifier>')
+def team(team_indentifier):
+    return jsonify(teams_controller.show_single_team(team_indentifier))
 
 
 @app.route('/drivers/scrape-drivers')

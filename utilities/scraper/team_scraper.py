@@ -165,6 +165,7 @@ def get_drivers(scraper_dict, li, url_name_slug):
             drivers = ul.find_all('li')
             if len(drivers) > 0:
                 drivers = [drivers[0].text, drivers[1].text]
+                # create driver name dict
                 drivers_list = utils.create_driver_list(drivers)
                 scraper_dict['drivers'] = drivers_list
         return scraper_dict

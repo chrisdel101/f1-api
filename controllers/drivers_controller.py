@@ -7,8 +7,6 @@ from slugify import slugify
 def make_slug_dict(arr):
     result_arr = []
     for item in arr:
-        print(item.driver_name)
-        print('\n')
         d = {
             'name': str(item.driver_name),
             'name_slug': slugify(str(item.driver_name).lower())

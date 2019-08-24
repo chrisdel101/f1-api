@@ -30,7 +30,6 @@ def show_all_teams():
 # takes either the team_name_slug or the team ID
 def show_single_team(identifier):
     # check if it's ID
-    print('ID in CNt', type(identifier))
     if identifier.isdigit():
         try:
             team = vars(team_model.Team.query.filter_by(
