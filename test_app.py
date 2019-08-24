@@ -196,10 +196,22 @@ class TestTeamScraper(unittest.TestCase):
         soup = team_scraper._team_page_scrape()
         renaultList = get_team_list('Renault', soup)
         renault_data = {
-            'url_name_slug': 'Haas'
+            'url_name_slug': 'Renault'
         }
-        team_scraper.get_podium_finishes(renault_data, renaultList, 'Haas')
+        team_scraper.get_podium_finishes(renault_data, renaultList, 'Renault')
         self.assertTrue('podium_finishes' in renault_data)
+
+    def test_get_drivers(self):
+        soup = team_scraper._team_page_scrape()
+        renaultList = get_team_list('Renault', soup)
+        renault_data = {
+            'url_name_slug': 'Renault'
+        }
+        team_scraper.get_drivers(renault_data, renaultList, 'Renault')
+
+        expected = [{'driver_name': 'Nico  Hulkenberg', 'name_slug': 'nico-hulkenberg'},
+                    {'driver_name': 'Daniel Ricciardo', 'name_slug': 'daniel-ricciardo'}]
+        self.assertEqual(renault_data['drivers'], expected)
 
 
 class TestUtils(unittest.TestCase):
@@ -212,6 +224,13 @@ class TestUtils(unittest.TestCase):
         url_slug2 = utils.create_url_name_slug(dic2)
         self.assertEqual(url_slug1, 'Haas')
         self.assertEqual(url_slug2, 'Alfa-Romeo')
+
+    def test_create_driver_list(self):
+        drivers = ['Nico  Hulkenberg', 'Daniel Ricciardo']
+        expected = [{'driver_name': 'Nico  Hulkenberg', 'name_slug': 'nico-hulkenberg'},
+                    {'driver_name': 'Daniel Ricciardo', 'name_slug': 'daniel-ricciardo'}]
+        driver_list = utils.create_driver_list(drivers)
+        self.assertEqual(driver_list, expected)
 
 
 class TestScraperRunner(unittest.TestCase):
@@ -495,7 +514,7 @@ class TestTeamController(unittest.TestCase):
         app = create_real_app()
         with app.app_context():
             db.init_app(app)
-            team = teams_controller.show_single_team(1)
+            team = teams_controller.show_single_team('1')
             self.assertAlmostEqual(team['team_name_slug'], 'mercedes')
 
     def test_show_single_team_w_slug(self):

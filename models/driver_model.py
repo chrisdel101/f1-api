@@ -67,6 +67,7 @@ class Driver(db.Model):
             d.world_championships = scraper_dict.get('world_championships')
             d.points = scraper_dict.get('points')
             d.podiums = scraper_dict.get('podiums')
+            d.position = scraper_dict.get('position')
             # print('DD', d)
             return d
         except Exception as e:

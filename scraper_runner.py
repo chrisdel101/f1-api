@@ -1,4 +1,3 @@
-import os
 import app
 from models import driver_model, team_model
 from slugify import slugify, Slugify
@@ -42,14 +41,14 @@ def scrape_drivers():
                 i = 0
                 break
             i = i + 1
-
+        # print('new dict', new_dict)
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
         # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
         # get matching team name slug - both driver and team need the same one
-        print('TTTTTTTTTTTTTT', team_match_driver)
+        # print('TTTTTTTTTTTTTT', team_match_driver)
         team_name_slug = team_match_driver.team_name_slug
         # print(team_match_driver)
         # error check
@@ -62,6 +61,7 @@ def scrape_drivers():
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
         # print('ID', team_match_driver.drivers_list)
+        # return
         print(new_driver_dict)
         if d.exists(driver_slug):
             d.delete(driver_slug)
@@ -71,7 +71,7 @@ def scrape_drivers():
 def scrape_teams():
     # -get all driver names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
-    print(all_teams)
+    # print(all_teams)
     # - loop over names
     for team in all_teams:
         # comes with all drivers list
@@ -84,10 +84,13 @@ def scrape_teams():
         new_dict['team_name_slug'] = team_name_slug
         # add url slug to model
         new_dict['url_name_slug'] = url_name_slug
-        # add main_ing to current team obj
+        # add main_ing to current team obj- add drivers
         new_dict = team_scraper.iterate_teams_markup(new_dict)
+        print('DD', new_dict)
+        return
         # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
+
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
         d.insert()

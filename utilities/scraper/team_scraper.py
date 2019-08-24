@@ -126,6 +126,7 @@ def get_podium_finishes(scraper_dict, li, url_name_slug):
             if t.find_all('td', {'class', 'stat-value'})[0].text:
                 scraper_dict['podium_finishes'] = t.find(
                     'td', {'class', 'stat-value'}).text
+
         return scraper_dict
     else:
         print('Warning: No podium_finishes found.')
@@ -164,7 +165,8 @@ def get_drivers(scraper_dict, li, url_name_slug):
             drivers = ul.find_all('li')
             if len(drivers) > 0:
                 drivers = [drivers[0].text, drivers[1].text]
-                scraper_dict['drivers'] = drivers
+                drivers_list = utils.create_driver_list(drivers)
+                scraper_dict['drivers'] = drivers_list
         return scraper_dict
     else:
         print('Warning: No drivers found.')

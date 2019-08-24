@@ -73,3 +73,19 @@ def create_url_name_slug(team_name_dict):
         return url_name_slug
     except Exception as e:
         print('an error in utils.create_url_name_slug', e)
+
+
+# takes string of name
+# returns {'name_slug': 'lewis-hamilton', 'name': 'Lewis Hamilton'}
+def create_driver_list(driver_list):
+    try:
+        new_list = []
+        for driver in driver_list:
+            d = {
+                'driver_name': driver,
+                'name_slug': slugify(driver).lower()
+            }
+            new_list.append(d)
+        return new_list
+    except Exception as e:
+        print('an errot in utils.create_driver_list', e)
