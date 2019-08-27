@@ -514,17 +514,52 @@ class TestTeamController(unittest.TestCase):
         app = create_real_app()
         with app.app_context():
             db.init_app(app)
-            team = teams_controller.show_single_team('1')
-            self.assertAlmostEqual(team['team_name_slug'], 'mercedes')
+            # look up first team
+            team_one_id = vars(team_model.Team.query.all()[0])['id']
+            team_one_slug = vars(team_model.Team.query.all()[0])[
+                'team_name_slug']
+            # use id to run test
+            team = teams_controller.show_single_team(str(team_one_id))
+            self.assertEqual(team['team_name_slug'], team_one_slug)
+            self.assertEqual(team['id'], team_one_id)
 
     def test_show_single_team_w_slug(self):
         app = create_real_app()
         with app.app_context():
             db.init_app(app)
-            team = teams_controller.show_single_team('red_bull_racing')
-            print(team)
-            self.assertEqual(team['team_name_slug'], 'red_bull_racing')
-            self.assertEqual(team['id'], 3)
+            team_four_id = vars(team_model.Team.query.all()[3])['id']
+            team_four_slug = vars(team_model.Team.query.all()[0])[
+                'team_name_slug']
+            team = teams_controller.show_single_team(team_four_slug)
+            self.assertEqual(team['team_name_slug'], team_four_slug)
+
+    def test_show_all_teams(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            team = teams_controller.show_all_teams()
+            self.assertTrue(type(team), list)
+            self.assertTrue(len(team) > 0)
+
+
+class TestDriverController(unittest.TestCase):
+    def test_show_all_drivers(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            drivers = drivers_controller.show_all_drivers()
+            self.assertTrue(type(drivers), list)
+            self.assertTrue(len(drivers) > 0)
+            self.assertTrue(len(drivers) == 20)
+
+    def test_show_single_driver(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = drivers_controller.show_single_driver('lewis-hamilton')
+            self.assertTrue(type(driver is dict))
+            self.assertTrue('place_of_birth' in driver)
+            self.assertTrue(driver['place_of_birth'], 'Stevenage, England')
 
 
 if __name__ == '__main__':

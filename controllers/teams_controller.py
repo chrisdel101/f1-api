@@ -1,5 +1,6 @@
 from models import team_model
 from utilities import utils
+from slugify import slugify
 
 
 # make obj with name and slug
@@ -29,6 +30,7 @@ def show_all_teams():
 
 # takes either the team_name_slug or the team ID
 def show_single_team(identifier):
+    # print('ID', identifier)
     # check if it's ID
     if identifier.isdigit():
         try:
@@ -36,7 +38,7 @@ def show_single_team(identifier):
                 id=identifier).first())
             return utils.serialize_row(team)
         except Exception as e:
-            print('Error', e)
+            print('Error in team_controller.show_single_team ID', e)
     # or if it's name_slug
     else:
         try:
@@ -44,4 +46,4 @@ def show_single_team(identifier):
                 team_name_slug=identifier).first())
             return utils.serialize_row(team)
         except Exception as e:
-            print('Error', e)
+            print('Error in team_controller.show_single_team slug', e)
