@@ -69,6 +69,7 @@ def all():
 @app.route('/test')
 def test():
     print("Test, Test, Test")
+    return "Test, Test, Test"
 
 
 if __name__ == '__main__':
