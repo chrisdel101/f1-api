@@ -7,7 +7,6 @@ import scraper_runner
 from utilities import utils
 from models import driver_model, team_model
 from controllers import drivers_controller, teams_controller
-from flask_testing import TestCase
 from database import db
 
 
