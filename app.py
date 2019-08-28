@@ -9,12 +9,21 @@ from flask_migrate import Migrate
 import json
 from utilities import utils
 import scraper_runner
+import os
+import psycopg2
 
 
 def create_app():
     app = Flask(__name__)
+    # set db url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://localhost/f1"
+    if os.environ['FLASK_ENV'] == 'production':
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['PROD_DB']
+        DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        print(conn)
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
     db = SQLAlchemy(app)
     return {
         'app': app,

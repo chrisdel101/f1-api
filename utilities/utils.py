@@ -1,3 +1,6 @@
+import datetime
+from flask import jsonify
+import json
 from utilities import utils
 import re
 from slugify import slugify, Slugify
@@ -109,10 +112,26 @@ def compare_current_to_stored(current_sql_instance, class_to_check):
                 if vars(current_sql_instance)[key] == None:
                     changed_vals[key] = vars(current_sql_instance)[key]
                     print(f"new instance #{key} is none")
-    print(changed_vals)
+    # print(changed_vals)
     # if empty dict, no changes
     if not changed_vals:
         return True
         # else return all changes
     else:
+        print('HERE')
         return changed_vals
+
+
+def log_None_values(dict_to_log):
+    try:
+        # make sure
+        if None not in dict_to_log.values():
+            return 'No None values to log'
+        # add timestamp
+        dict_to_log['timestamp'] = datetime.datetime.now().strftime(
+            "%d/%m/%y %H:%M")
+        # add to txt file
+        with open('none_log.txt', 'a', encoding='utf-8') as f:
+            json.dump(dict_to_log, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        return('An error ocurred in utils.log_None_vals:', e)

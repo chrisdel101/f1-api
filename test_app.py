@@ -257,8 +257,27 @@ class TestUtils(unittest.TestCase):
             })
             res = utils.compare_current_to_stored(
                 diff_class, driver_model.Driver)
+            print(res)
             self.assertTrue(type(res) == dict)
             self.assertTrue(type(res) != bool)
+
+    @unittest.skip
+    def test_log_None_values(self):
+        app = create_real_app()
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # create new instance with diff properties
+            diff_class = driver_model.Driver.new({
+                'driver_name': 'Lewis Hamilton',
+                'country': 'United Kingdom',
+                'driver_number': '11',
+                'team': 'Mercedes'
+            })
+            res = utils.compare_current_to_stored(
+                diff_class, driver_model.Driver)
+            # print('RES', res)
+            utils.log_None_values(res)
 
 
 class TestScraperRunner(unittest.TestCase):

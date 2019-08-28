@@ -61,11 +61,14 @@ def scrape_drivers():
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
         # print('ID', team_match_driver.drivers_list)
-        print(d)
-        return
-        if d.exists(driver_slug):
-            d.delete(driver_slug)
-        d.insert()
+        compare = utils.compare_current_to_stored(d, driver_model.Driver)
+        if compare and type(compare) != dict:
+            if d.exists(driver_slug):
+                d.delete(driver_slug)
+            d.insert()
+        else:
+            print('New instance is missing values')
+            utils.log_None_values(compare)
 
 
 def scrape_teams():
