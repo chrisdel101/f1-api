@@ -15,6 +15,8 @@ import psycopg2
 
 def create_app():
     app = Flask(__name__)
+    print(os.environ)
+    print(app.config)
     # set db url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production':
