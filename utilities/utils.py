@@ -100,9 +100,11 @@ def compare_current_to_stored(current_sql_instance, class_to_check):
     slug = current_sql_instance.name_slug
     # look up same class in DB
     query_stored = class_to_check.query.filter_by(name_slug=slug).first()
+    # if nothing stored yet return true
+    if query_stored == None:
+        return True
     # loop over stored instance
     changed_vals = {}
-    # loop over stored class
     for key, value in vars(query_stored).items():
         # pass
         if key != "_sa_instance_state" and key != 'id':
