@@ -15,13 +15,13 @@ import psycopg2
 
 def create_app():
     app = Flask(__name__)
-    print(os.environ)
-    print(app.config)
+    print(os.environ.get('PROD_DB'))
+    # print(app.config)
     # set db url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production':
         # PROD_DB is set on heroku
-        app.config['SQLALCHEMY_DATABASE_URI'] = PROD_DB
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         print(conn)
