@@ -68,10 +68,10 @@ class Driver(db.Model):
             d.points = scraper_dict.get('points')
             d.podiums = scraper_dict.get('podiums')
             d.position = scraper_dict.get('position')
-            # print('DD', d)
+            print('DD', d)
             return d
         except Exception as e:
-            print('New Error', e)
+            print('Error in Driver new:', e)
 
     def insert(self):
         try:

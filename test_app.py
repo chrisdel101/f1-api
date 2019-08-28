@@ -231,6 +231,35 @@ class TestUtils(unittest.TestCase):
         driver_list = utils.create_driver_list(drivers)
         self.assertEqual(driver_list, expected)
 
+    def test_compare_current_to_stored_true(self):
+        app = create_real_app()
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # look up first driver in db
+            get_first_driver_sql = driver_model.Driver.query.all()[0]
+            res = utils.compare_current_to_stored(
+                get_first_driver_sql, driver_model.Driver)
+            self.assertTrue(res)
+
+    # new class contains none vals
+    def test_compare_current_to_stored_false(self):
+        app = create_real_app()
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # create new instance with diff properties
+            diff_class = driver_model.Driver.new({
+                'driver_name': 'Lewis Hamilton',
+                'country': 'United Kingdom',
+                'driver_number': '11',
+                'team': 'Mercedes'
+            })
+            res = utils.compare_current_to_stored(
+                diff_class, driver_model.Driver)
+            self.assertTrue(type(res) == dict)
+            self.assertTrue(type(res) != bool)
+
 
 class TestScraperRunner(unittest.TestCase):
     @unittest.skip

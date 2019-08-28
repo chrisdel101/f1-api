@@ -61,8 +61,8 @@ def scrape_drivers():
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
         # print('ID', team_match_driver.drivers_list)
-        # re    turn
-        print(new_driver_dict)
+        print(d)
+        return
         if d.exists(driver_slug):
             d.delete(driver_slug)
         d.insert()
