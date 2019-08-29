@@ -22,8 +22,12 @@ def show_all_drivers():
 
 def show_single_driver(name_slug):
     try:
-        driver = vars(driver_model.Driver.query.filter_by(
-            name_slug=str(name_slug)).first())
-        return utils.serialize_row(driver)
+        driver = driver_model.Driver.query.filter_by(
+            name_slug=str(name_slug)).first()
+        if driver != None:
+            driver = vars(driver)
+            return utils.serialize_row(driver)
+        else:
+            return 'No Driver with that name'
     except Exception as e:
         print('error in driver_controller.show_single_driver', e)

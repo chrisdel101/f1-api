@@ -599,7 +599,7 @@ class TestDriverController(unittest.TestCase):
             self.assertTrue(len(drivers) > 0)
             self.assertTrue(len(drivers) == 20)
 
-    def test_show_single_driver(self):
+    def test_show_single_driver_true(self):
         app = create_real_app()
         with app.app_context():
             db.init_app(app)
@@ -607,6 +607,14 @@ class TestDriverController(unittest.TestCase):
             self.assertTrue(type(driver is dict))
             self.assertTrue('place_of_birth' in driver)
             self.assertTrue(driver['place_of_birth'], 'Stevenage, England')
+    # test if DB is empty
+
+    def test_show_single_driver_false(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = drivers_controller.show_single_driver('some-random-name')
+            self.assertEqual(driver, 'No Driver with that name')
 
 
 if __name__ == '__main__':
