@@ -89,7 +89,7 @@ def scrape_teams():
         new_dict['url_name_slug'] = url_name_slug
         # add main_ing to current team obj- add drivers
         new_dict = team_scraper.iterate_teams_markup(new_dict)
-        print('DD', new_dict)
+        # print('DD', new_dict)
         # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
 

@@ -1,3 +1,4 @@
+import os
 from database import db
 from sqlalchemy import text
 from slugify import slugify, Slugify
@@ -43,7 +44,8 @@ class Driver(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            print('CREATE', scraper_dict)
+            if os.environ['FLASK_ENV'] == 'development':
+                print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
@@ -93,7 +95,7 @@ class Driver(db.Model):
 
     def exists(self, driver_slug):
         try:
-            print('SLUG', driver_slug)
+            # print('SLUG', driver_slug)
             if self.query.filter_by(name_slug=driver_slug).first():
                 return True
             return False
