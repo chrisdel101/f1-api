@@ -44,3 +44,4 @@ user-agent==0.1.9
 wcwidth==0.1.7
 Werkzeug==0.15.5
 zipp==0.5.2
+newrelic
