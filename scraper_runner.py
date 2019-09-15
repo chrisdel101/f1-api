@@ -48,7 +48,8 @@ def scrape_drivers():
         # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
-        print('TTTTTTTTTTTTTT', team_match_driver)
+
+        print('TTTTTTTTTTTTTT', team_model.Team.query.filter)
         # get matching team name slug - both driver and team need the same one
         team_name_slug = team_match_driver.team_name_slug
         # print('XXXXXXX', team_match_driver)
@@ -61,8 +62,7 @@ def scrape_drivers():
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
-        print('XXX', d)
-
+        print('XXX', d.team_id)
         # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         if compare and type(compare) != dict:
