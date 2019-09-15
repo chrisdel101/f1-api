@@ -22,7 +22,7 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        print(conn)
+        print('connection', conn)
     elif os.environ['FLASK_ENV'] == 'development':
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
     elif os.environ['FLASK_ENV'] == 'testing':

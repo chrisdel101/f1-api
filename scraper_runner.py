@@ -1,4 +1,5 @@
 import app
+import os
 from models import driver_model, team_model
 from slugify import slugify, Slugify
 from utilities import utils
@@ -54,11 +55,15 @@ def scrape_drivers():
         team_name_slug = team_match_driver.team_name_slug
         # print('XXXXXXX', team_match_driver)
         # error check
-        if team_match_driver:
-            # get team id from team lookup
-            team_id = team_match_driver.id
-            # add foreign key to driver
-            new_driver_dict['team_id'] = team_id
+        # assign random value in tests
+        if os.environ['FLASK_ENV'] == 'testing':
+            new_driver_dict['team_id'] = 101
+        else:
+            if team_match_driver:
+                # get team id from team lookup
+                team_id = team_match_driver.id
+                # add foreign key to driver
+                new_driver_dict['team_id'] = team_id
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
@@ -66,6 +71,9 @@ def scrape_drivers():
         # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         if compare and type(compare) != dict:
+            print('+++++++', d.team_id)
+            print('+++++++', d.exists(driver_slug))
+
             if d.exists(driver_slug):
                 d.delete(driver_slug)
             d.insert()
@@ -101,4 +109,4 @@ def scrape_teams():
             d.delete(team_name_slug)
         d.insert()
         # if(new_dict['name_slug'] == 'ferrari'):
-        #     return
+        # return

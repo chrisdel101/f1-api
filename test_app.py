@@ -282,41 +282,42 @@ class TestUtils(unittest.TestCase):
 
 
 class TestScraperRunner(unittest.TestCase):
-    # @unittest.skip
+    @unittest.skip
     #    https://stackoverflow.com/questions/16051422/patch-patching-the-class-introduces-an-extra-parameter
     # https://stackoverflow.com/questions/42482021/how-to-mock-modelclass-query-filter-by-in-flask-sqlalchemy
-    app = create_test_app()
+    # mock = MagicMock(return=3)
+    # @patch('models.team_model.Team', return_value="test_slug")
+    @patch('flask_sqlalchemy._QueryProperty.__get__')
+    def test_driver_runner(self, *args):
+        # filter_by_mock = some_model_mock.query.filter_by
+        # create app instance
+        app = create_test_app()
         # add to context
-    with app.app_context():
-        @patch('models.team_model.Team.query', return_value="test_slug")
-        def test_driver_runner(self, *args):
-            # create app instance
-            app = create_test_app()
-            # add to context
-            with app.app_context():
-                # init db
-                db.init_app(app)
-                # print('HERE')
-                scraper_runner.scrape_drivers()
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # print('HERE', db)
+            scraper_runner.scrape_drivers()
 
-                drivers = driver_model.Driver.query.all()
-                self.assertTrue(type(drivers) == list)
-                self.assertTrue(len(drivers) == 20)
+            drivers = driver_model.Driver.query.all()
+            print('Dr', drivers)
+            self.assertTrue(type(drivers) == list)
+            self.assertTrue(len(drivers) == 20)
 
-                hamilton = driver_model.Driver.query.filter_by(
-                    name_slug='lewis-hamilton').first()
-                albon = driver_model.Driver.query.filter_by(
-                    name_slug='alexander-albon').first()
-                self.assertEqual(hamilton.name_slug, 'lewis-hamilton')
-                self.assertEqual(hamilton.place_of_birth, 'Stevenage, England')
-                self.assertEqual(hamilton.country, 'United Kingdom')
+            hamilton = driver_model.Driver.query.filter_by(
+                name_slug='lewis-hamilton').first()
+            albon = driver_model.Driver.query.filter_by(
+                name_slug='alexander-albon').first()
+            self.assertEqual(hamilton.name_slug, 'lewis-hamilton')
+            self.assertEqual(hamilton.place_of_birth, 'Stevenage, England')
+            self.assertEqual(hamilton.country, 'United Kingdom')
 
-                self.assertEqual(albon.name_slug, 'alexander-albon')
-                self.assertEqual(albon.place_of_birth, 'London, England')
-                self.assertEqual(albon.date_of_birth, '23/03/1996')
+            self.assertEqual(albon.name_slug, 'alexander-albon')
+            self.assertEqual(albon.place_of_birth, 'London, England')
+            self.assertEqual(albon.date_of_birth, '23/03/1996')
 
-                db.session.remove()
-                db.drop_all()
+            db.session.remove()
+            db.drop_all()
 
     def test_team_runner(self):
 
