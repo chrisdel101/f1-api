@@ -18,13 +18,14 @@ def main():
 def scrape_drivers():
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
-    # print(alldrivers)
+    # print(all_drivers)
+    # - get all driver standings
     standings = driver_scraper.scrape_all_drivers_standings()
     # - loop over names
     for driver in all_drivers:
         # slugify name
         driver_slug = slugify(driver).lower()
-        # scrape each driver
+        # scrape more driver data
         new_driver_dict = driver_scraper.apply_scraper_func1_complete_driver(
             driver_slug)
         # add etxra data to obj
@@ -47,10 +48,10 @@ def scrape_drivers():
         # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
+        print('TTTTTTTTTTTTTT', team_match_driver)
         # get matching team name slug - both driver and team need the same one
-        # print('TTTTTTTTTTTTTT', team_match_driver)
         team_name_slug = team_match_driver.team_name_slug
-        # print(team_match_driver)
+        # print('XXXXXXX', team_match_driver)
         # error check
         if team_match_driver:
             # get team id from team lookup
@@ -60,6 +61,8 @@ def scrape_drivers():
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
+        print('XXX', d)
+
         # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         if compare and type(compare) != dict:
@@ -69,6 +72,7 @@ def scrape_drivers():
         else:
             print('New instance is missing values')
             utils.log_None_values(compare)
+        return
 
 
 def scrape_teams():

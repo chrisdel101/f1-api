@@ -1,6 +1,7 @@
 from flask import Flask
 import sqlite3
 import unittest
+from unittest.mock import patch
 from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
@@ -104,17 +105,17 @@ class TestDriverScraper(unittest.TestCase):
                 'driver_name': 'Sebastian Vettel'
             })
         self.assertTrue(type(result1) == dict)
-        self.assertEqual(
-            result1['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium.jpg/1554818962683.jpg')
+        self.assertTrue(
+            'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium' in result1['main_image'])
         # test all manual additions
         result2 = driver_scraper.apply_scraper_func2_complete_driver(
             'romain-grosjean', {
                 'driver_name': 'Romain Grosjean'
             })
-        self.assertEqual(
-            result2['flag_img_url'], 'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/countryFlag.img.gif/1423762801429.gif')
-        self.assertEqual(
-            result2['main_image'], 'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/image.img.1536.medium.jpg/1554818978139.jpg')
+        self.assertTrue(
+            'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/countryFlag.img.gif' in result2['flag_img_url'])
+        self.assertTrue(
+            'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/image.img.1536.medium' in result2['main_image'])
         self.assertEqual(result2['driver_name'], 'Romain Grosjean')
         self.assertEqual(result2['driver_number'], '8')
 
@@ -281,14 +282,17 @@ class TestUtils(unittest.TestCase):
 
 
 class TestScraperRunner(unittest.TestCase):
-    @unittest.skip
-    def test_driver_runner(self):
+    # @unittest.skip
+    # needs work
+    @patch('models.team_model.Team')
+    def test_driver_runner(self, *args):
         # create app instance
         app = create_test_app()
         # add to context
         with app.app_context():
             # init db
             db.init_app(app)
+            # print('HERE')
             scraper_runner.scrape_drivers()
 
             drivers = driver_model.Driver.query.all()
@@ -321,13 +325,12 @@ class TestScraperRunner(unittest.TestCase):
             haas = team_model.Team.query.filter_by(
                 team_name_slug='haas_f1_team').first()
 
-            self.assertEqual(ferrari.full_team_name,
-                             'Scuderia Ferrari Mission Winnow')
+            self.assertTrue('Scuderia Ferrari' in ferrari.full_team_name,
+                            )
             self.assertEqual(ferrari.base, 'Maranello, Italy')
             self.assertEqual(ferrari.power_unit, 'Ferrari')
 
-            self.assertEqual(haas.full_team_name,
-                             'Rich Energy Haas F1 Team')
+            self.assertTrue('Haas F1 Team' in haas.full_team_name)
             self.assertEqual(haas.base, 'Kannapolis, United States')
             self.assertEqual(haas.power_unit, 'Ferrari')
 
