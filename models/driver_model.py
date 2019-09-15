@@ -98,7 +98,7 @@ class Driver(db.Model):
         if os.environ['FLASK_ENV'] == 'testing':
             return False
         try:
-            print('SLUG', driver_slug)
+            # print('SLUG', driver_slug)
             if self.query.filter_by(name_slug=driver_slug).first():
                 return True
             return False

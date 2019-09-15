@@ -67,7 +67,7 @@ def scrape_drivers():
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # add driver to team drivers_list
-        print('XXX', d.team_id)
+        # print('XXX', d.team_id)
         # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         if compare and type(compare) != dict:
