@@ -11,7 +11,6 @@ Flask==1.1.1
 Flask-Migrate==2.5.2
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.0
--e git+https://github.com/pallets/flask@ffc68840f821fb0a4c41a7b2b4eaad6d71f539b7#egg=flaskr&subdirectory=examples/tutorial
 gunicorn==19.9.0
 idna==2.8
 importlib-metadata==0.19

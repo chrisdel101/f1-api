@@ -11,6 +11,7 @@ from utilities import utils
 import scraper_runner
 import os
 import psycopg2
+# print('++++', os.environ)
 
 
 def create_app():

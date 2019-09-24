@@ -244,6 +244,7 @@ class TestUtils(unittest.TestCase):
             self.assertTrue(res)
 
     # new class contains none vals
+    @unittest.skip
     def test_compare_current_to_stored_false(self):
         app = create_real_app()
         with app.app_context():
@@ -258,7 +259,8 @@ class TestUtils(unittest.TestCase):
             })
             res = utils.compare_current_to_stored(
                 diff_class, driver_model.Driver)
-            print(res)
+            print('1', diff_class)
+            print('2', driver_model.Driver)
             self.assertTrue(type(res) == dict)
             self.assertTrue(type(res) != bool)
 
@@ -344,6 +346,7 @@ class TestScraperRunner(unittest.TestCase):
 
 
 class TestDriverModel(unittest.TestCase):
+    # utiliy functions to use in below tests
     def create_new_driver_pass(self):
         driver = driver_model.Driver.new(
             {
@@ -357,6 +360,7 @@ class TestDriverModel(unittest.TestCase):
             }
         )
         return driver
+# utiliy functions
 
     def create_new_driver_fail(self):
         driver = driver_model.Driver.new(
