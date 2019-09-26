@@ -31,7 +31,7 @@ class Driver(db.Model):
     # url name with underscores
     team_name_slug = db.Column(db.String(50), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey(
-        'team.id'), nullable=False)
+        'team.id'))
 
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
@@ -44,8 +44,8 @@ class Driver(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            if os.environ['FLASK_ENV'] == 'development':
-                print('CREATE', scraper_dict)
+            if os.environ['FLASK_ENV'] == 'development' or os.environ['LOGS'] != 'off':
+                print('XX CREATE', scraper_dict)
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')

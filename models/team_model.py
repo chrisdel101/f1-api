@@ -2,6 +2,7 @@ from database import db
 from sqlalchemy import text
 from .driver_model import Driver
 from slugify import slugify, Slugify
+import os
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 
@@ -45,7 +46,8 @@ class Team(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            print('CREATE', scraper_dict)
+            if os.environ['FLASK_ENV'] == 'development' or os.environ['LOGS'] != 'off':
+                print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
             d.team_name_slug = scraper_dict.get('team_name_slug')

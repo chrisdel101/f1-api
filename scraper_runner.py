@@ -49,7 +49,6 @@ def scrape_drivers():
         # match driver team_name_slug to actual team with contains
         team_match_driver = team_model.Team.query.filter(
             team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
-
         # print('TTTTTTTTTTTTTT', team_model.Team.query.filter)
         # get matching team name slug - both driver and team need the same one
         team_name_slug = team_match_driver.team_name_slug
@@ -78,7 +77,7 @@ def scrape_drivers():
                 d.delete(driver_slug)
             d.insert()
         else:
-            print('New instance is missing values')
+            print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
         # return
 

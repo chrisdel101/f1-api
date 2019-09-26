@@ -111,7 +111,7 @@ def compare_current_to_stored(current_sql_instance, class_to_check):
     changed_vals = {}
     for key, value in vars(query_stored).items():
         # pass
-        print('KEY', key)
+        # print('KEY', key)
         if key != "_sa_instance_state" and key != 'id':
             # don't compate _sa_instance or id
             if vars(current_sql_instance)[key] != value:
