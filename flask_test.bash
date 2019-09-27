@@ -1,0 +1,1 @@
+FLASK_ENV=testing LOGS=on python -m unittest test_app

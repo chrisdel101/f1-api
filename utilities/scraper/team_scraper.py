@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+import os
 from utilities import endpoints, utils
 from user_agent import generate_user_agent
 from slugify import slugify, Slugify
@@ -175,8 +176,9 @@ def get_drivers(scraper_dict, li, url_name_slug):
 
 
 def iterate_teams_markup(scraper_dict):
-    print('\n')
-    print('Change DICT', scraper_dict)
+    if os.environ['FLASK_ENV'] == 'development' or os.environ['LOGS'] != 'off':
+        print('\n')
+        print('Change DICT', scraper_dict)
     if type(scraper_dict) is not dict:
         return
     try:
@@ -191,7 +193,8 @@ def iterate_teams_markup(scraper_dict):
                 team_name = li.find('a')['href']
                 team_name = team_name.split('/')[-1]
                 url_name_slug = team_name.replace('.html', '').strip()
-                print('LIST', url_name_slug)
+                if os.environ['FLASK_ENV'] == 'development' or os.environ['LOGS'] != 'off':
+                    print('LIST', url_name_slug)
                 # - call each function
                 scraper_dict = get_main_image(scraper_dict, li, url_name_slug)
                 scraper_dict = get_flag_img_url(

@@ -11,7 +11,6 @@ from utilities import utils
 import scraper_runner
 import os
 import psycopg2
-# print('++++', os.environ)
 
 
 def create_app():
@@ -32,6 +31,7 @@ def create_app():
         print('testing DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
     db = SQLAlchemy(app)
+
     return {
         'app': app,
         'db': db
