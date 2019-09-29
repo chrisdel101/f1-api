@@ -1,2 +1,2 @@
-#!/usr/local/bin/bash
+#!/bin/bash
 curl localhost:5000/scrape-all
