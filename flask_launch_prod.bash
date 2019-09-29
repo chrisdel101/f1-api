@@ -1,2 +1,2 @@
 #!/bin/bash
-curl https://dashboard.heroku.com/apps/f1-api/scrape-all
+curl https://f1-api.herokuapp.com/drivers/scrape-all
