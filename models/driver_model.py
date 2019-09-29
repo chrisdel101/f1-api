@@ -11,7 +11,6 @@ class Driver(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     # full name with spaces
-    test = db.Column(db.String(1))
     driver_name = db.Column(db.String(80), nullable=False)
     country = db.Column(db.String(100))
     # slug with hyphens
@@ -32,7 +31,7 @@ class Driver(db.Model):
     # url name with underscores
     team_name_slug = db.Column(db.String(50), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey(
-        'team.id'), nullable=False)
+        'team.id'))
     # fix FK error in migrate
     # https://stackoverflow.com/a/52334988/5972531
 
@@ -47,8 +46,10 @@ class Driver(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            if os.environ['FLASK_ENV'] == 'development' or os.environ['LOGS'] != 'off':
-                print('XX CREATE', scraper_dict)
+            if os.environ['LOGS'] != 'off':
+                if os.environ['FLASK_ENV'] == 'development':
+                    print('XX LOGS', os.environ['LOGS'])
+                    print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')

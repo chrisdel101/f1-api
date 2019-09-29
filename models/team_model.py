@@ -46,8 +46,10 @@ class Team(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            if os.environ['FLASK_ENV'] == 'development' or os.environ['LOGS'] != 'off':
-                print('CREATE', scraper_dict)
+            if os.environ['LOGS'] != 'off':
+                if os.environ['FLASK_ENV'] == 'development':
+                    print('XX LOGS', os.environ['LOGS'])
+                    print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
             d.team_name_slug = scraper_dict.get('team_name_slug')

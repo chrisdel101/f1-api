@@ -1,1 +1,1 @@
-FLASK_ENV=testing LOGS=on python -m unittest test_app
+FLASK_ENV=testing LOGS=off python -m unittest test_app

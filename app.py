@@ -78,6 +78,8 @@ def scrape_teams():
 
 @app.route('/scrape-all')
 def all():
+    # print('LOGS+++++++++++=', os.environ['LOGS'])
+    # return
     scraper_runner.main()
     return 'Complete\n'
 

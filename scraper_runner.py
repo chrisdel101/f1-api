@@ -65,8 +65,9 @@ def scrape_drivers():
                 new_driver_dict['team_id'] = team_id
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
+        # print('XXX', d)
+
         # add driver to team drivers_list
-        # print('XXX', d.team_id)
         # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         if compare and type(compare) != dict:
@@ -79,7 +80,6 @@ def scrape_drivers():
         else:
             print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
-        # return
 
 
 def scrape_teams():
@@ -94,6 +94,7 @@ def scrape_teams():
         url_name_slug = utils.create_url_name_slug(team)
         # scrape each team
         new_dict = team_scraper.scrape_single_team_stats(url_name_slug)
+
         # add slug to model
         new_dict['team_name_slug'] = team_name_slug
         # add url slug to model
@@ -103,9 +104,12 @@ def scrape_teams():
         # print('DD', new_dict)
         # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
-
+        # check value of driver
+        # test = driver_model.Driver.query.filter(
+        # driver_model.Driver.name_slug == 'alexander-albon').first()
+        # print("TEST", test)
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
         d.insert()
         # if(new_dict['name_slug'] == 'ferrari'):
-        # return
+        #
