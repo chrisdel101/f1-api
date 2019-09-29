@@ -31,7 +31,7 @@ class Driver(db.Model):
     # url name with underscores
     team_name_slug = db.Column(db.String(50), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey(
-        'team.id'))
+        'team.id'), nullable=False)
     # fix FK error in migrate
     # https://stackoverflow.com/a/52334988/5972531
 
@@ -47,8 +47,7 @@ class Driver(db.Model):
     def new(cls, scraper_dict):
         try:
             if os.environ['LOGS'] != 'off':
-                if os.environ['FLASK_ENV'] == 'development':
-                    print('XX LOGS', os.environ['LOGS'])
+                if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
                     print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
@@ -90,6 +89,7 @@ class Driver(db.Model):
 
     def delete(self, driver_slug):
         d = self.query.filter_by(name_slug=driver_slug).first()
+        print('DELETE', d)
         try:
             db.session.delete(d)
             db.session.commit()

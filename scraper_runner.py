@@ -1,5 +1,6 @@
 import app
 import os
+import random
 from models import driver_model, team_model
 from slugify import slugify, Slugify
 from utilities import utils
@@ -17,6 +18,7 @@ def main():
 # - scrapes all drivers & inserts into DB
 # - teams must be scraped first - driver depends on team model
 def scrape_drivers():
+    team_match_driver = None
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
     # print(all_drivers)
@@ -46,23 +48,19 @@ def scrape_drivers():
         # print('new dict', new_dict)
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
-        # match driver team_name_slug to actual team with contains
-        team_match_driver = team_model.Team.query.filter(
-            team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
-        # print('TTTTTTTTTTTTTT', team_model.Team.query.filter)
-        # get matching team name slug - both driver and team need the same one
-        team_name_slug = team_match_driver.team_name_slug
-        # print('XXXXXXX', team_match_driver)
-        # error check
-        # assign random value in tests
         if os.environ['FLASK_ENV'] == 'testing':
-            new_driver_dict['team_id'] = 101
+             # assign random value in tests
+            new_driver_dict['team_id'] = random.randint(1, 10000)
         else:
-            if team_match_driver:
-                # get team id from team lookup
-                team_id = team_match_driver.id
-                # add foreign key to driver
-                new_driver_dict['team_id'] = team_id
+            # match driver team_name_slug to actual team with contains - get team_id
+            team_match_driver = team_model.Team.query.filter(
+                team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
+            # print('TTTTTTTTTTTTTT', team_match_driver)
+            # get team id from team lookup
+            team_id = team_match_driver.id
+            # add foreign key to driver
+            new_driver_dict['team_id'] = team_id
+
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # print('XXX', d)
@@ -70,6 +68,7 @@ def scrape_drivers():
         # add driver to team drivers_list
         # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
+        # return
         if compare and type(compare) != dict:
             # print('+++++++', d.team_id)
             # print('+++++++', d.exists(driver_slug))
