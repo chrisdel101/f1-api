@@ -47,7 +47,7 @@ class Driver(db.Model):
     def new(cls, scraper_dict):
         try:
             if os.environ['LOGS'] != 'off':
-                if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
+                if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
                     print('CREATE', scraper_dict)
             db.create_all()
             d = cls()
@@ -89,7 +89,6 @@ class Driver(db.Model):
 
     def delete(self, driver_slug):
         d = self.query.filter_by(name_slug=driver_slug).first()
-        print('DELETE', d)
         try:
             db.session.delete(d)
             db.session.commit()

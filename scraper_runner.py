@@ -17,7 +17,8 @@ def main():
 
 # - scrapes all drivers & inserts into DB
 # - teams must be scraped first - driver depends on team model
-def scrape_drivers():
+def scrape_drivers(fail=False):
+    new_driver_dict = None
     team_match_driver = None
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
@@ -48,19 +49,24 @@ def scrape_drivers():
         # print('new dict', new_dict)
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
-        if os.environ['FLASK_ENV'] == 'testing':
-             # assign random value in tests
-            new_driver_dict['team_id'] = random.randint(1, 10000)
+        if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
+                # fail flag can be set for testing
+            if fail:
+                # test for failure
+                new_driver_dict['team_id'] = None
+            else:
+                # assign random value in tests
+                new_driver_dict['team_id'] = random.randint(1, 100000)
         else:
-            # match driver team_name_slug to actual team with contains - get team_id
+            # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
-            # print('TTTTTTTTTTTTTT', team_match_driver)
+            if os.environ['LOGS'] != 'off':
+                print('TEAM DATA', team_match_driver)
             # get team id from team lookup
             team_id = team_match_driver.id
             # add foreign key to driver
             new_driver_dict['team_id'] = team_id
-
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # print('XXX', d)
@@ -79,6 +85,7 @@ def scrape_drivers():
         else:
             print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
+        # return
 
 
 def scrape_teams():
@@ -110,5 +117,3 @@ def scrape_teams():
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
         d.insert()
-        # if(new_dict['name_slug'] == 'ferrari'):
-        #

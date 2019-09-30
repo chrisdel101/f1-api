@@ -17,18 +17,21 @@ def create_app():
     app = Flask(__name__)
     # set db url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    if os.environ['FLASK_ENV'] == 'production':
-        print('Prod DB')
+    if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
         # PROD_DB is set on heroku
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        print('connection', conn)
+        if os.environ['LOGS'] != 'off':
+            print('APP Prod DB')
+            print('connection', conn)
     elif os.environ['FLASK_ENV'] == 'development':
-        print('dev DB')
+        if os.environ['LOGS'] != 'off':
+            print('dev DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
-    elif os.environ['FLASK_ENV'] == 'testing':
-        print('testing DB')
+    elif os.environ['FLASK_ENV'] == 'dev_testing':
+        if os.environ['LOGS'] != 'off':
+            print('testing DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
     db = SQLAlchemy(app)
 
