@@ -41,21 +41,14 @@ def create_test_app():
 def create_real_app():
     try:
         app = Flask(__name__)
-        print('APP1', app)
-        # print('SETUP',setup_testing_environment())
-        print('APP2', app)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'production':
-            # print('Prod DB', os.environ.get('PROD_DB'))
             print('Prod TEST', os.environ.get('PROD_DB'))
-            # PROD_DB is set on heroku
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
-            print('APP3', app)
-            print('SQLALCHEMY_DATABASE_URI',app.config['SQLALCHEMY_DATABASE_URI'])
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            print('connection', conn)
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
+            # import env
             setup_testing_environment()
             print('DEV DB', os.environ.get('DEV_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
@@ -681,7 +674,6 @@ class TestTeamController(unittest.TestCase):
 class TestDriverController(unittest.TestCase):
     def test_show_all_drivers(self):
         app = create_real_app()
-        print('APP', app)
         with app.app_context():
             db.init_app(app)
             drivers = drivers_controller.show_all_drivers()
