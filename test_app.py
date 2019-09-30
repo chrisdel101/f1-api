@@ -13,6 +13,7 @@ from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
 
+
 # https://stackoverflow.com/a/50536837/5972531
 def setup_testing_environment():
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
@@ -43,16 +44,18 @@ def create_real_app():
     try:
         app = Flask(__name__)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        # print('ENV', os.environ['FLASK_ENV'])
         if os.environ['FLASK_ENV'] == 'prod_testing':
-            print('Prod TEST', os.environ.get('PROD_DB'))
+            setup_testing_environment()
+            if os.environ['LOGS'] != 'off':
+                print('Prod TEST', os.environ.get('PROD_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
             # import env
             setup_testing_environment()
-            print('DEV DB', os.environ.get('DEV_DB'))
+            if os.environ['LOGS'] != 'off':
+                print('DEV DB', os.environ.get('DEV_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
         return app
     except Exception as e:
