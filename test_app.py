@@ -49,11 +49,12 @@ def create_real_app():
             print(os.environ['PROD_DB'])
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            return app
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
-        return app
+            return app
     except Exception as e:
-        print('Error in create_real_app', e)
+        print('Error in create_real_app')
 
 class TestDriverScraper(unittest.TestCase):
 
