@@ -340,14 +340,13 @@ class TestScraperRunner(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-
-
     # make sure runners work together
+
     def test_all_runners(self):
         app = create_test_app()
         with app.app_context():
-            print('db', db)
             db.init_app(app)
+            print('db', db)
             scraper_runner.scrape_drivers()
             scraper_runner.scrape_teams()
             drivers = driver_model.Driver.query.all()
