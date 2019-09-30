@@ -50,17 +50,18 @@ def scrape_drivers():
         d = driver_model.Driver.new(new_driver_dict)
         if os.environ['FLASK_ENV'] == 'testing':
              # assign random value in tests
-            new_driver_dict['team_id'] = random.randint(1, 10000)
+            new_driver_dict['team_id'] = random.randint(1, 100000)
+            # new_driver_dict['team_id'] = None
         else:
-            # match driver team_name_slug to actual team with contains - get team_id
+            # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
-            # print('TTTTTTTTTTTTTT', team_match_driver)
+            if os.environ['LOGS'] != 'off':
+                print('TEAM DATA', team_match_driver)
             # get team id from team lookup
             team_id = team_match_driver.id
             # add foreign key to driver
             new_driver_dict['team_id'] = team_id
-
         # reinstansiate driver instance with foriegn key
         d = driver_model.Driver.new(new_driver_dict)
         # print('XXX', d)
@@ -79,6 +80,7 @@ def scrape_drivers():
         else:
             print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
+        # return
 
 
 def scrape_teams():

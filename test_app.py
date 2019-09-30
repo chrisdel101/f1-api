@@ -1,7 +1,6 @@
 from flask import Flask
 import sqlite3
 import unittest
-from unittest.mock import patch
 from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
@@ -284,14 +283,11 @@ class TestUtils(unittest.TestCase):
 
 
 class TestScraperRunner(unittest.TestCase):
-    # @unittest.skip
     #    https://stackoverflow.com/questions/16051422/patch-patching-the-class-introduces-an-extra-parameter
     # https://stackoverflow.com/questions/42482021/how-to-mock-modelclass-query-filter-by-in-flask-sqlalchemy
-    # mock = MagicMock(return=3)
     # @patch('models.team_model.Team', return_value="test_slug")
     # @patch('flask_sqlalchemy._QueryProperty.__get__')
     def test_driver_runner(self, *args):
-        # filter_by_mock = some_model_mock.query.filter_by
         # create app instance
         app = create_test_app()
         # add to context
@@ -317,7 +313,7 @@ class TestScraperRunner(unittest.TestCase):
             self.assertEqual(albon.name_slug, 'alexander-albon')
             self.assertEqual(albon.place_of_birth, 'London, England')
             self.assertEqual(albon.date_of_birth, '23/03/1996')
-            scraper_runner.scrape_teams()
+
             db.session.remove()
             db.drop_all()
 
@@ -327,6 +323,48 @@ class TestScraperRunner(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             scraper_runner.scrape_teams()
+            ferrari = team_model.Team.query.filter_by(
+                team_name_slug='ferrari').first()
+            haas = team_model.Team.query.filter_by(
+                team_name_slug='haas_f1_team').first()
+
+            self.assertTrue('Scuderia Ferrari' in ferrari.full_team_name,
+                            )
+            self.assertEqual(ferrari.base, 'Maranello, Italy')
+            self.assertEqual(ferrari.power_unit, 'Ferrari')
+
+            self.assertTrue('Haas F1 Team' in haas.full_team_name)
+            self.assertEqual(haas.base, 'Kannapolis, United States')
+            self.assertEqual(haas.power_unit, 'Ferrari')
+
+            db.session.remove()
+            db.drop_all()
+
+
+
+    # make sure runners work together
+    def test_all_runners(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            scraper_runner.scrape_drivers()
+            scraper_runner.scrape_teams()
+            drivers = driver_model.Driver.query.all()
+            # print('Dr', drivers)
+            self.assertTrue(type(drivers) == list)
+            self.assertTrue(len(drivers) == 20)
+
+            hamilton = driver_model.Driver.query.filter_by(
+                name_slug='lewis-hamilton').first()
+            albon = driver_model.Driver.query.filter_by(
+                name_slug='alexander-albon').first()
+            self.assertEqual(hamilton.name_slug, 'lewis-hamilton')
+            self.assertEqual(hamilton.place_of_birth, 'Stevenage, England')
+            self.assertEqual(hamilton.country, 'United Kingdom')
+
+            self.assertEqual(albon.name_slug, 'alexander-albon')
+            self.assertEqual(albon.place_of_birth, 'London, England')
+            self.assertEqual(albon.date_of_birth, '23/03/1996')
             ferrari = team_model.Team.query.filter_by(
                 team_name_slug='ferrari').first()
             haas = team_model.Team.query.filter_by(
