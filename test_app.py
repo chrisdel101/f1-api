@@ -30,9 +30,9 @@ def get_team_list(team_name, soup):
 def create_test_app():
     try:
         app = Flask(__name__)
-        elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
-            setup_testing_environment()
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
+            setup_testing_environment()
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
         return app
     except Exception as e:
@@ -44,14 +44,15 @@ def create_real_app():
         app = Flask(__name__)
         print('ENV', os.environ['FLASK_ENV'])
         if os.environ['FLASK_ENV'] == 'prod_testing':
+            app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
             print('Prod TEST', os.environ.get('PROD_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
             # import env
             setup_testing_environment()
+            app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
             print('DEV DB', os.environ.get('DEV_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
         return app
