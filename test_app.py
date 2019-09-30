@@ -41,14 +41,18 @@ def create_test_app():
 def create_real_app():
     try:
         app = Flask(__name__)
+        print('APP1', app)
         setup_testing_environment()
+        # print('SETUP',setup_testing_environment())
+        print('APP2', app)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'production':
             # print('Prod DB', os.environ.get('PROD_DB'))
             print('Prod TEST', os.environ.get('PROD_DB'))
             # PROD_DB is set on heroku
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
-            print('app', app)
+            print('APP3', app)
+            print('SQLALCHEMY_DATABASE_URI',app.config['SQLALCHEMY_DATABASE_URI'])
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             print('connection', conn)
