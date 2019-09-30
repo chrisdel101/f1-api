@@ -11,6 +11,8 @@ from models import driver_model, team_model
 from controllers import drivers_controller, teams_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
+import psycopg2
+
 
 def setup_testing_environment():
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
