@@ -346,6 +346,7 @@ class TestScraperRunner(unittest.TestCase):
     def test_all_runners(self):
         app = create_test_app()
         with app.app_context():
+            print('db', db)
             db.init_app(app)
             scraper_runner.scrape_drivers()
             scraper_runner.scrape_teams()

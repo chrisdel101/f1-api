@@ -112,5 +112,3 @@ def scrape_teams():
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
         d.insert()
-        # if(new_dict['name_slug'] == 'ferrari'):
-        #
