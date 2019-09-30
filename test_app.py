@@ -45,7 +45,6 @@ def create_real_app():
         app = Flask(__name__)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'prod_testing':
-            setup_testing_environment()
             if os.environ['LOGS'] != 'off':
                 print('Prod TEST', os.environ.get('PROD_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
