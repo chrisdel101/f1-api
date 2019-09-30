@@ -27,7 +27,7 @@ def create_app():
     elif os.environ['FLASK_ENV'] == 'development':
         print('dev DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
-    elif os.environ['FLASK_ENV'] == 'testing':
+    elif os.environ['FLASK_ENV'] == 'dev_testing':
         print('testing DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
     db = SQLAlchemy(app)

@@ -42,12 +42,12 @@ def create_real_app():
     try:
         app = Flask(__name__)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        if os.environ['FLASK_ENV'] == 'production':
+        if os.environ['FLASK_ENV'] == 'prod_testing':
             print('Prod TEST', os.environ.get('PROD_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
+        elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
             # import env
             setup_testing_environment()
             print('DEV DB', os.environ.get('DEV_DB'))
