@@ -41,18 +41,17 @@ def create_test_app():
 def create_real_app():
     try:
         app = Flask(__name__)
-        setup_testing_environment()
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'production':
+            print('Prod DB')
             # PROD_DB is set on heroku
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
-            print(os.environ['PROD_DB'])
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            return app
+            # print('connection', conn)
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
-            return app
+        return app
     except Exception as e:
         print('Error in create_real_app')
 
@@ -677,7 +676,10 @@ class TestDriverController(unittest.TestCase):
         app = create_real_app()
         with app.app_context():
             db.init_app(app)
+            print('AA', db)
+            return
             drivers = drivers_controller.show_all_drivers()
+            print(drivers)
             self.assertTrue(type(drivers), list)
             self.assertTrue(len(drivers) > 0)
             self.assertTrue(len(drivers) == 20)
@@ -690,8 +692,9 @@ class TestDriverController(unittest.TestCase):
             self.assertTrue(type(driver is dict))
             self.assertTrue('place_of_birth' in driver)
             self.assertTrue(driver['place_of_birth'], 'Stevenage, England')
-    # test if DB is empty
 
+
+    # test if DB is empty
     def test_show_single_driver_false(self):
         app = create_real_app()
         with app.app_context():
