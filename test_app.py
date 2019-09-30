@@ -47,6 +47,7 @@ def create_real_app():
             print('Prod DB')
             # PROD_DB is set on heroku
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
+            print('app', app)
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             # print('connection', conn)
@@ -54,7 +55,7 @@ def create_real_app():
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
         return app
     except Exception as e:
-        print('Error in create_real_app')
+        print('Error in create_real_app',e)
 
 class TestDriverScraper(unittest.TestCase):
 
@@ -314,7 +315,6 @@ class TestScraperRunner(unittest.TestCase):
         with app.app_context():
             # init db
             db.init_app(app)
-            # print('HERE', db)
             scraper_runner.scrape_drivers()
 
             drivers = driver_model.Driver.query.all()
@@ -676,7 +676,7 @@ class TestDriverController(unittest.TestCase):
     def test_show_all_drivers(self):
         app = create_real_app()
         with app.app_context():
-            db.init_app(app)           
+            db.init_app(app)
             drivers = drivers_controller.show_all_drivers()
             self.assertTrue(type(drivers), list)
             self.assertTrue(len(drivers) > 0)
