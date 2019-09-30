@@ -41,6 +41,7 @@ def create_test_app():
 def create_real_app():
     try:
         app = Flask(__name__)
+        setup_testing_environment()
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'production':
             print('Prod DB')
@@ -675,11 +676,8 @@ class TestDriverController(unittest.TestCase):
     def test_show_all_drivers(self):
         app = create_real_app()
         with app.app_context():
-            db.init_app(app)
-            print('AA', db)
-            return
+            db.init_app(app)           
             drivers = drivers_controller.show_all_drivers()
-            print(drivers)
             self.assertTrue(type(drivers), list)
             self.assertTrue(len(drivers) > 0)
             self.assertTrue(len(drivers) == 20)

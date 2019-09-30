@@ -17,7 +17,6 @@ def make_slug_dict(arr):
 
 def show_all_drivers():
     arr = driver_model.Driver.query.all()
-    print(driver_model.Driver)
     return make_slug_dict(arr)
 
 
