@@ -44,7 +44,8 @@ def create_real_app():
         setup_testing_environment()
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'production':
-            print('Prod DB')
+            # print('Prod DB', os.environ.get('PROD_DB'))
+            print('Prod TEST', os.environ.get('PROD_DB'))
             # PROD_DB is set on heroku
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
             print('app', app)
@@ -52,6 +53,7 @@ def create_real_app():
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             # print('connection', conn)
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
+            print('DEV DB', os.environ.get('DEV_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
         return app
     except Exception as e:

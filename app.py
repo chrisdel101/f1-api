@@ -18,7 +18,7 @@ def create_app():
     # set db url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production':
-        print('Prod DB')
+        print('APP Prod DB')
         # PROD_DB is set on heroku
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']

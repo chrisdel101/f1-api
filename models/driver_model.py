@@ -89,7 +89,6 @@ class Driver(db.Model):
 
     def delete(self, driver_slug):
         d = self.query.filter_by(name_slug=driver_slug).first()
-        print('DELETE', d)
         try:
             db.session.delete(d)
             db.session.commit()
