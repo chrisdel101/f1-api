@@ -49,17 +49,16 @@ def scrape_drivers(fail=False):
         # print('new dict', new_dict)
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
-        if os.environ['FLASK_ENV'] == 'dev_testing' or
-        os.environ['FLASK_ENV'] == 'prod_testing':
+        if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
                 # fail flag can be set for testing
-                if fail:
-                    # test for failure
-                    new_driver_dict['team_id'] = None
-                else:
-                    # assign random value in tests
-                    new_driver_dict['team_id'] = random.randint(1, 100000)
+            if fail:
+                # test for failure
+                new_driver_dict['team_id'] = None
+            else:
+                # assign random value in tests
+                new_driver_dict['team_id'] = random.randint(1, 100000)
         else:
-                # match driver team_name_slug to actual team with contains - goal is team_id
+            # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
             if os.environ['LOGS'] != 'off':
