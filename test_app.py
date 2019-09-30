@@ -51,7 +51,7 @@ def create_real_app():
             print('app', app)
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            # print('connection', conn)
+            print('connection', conn)
         elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
             print('DEV DB', os.environ.get('DEV_DB'))
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
@@ -677,6 +677,7 @@ class TestTeamController(unittest.TestCase):
 class TestDriverController(unittest.TestCase):
     def test_show_all_drivers(self):
         app = create_real_app()
+        print('APP', app)
         with app.app_context():
             db.init_app(app)
             drivers = drivers_controller.show_all_drivers()
