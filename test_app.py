@@ -1,6 +1,8 @@
 from flask import Flask
 import sqlite3
+import os
 import unittest
+from unittest.mock import patch
 from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
@@ -8,7 +10,10 @@ from utilities import utils
 from models import driver_model, team_model
 from controllers import drivers_controller, teams_controller
 from database import db
+from dotenv import load_dotenv, find_dotenv
 
+def setup_testing_environment():
+    load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
 def get_team_list(team_name, soup):
     lis = soup.find_all('li')
@@ -22,17 +27,24 @@ def get_team_list(team_name, soup):
 
 def create_test_app():
     app = Flask(__name__)
+    setup_testing_environment()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
-    app.config['TESTING'] = True
     return app
 
 
 def create_real_app():
     app = Flask(__name__)
+    setup_testing_environment()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/f1'
-    app.config['TESTING'] = True
+    if os.environ['FLASK_ENV'] == 'production':
+        # PROD_DB is set on heroku
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
+        print(os.environ['PROD_DB'])
+        DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    elif os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'testing':
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
     return app
 
 
@@ -45,15 +57,15 @@ class TestDriverScraper(unittest.TestCase):
             res, "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.768.medium.jpg/1554818962683.jpg")
 
     def test_scrape_all_driver_names(self):
-        result = driver_scraper.scrape_all_driver_names()
+        result=driver_scraper.scrape_all_driver_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
     def test_scrape_all_driver_standings(self):
-        result = driver_scraper.scrape_all_drivers_standings()
+        result=driver_scraper.scrape_all_drivers_standings()
         self.assertTrue(type(result) is list)
         self.assertTrue(len(result) > 0)
-        res1 = result[0]
+        res1=result[0]
         self.assertTrue('points' in res1)
         self.assertTrue('position' in res1)
         self.assertEqual(res1['position'], '1')
@@ -85,13 +97,13 @@ class TestDriverScraper(unittest.TestCase):
         self.assertRaises(TypeError, driver_scraper.get_driver_number, 33)
 
     def scrape_driver_details_func1(self):
-        result1 = driver_scraper.scrape_driver_details_func1("alexander-albon")
+        result1=driver_scraper.scrape_driver_details_func1("alexander-albon")
         self.assertEqual(result1[1]['country'], 'Thailand')
         self.assertEqual(result1[1]['date_of_birth'], '23/03/1996')
         self.assertEqual(result1[1]['place_of_birth'], 'London, England')
 
     def test_check_any_new_driver_attrs(self):
-        result1 = driver_scraper.scrape_driver_details_func1("alexander-albon")
+        result1=driver_scraper.scrape_driver_details_func1("alexander-albon")
         try:
             self.assertTrue(len(result1[0]) == 0)
         except Exception as e:
@@ -99,7 +111,7 @@ class TestDriverScraper(unittest.TestCase):
                 "Unknown driver attributes added to driver markup.")
 
     def test_apply_scraper_func2_complete_driver(self):
-        result1 = driver_scraper.apply_scraper_func2_complete_driver(
+        result1=driver_scraper.apply_scraper_func2_complete_driver(
             'sebastian-vettel', {
                 'driver_name': 'Sebastian Vettel'
             })
@@ -107,7 +119,7 @@ class TestDriverScraper(unittest.TestCase):
         self.assertTrue(
             'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium' in result1['main_image'])
         # test all manual additions
-        result2 = driver_scraper.apply_scraper_func2_complete_driver(
+        result2=driver_scraper.apply_scraper_func2_complete_driver(
             'romain-grosjean', {
                 'driver_name': 'Romain Grosjean'
             })
@@ -119,13 +131,13 @@ class TestDriverScraper(unittest.TestCase):
         self.assertEqual(result2['driver_number'], '8')
 
     def test_apply_scraper_func1_complete_driver(self):
-        result1 = driver_scraper.apply_scraper_func1_complete_driver(
+        result1=driver_scraper.apply_scraper_func1_complete_driver(
             'sebastian-vettel'
         )
         self.assertTrue(type(result1) == dict)
         self.assertEqual(result1['country'], 'Germany')
         # test all manual additions
-        result2 = driver_scraper.apply_scraper_func1_complete_driver(
+        result2=driver_scraper.apply_scraper_func1_complete_driver(
             'romain-grosjean'
         )
         self.assertEqual(result2['country'], 'France')
@@ -135,21 +147,21 @@ class TestDriverScraper(unittest.TestCase):
 class TestTeamScraper(unittest.TestCase):
 
     def test_scrape_all_team_names(self):
-        result = team_scraper.scrape_all_team_names()
+        result=team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
     def test_get_main_image(self):
-        soup = team_scraper._team_page_scrape()
-        ferrariList = get_team_list('Ferrari', soup)
-        ferrari_data = {
+        soup=team_scraper._team_page_scrape()
+        ferrariList=get_team_list('Ferrari', soup)
+        ferrari_data={
             'url_name_slug': "Ferrari",
         }
         team_scraper.get_main_image(
             ferrari_data, ferrariList, 'Ferrari')
         self.assertTrue('main_image' in ferrari_data)
-        williamsList = get_team_list('Williams', soup)
-        williams_data = {
+        williamsList=get_team_list('Williams', soup)
+        williams_data={
             'url_name_slug': "Williams",
         }
         team_scraper.get_main_image(
@@ -157,9 +169,9 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue('main_image' in williams_data)
 
     def test_get_driver_flag_url(self):
-        soup = team_scraper._team_page_scrape()
-        williamsList = get_team_list('Williams', soup)
-        williams_dict = {
+        soup=team_scraper._team_page_scrape()
+        williamsList=get_team_list('Williams', soup)
+        williams_dict={
             'url_name_slug': 'Williams'
         }
         team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
@@ -183,8 +195,8 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_championship_titles(
             racing_point_data, racingPointList, 'Racing-Point')
         self.assertTrue('championship_titles' in racing_point_data)
-        MercedesList = get_team_list('Mercedes', soup)
-        mercedes_data = {
+        MercedesList=get_team_list('Mercedes', soup)
+        mercedes_data={
             'url_name_slug': "Mercedes"
         }
         team_scraper.get_championship_titles(
@@ -192,9 +204,9 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue('championship_titles' in mercedes_data)
 
     def test_get_podium_finishes(self):
-        soup = team_scraper._team_page_scrape()
-        renaultList = get_team_list('Renault', soup)
-        renault_data = {
+        soup=team_scraper._team_page_scrape()
+        renaultList=get_team_list('Renault', soup)
+        renault_data={
             'url_name_slug': 'Renault'
         }
         team_scraper.get_podium_finishes(renault_data, renaultList, 'Renault')
@@ -340,13 +352,13 @@ class TestScraperRunner(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    # make sure runners work together
 
+
+    # make sure runners work together
     def test_all_runners(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            print('db', db)
             scraper_runner.scrape_drivers()
             scraper_runner.scrape_teams()
             drivers = driver_model.Driver.query.all()
@@ -378,6 +390,19 @@ class TestScraperRunner(unittest.TestCase):
             self.assertTrue('Haas F1 Team' in haas.full_team_name)
             self.assertEqual(haas.base, 'Kannapolis, United States')
             self.assertEqual(haas.power_unit, 'Ferrari')
+
+            db.session.remove()
+            db.drop_all()
+
+    # @unittest.expectedFailure
+    # run witn fail flag set to true - test for correct DB action
+    def test_driver_runner_failure(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            scraper_runner.scrape_drivers(True)
+            drivers = driver_model.Driver.query.all()
+            self.assertTrue(len(drivers) == 0)
 
             db.session.remove()
             db.drop_all()

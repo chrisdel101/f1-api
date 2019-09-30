@@ -17,7 +17,8 @@ def main():
 
 # - scrapes all drivers & inserts into DB
 # - teams must be scraped first - driver depends on team model
-def scrape_drivers():
+def scrape_drivers(fail=False):
+    new_driver_dict = None
     team_match_driver = None
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
@@ -49,9 +50,12 @@ def scrape_drivers():
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
         if os.environ['FLASK_ENV'] == 'testing':
-             # assign random value in tests
-            new_driver_dict['team_id'] = random.randint(1, 100000)
-            # new_driver_dict['team_id'] = None
+            if fail:
+                # test for failure
+                new_driver_dict['team_id'] = None
+            else:
+                # assign random value in tests
+                new_driver_dict['team_id'] = random.randint(1, 100000)
         else:
             # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
