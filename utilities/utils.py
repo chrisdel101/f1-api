@@ -125,7 +125,7 @@ def compare_current_to_stored(current_sql_instance, class_to_check):
         return True
         # else return all changes
     else:
-        print('HERE')
+        print('Changed Vals: ', changed_vals)
         return changed_vals
 
 

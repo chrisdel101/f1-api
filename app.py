@@ -15,10 +15,8 @@ import psycopg2
 
 def create_app():
     app = Flask(__name__)
-    # set db url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
-        # PROD_DB is set on heroku
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -81,8 +79,6 @@ def scrape_teams():
 
 @app.route('/scrape-all')
 def all():
-    # print('LOGS+++++++++++=', os.environ['LOGS'])
-    # return
     scraper_runner.main()
     return 'Complete\n'
 
