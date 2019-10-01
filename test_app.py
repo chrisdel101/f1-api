@@ -405,7 +405,7 @@ class TestScraperRunner(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    # @unittest.expectedFailure
+    @unittest.skip #need to rewrite - no nullable false to fail now
     # run witn fail flag set to true - test for correct DB action
     def test_driver_runner_failure(self):
         app = create_test_app()
