@@ -476,7 +476,7 @@ class TestDriverModel(unittest.TestCase):
             assert driver_pass in db.session
             db.session.remove()
             db.drop_all()
-
+    @unittest.skip #rewrite needed 
     def test_driver_insert_fail(self):
         # should fail missing contstrainta
         app = create_test_app()
