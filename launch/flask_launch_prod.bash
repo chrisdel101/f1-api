@@ -1,6 +1,6 @@
 #!/bin/bash
 # run tests
-FLASK_ENV=dev_testing LOGS=off python -m unittest test_app
+FLASK_ENV=prod_testing LOGS=off python -m unittest test_app
 # if tests pass run scraper
 if [[ $? == 0 ]]; then
     echo 'TEST OKAY: RUN SCRAPER'
