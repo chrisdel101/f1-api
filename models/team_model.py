@@ -30,11 +30,10 @@ class Team(db.Model):
     podium_finishes = db.Column(db.String(25))
     championship_titles = db.Column(db.String(25))
     drivers_scraped = db.Column(db.PickleType)
-    drivers_list = db.relationship('Driver', backref='team_name', lazy=True)
-
+    drivers_list = db.relationship(
+        'Driver', backref='team_name', lazy=True)
 
 #   https://stackoverflow.com/a/44595303/5972531
-
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
             klass=self.__class__.__name__,

@@ -682,7 +682,7 @@ class TestDriverController(unittest.TestCase):
             db.init_app(app)
             drivers = drivers_controller.show_all_drivers()
             self.assertTrue(type(drivers), list)
-            self.assertTrue(len(drivers) > 0)
+            self.assertTrue(len(drivers) > 100)
             self.assertTrue(len(drivers) == 20)
 
     def test_show_single_driver_true(self):

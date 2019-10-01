@@ -11,8 +11,8 @@ _slugify.separator = '_'
 
 
 def main():
-    scrape_teams()
     scrape_drivers()
+    scrape_teams()
 
 
 # - scrapes all drivers & inserts into DB
@@ -78,7 +78,6 @@ def scrape_drivers(fail=False):
         if compare and type(compare) != dict:
             # print('+++++++', d.team_id)
             # print('+++++++', d.exists(driver_slug))
-
             if d.exists(driver_slug):
                 d.delete(driver_slug)
             d.insert()
@@ -117,3 +116,4 @@ def scrape_teams():
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
         d.insert()
+        return
