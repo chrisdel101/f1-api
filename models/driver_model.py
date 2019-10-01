@@ -30,8 +30,7 @@ class Driver(db.Model):
     team = db.Column(db.String(50), nullable=False)
     # url name with underscores
     team_name_slug = db.Column(db.String(50), nullable=False)
-    team_id = db.Column(db.Integer, db.ForeignKey(
-        'team.id'))
+    team_id = db.Column(db.Integer)
     # fix FK error in migrate
     # https://stackoverflow.com/a/52334988/5972531
 
