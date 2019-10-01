@@ -66,7 +66,7 @@ def downgrade():
     sa.Column('position', sa.VARCHAR(length=10), autoincrement=False, nullable=True),
     sa.Column('team', sa.VARCHAR(length=50), autoincrement=False, nullable=False),
     sa.Column('team_name_slug', sa.VARCHAR(length=50), autoincrement=False, nullable=False),
-    sa.Column('team_id', sa.INTEGER(), autoincrement=False, nullable=False),
+    sa.Column('team_id', sa.INTEGER(), autoincrement=False),
     sa.ForeignKeyConstraint(['team_id'], ['team.id'], name='driver_team_id_fkey'),
     sa.PrimaryKeyConstraint('id', name='driver_pkey'),
     sa.UniqueConstraint('name_slug', name='driver_name_slug_key')
