@@ -30,7 +30,8 @@ class Driver(db.Model):
     team = db.Column(db.String(50), nullable=False)
     # url name with underscores
     team_name_slug = db.Column(db.String(50), nullable=False)
-    team_id = db.Column(db.Integer)
+    team_id = db.Column(db.Integer, db.ForeignKey(
+        'team.id'))
     # fix FK error in migrate
     # https://stackoverflow.com/a/52334988/5972531
 
@@ -60,14 +61,11 @@ class Driver(db.Model):
             d.team_id = scraper_dict.get('team_id')
             d.country = scraper_dict.get('country')
             d.highest_grid_position = scraper_dict.get('highest_grid_position')
-            d.driver_name = scraper_dict.get('driver_name')
             d.date_of_birth = scraper_dict.get('date_of_birth')
             d.driver_number = scraper_dict.get('driver_number')
             d.place_of_birth = scraper_dict.get('place_of_birth')
             d.flag_img_url = scraper_dict.get('flag_img_url')
             d.main_image = scraper_dict.get('main_image')
-            d.podiums = scraper_dict.get('podiums')
-            d.points = scraper_dict.get('points')
             d.world_championships = scraper_dict.get('world_championships')
             d.points = scraper_dict.get('points')
             d.podiums = scraper_dict.get('podiums')

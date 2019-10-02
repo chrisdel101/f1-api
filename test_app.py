@@ -2,7 +2,6 @@ from flask import Flask
 import sqlite3
 import os
 import unittest
-from unittest.mock import patch
 from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
@@ -674,7 +673,6 @@ class TestTeamController(unittest.TestCase):
             self.assertTrue(type(team), list)
             self.assertTrue(len(team) > 0)
 
-
 class TestDriverController(unittest.TestCase):
     def test_show_all_drivers(self):
         app = create_real_app()
@@ -684,7 +682,7 @@ class TestDriverController(unittest.TestCase):
             self.assertTrue(type(drivers), list)
             self.assertTrue(len(drivers) > 0)
             self.assertTrue(len(drivers) == 20)
-            
+        
 
     def test_show_single_driver_true(self):
         app = create_real_app()
@@ -704,6 +702,11 @@ class TestDriverController(unittest.TestCase):
             driver = drivers_controller.show_single_driver('some-random-name')
             self.assertEqual(driver, 'No Driver with that name')
 
+        
+        # result = unittest.TestResult()
+        # self.assertEqual(result.testsRun, 0 )
+        # print('RES', result)
+        
 
 if __name__ == '__main__':
     unittest.main()
