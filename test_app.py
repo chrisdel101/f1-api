@@ -17,6 +17,7 @@ import psycopg2
 def setup_testing_environment():
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
+
 def get_team_list(team_name, soup):
     lis = soup.find_all('li')
     for li in lis:
@@ -57,26 +58,31 @@ def create_real_app():
             app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DEV_DB')
         return app
     except Exception as e:
-        print('Error in create_real_app',e)
+        print('Error in create_real_app', e)
+
 
 class TestDriverScraper(unittest.TestCase):
 
-    def test_change_driver_image_size(self):
+    def test_change_driver_image_size_medium(self):
         res = driver_scraper._change_driver_img_size(
-            "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.320.medium.jpg/1554818962683.jpg", 2)
-        self.assertEqual(
-            res, "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.768.medium.jpg/1554818962683.jpg")
+            "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.320.medium.jpg/1554818962683.jpg", 1)
+        self.assertTrue('640' in res)
+
+    def test_change_driver_image_size_small(self):
+        res = driver_scraper._change_driver_img_size(
+            "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.320.medium.jpg/1554818962683.jpg", 0)
+        self.assertTrue('320' in res)
 
     def test_scrape_all_driver_names(self):
-        result=driver_scraper.scrape_all_driver_names()
+        result = driver_scraper.scrape_all_driver_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
     def test_scrape_all_driver_standings(self):
-        result=driver_scraper.scrape_all_drivers_standings()
+        result = driver_scraper.scrape_all_drivers_standings()
         self.assertTrue(type(result) is list)
         self.assertTrue(len(result) > 0)
-        res1=result[0]
+        res1 = result[0]
         self.assertTrue('points' in res1)
         self.assertTrue('position' in res1)
         self.assertEqual(res1['position'], '1')
@@ -108,13 +114,13 @@ class TestDriverScraper(unittest.TestCase):
         self.assertRaises(TypeError, driver_scraper.get_driver_number, 33)
 
     def scrape_driver_details_func1(self):
-        result1=driver_scraper.scrape_driver_details_func1("alexander-albon")
+        result1 = driver_scraper.scrape_driver_details_func1("alexander-albon")
         self.assertEqual(result1[1]['country'], 'Thailand')
         self.assertEqual(result1[1]['date_of_birth'], '23/03/1996')
         self.assertEqual(result1[1]['place_of_birth'], 'London, England')
 
     def test_check_any_new_driver_attrs(self):
-        result1=driver_scraper.scrape_driver_details_func1("alexander-albon")
+        result1 = driver_scraper.scrape_driver_details_func1("alexander-albon")
         try:
             self.assertTrue(len(result1[0]) == 0)
         except Exception as e:
@@ -122,7 +128,7 @@ class TestDriverScraper(unittest.TestCase):
                 "Unknown driver attributes added to driver markup.")
 
     def test_apply_scraper_func2_complete_driver(self):
-        result1=driver_scraper.apply_scraper_func2_complete_driver(
+        result1 = driver_scraper.apply_scraper_func2_complete_driver(
             'sebastian-vettel', {
                 'driver_name': 'Sebastian Vettel'
             })
@@ -130,7 +136,7 @@ class TestDriverScraper(unittest.TestCase):
         self.assertTrue(
             'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium' in result1['main_image'])
         # test all manual additions
-        result2=driver_scraper.apply_scraper_func2_complete_driver(
+        result2 = driver_scraper.apply_scraper_func2_complete_driver(
             'romain-grosjean', {
                 'driver_name': 'Romain Grosjean'
             })
@@ -142,13 +148,13 @@ class TestDriverScraper(unittest.TestCase):
         self.assertEqual(result2['driver_number'], '8')
 
     def test_apply_scraper_func1_complete_driver(self):
-        result1=driver_scraper.apply_scraper_func1_complete_driver(
+        result1 = driver_scraper.apply_scraper_func1_complete_driver(
             'sebastian-vettel'
         )
         self.assertTrue(type(result1) == dict)
         self.assertEqual(result1['country'], 'Germany')
         # test all manual additions
-        result2=driver_scraper.apply_scraper_func1_complete_driver(
+        result2 = driver_scraper.apply_scraper_func1_complete_driver(
             'romain-grosjean'
         )
         self.assertEqual(result2['country'], 'France')
@@ -156,6 +162,17 @@ class TestDriverScraper(unittest.TestCase):
 
 
 class TestTeamScraper(unittest.TestCase):
+
+    def test_change_team_image_size_medium(self):
+            res = team_scraper._change_team_img_size(
+                "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
+            self.assertTrue('640' in res)
+
+    def test_change_team_image_size_large(self):
+            res = team_scraper._change_team_img_size(
+                "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 2)
+            print(res)
+            self.assertTrue('768' in res)
 
     def test_scrape_all_team_names(self):
         result=team_scraper.scrape_all_team_names()
