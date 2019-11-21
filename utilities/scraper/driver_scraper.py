@@ -26,7 +26,6 @@ def _driver_page_scrape(name):
 # # manually add in dif sizes for imgs
 # # takes url and index to choose size from list
 def _change_driver_img_size(src, list_index):
-    print('list index size', list_index)
     # replace scraped img size with one the sizes below
     regex = "image.img.[\d]+\.?.[\w]+"
     sizes = ['320', '640', '768', '1536']

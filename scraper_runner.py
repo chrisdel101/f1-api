@@ -27,7 +27,6 @@ def scrape_drivers(fail=False):
     standings = driver_scraper.scrape_all_drivers_standings()
     # - loop over names
     for driver in all_drivers:
-        print('driver', driver)
         # slugify name
         driver_slug = slugify(driver).lower()
         # scrape more driver data
@@ -63,9 +62,9 @@ def scrape_drivers(fail=False):
             # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
-            print('new dict', team_model.Team.query.filter_by())
             if os.environ['LOGS'] != 'off':
                 print('TEAM DATA', team_match_driver)
+                print('\n')
             # get team id from team lookup
             team_id = team_match_driver.id
             # add foreign key to driver
