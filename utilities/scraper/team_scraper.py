@@ -177,9 +177,8 @@ def get_drivers(scraper_dict, li, url_name_slug):
 
 def iterate_teams_markup(scraper_dict):
     if os.environ['LOGS'] != 'off':
-        if os.environ['FLASK_ENV'] == 'development':
-            print('\n')
-            print('Change DICT', scraper_dict)
+        print('\n')
+        print('Change DICT', scraper_dict)
     if type(scraper_dict) is not dict:
         return
     try:

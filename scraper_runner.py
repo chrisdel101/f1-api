@@ -27,6 +27,7 @@ def scrape_drivers(fail=False):
     standings = driver_scraper.scrape_all_drivers_standings()
     # - loop over names
     for driver in all_drivers:
+        print('driver', driver)
         # slugify name
         driver_slug = slugify(driver).lower()
         # scrape more driver data
@@ -35,6 +36,7 @@ def scrape_drivers(fail=False):
         # add etxra data to obj
         new_driver_dict = driver_scraper.apply_scraper_func2_complete_driver(
             driver_slug, new_driver_dict)
+        # print('dri', new_driver_dict)
         i = 0
         # match standing with current driver
         while standings:
@@ -46,9 +48,9 @@ def scrape_drivers(fail=False):
                 i = 0
                 break
             i = i + 1
-        # print('new dict', new_dict)
         # - make instance of driver
         d = driver_model.Driver.new(new_driver_dict)
+
         if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
                 # fail flag can be set for testing
             if fail:
@@ -61,6 +63,7 @@ def scrape_drivers(fail=False):
             # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
+            print('new dict', team_model.Team.query.filter_by())
             if os.environ['LOGS'] != 'off':
                 print('TEAM DATA', team_match_driver)
             # get team id from team lookup
