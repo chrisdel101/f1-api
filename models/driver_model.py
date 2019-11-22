@@ -1,6 +1,7 @@
 import os
 from database import db
 from sqlalchemy import text
+import models
 from slugify import slugify, Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
@@ -31,7 +32,7 @@ class Driver(db.Model):
     # url name with underscores
     team_name_slug = db.Column(db.String(50), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey(
-        'team.id'))
+        'team.id'), nullable=False)
     # fix FK error in migrate
     # https://stackoverflow.com/a/52334988/5972531
 

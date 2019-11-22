@@ -62,19 +62,22 @@ def scrape_drivers(fail=False):
             # match driver team_name_slug to actual team with contains - goal is team_id
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
+            # print('match', team_match_driver)
+
             if os.environ['LOGS'] != 'off':
                 print('TEAM DATA', team_match_driver)
                 print('\n')
-            # get team id from team lookup
-            team_id = team_match_driver.id
-            # add foreign key to driver
-            new_driver_dict['team_id'] = team_id
-        # reinstansiate driver instance with foriegn key
-        d = driver_model.Driver.new(new_driver_dict)
-        # print('XXX', d)
+                # get team id from team lookup
+                team_id = team_match_driver.id
+                # print('YYY', team_id)
+                # # add foreign key to driver
+                new_driver_dict['team_id'] = team_id
+                # reinstansiate driver instance with foriegn key
+                d = driver_model.Driver.new(new_driver_dict)
+                # print('XXX', d)
 
-        # add driver to team drivers_list
-        # print('ID', team_match_driver.drivers_list)
+                # add driver to team drivers_list
+                # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         # return
         if compare and type(compare) != dict:
@@ -86,7 +89,8 @@ def scrape_drivers(fail=False):
         else:
             print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
-        # return
+        print(d.team_id)
+        return
 
 
 def scrape_teams():
