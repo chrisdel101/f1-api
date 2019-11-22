@@ -665,7 +665,25 @@ class TestTeamModel(unittest.TestCase):
             db.init_app(app)
             # create driver instance
             team = self.create_new_team_pass()
-            team = vars(team)
+            team.insert()
+            # team = vars(team)
+            # add driver 
+            t = team_model.Team.query.all()
+            t_id = t[0].id
+            driver = driver_model.Driver.new({
+                'driver_name': 'Lewis Hamilton',
+                'country': 'United Kingdom',
+                'driver_number': '11',
+                'team': 'Mercedes',
+                'team_id':t_id
+            })
+            driver.insert()
+            d = driver_model.Driver.query.all()
+            print(d[0].team_id)
+
+
+            db.session.remove()
+            db.drop_all()
             # print(team)
             # print(team)
 
