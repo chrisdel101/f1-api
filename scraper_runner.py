@@ -68,16 +68,16 @@ def scrape_drivers(fail=False):
                 print('TEAM DATA', team_match_driver)
                 print('\n')
                 # get team id from team lookup
-                team_id = team_match_driver.id
-                # print('YYY', team_id)
-                # # add foreign key to driver
-                new_driver_dict['team_id'] = team_id
-                # reinstansiate driver instance with foriegn key
-                d = driver_model.Driver.new(new_driver_dict)
-                # print('XXX', d)
+            team_id = team_match_driver.id
+            # print('YYY', team_id)
+            # # add foreign key to driver
+            new_driver_dict['team_id'] = team_id
+            # reinstansiate driver instance with foriegn key
+            d = driver_model.Driver.new(new_driver_dict)
+            # print('XXX', d)
 
-                # add driver to team drivers_list
-                # print('ID', team_match_driver.drivers_list)
+            # add driver to team drivers_list
+            # print('ID', team_match_driver.drivers_list)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
         # return
         if compare and type(compare) != dict:
