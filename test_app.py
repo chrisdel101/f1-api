@@ -656,6 +656,19 @@ class TestTeamModel(unittest.TestCase):
             self.assertFalse(exists)
             db.session.remove()
             db.drop_all()
+        
+    def test_team_driver_id_match(self):
+        app = create_test_app()
+        # add to context
+        with app.app_context():
+            # init db
+            db.init_app(app)
+            # create driver instance
+            team = self.create_new_team_pass()
+            team = vars(team)
+            # print(team)
+            # print(team)
+
 
 
 class TestTeamController(unittest.TestCase):

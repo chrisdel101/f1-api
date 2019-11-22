@@ -21,15 +21,15 @@ def create_app():
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         if os.environ['LOGS'] != 'off':
-            print('APP Prod DB')
+            print('app.py: Prod DB')
             print('connection', conn)
     elif os.environ['FLASK_ENV'] == 'development':
         if os.environ['LOGS'] != 'off':
-            print('dev DB')
+            print('app.py: dev DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
     elif os.environ['FLASK_ENV'] == 'dev_testing':
         if os.environ['LOGS'] != 'off':
-            print('testing DB')
+            print('app.py: testing DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
     db = SQLAlchemy(app)
 
