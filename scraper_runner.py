@@ -89,8 +89,7 @@ def scrape_drivers(fail=False):
         else:
             print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
-        print(d.team_id)
-        return
+        # return
 
 
 def scrape_teams():
