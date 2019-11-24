@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
-from models import driver_model, team_model
+from models import driver_model, team_model, user_model
 from controllers import drivers_controller, teams_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
@@ -450,7 +450,6 @@ class TestDriverModel(unittest.TestCase):
             }
         )
         return driver
-# utiliy functions
 
     def create_new_driver_fail(self):
         driver = driver_model.Driver.new(
@@ -572,7 +571,7 @@ class TestTeamModel(unittest.TestCase):
         )
         return team
 
-    def test_driver_new(self):
+    def test_team_new(self):
         # create app instance
         app = create_test_app()
         # add to context
@@ -751,10 +750,36 @@ class TestDriverController(unittest.TestCase):
             self.assertEqual(driver, 'No Driver with that name')
 
         
-        # result = unittest.TestResult()
-        # self.assertEqual(result.testsRun, 0 )
-        # print('RES', result)
-        
+class TestUserModel(unittest.TestCase):
+    def create_new_user_pass(self):
+        user = user_model.User.new(
+            {
+                "id": 1111111111,
+            }, 
+            data={}
+        )
+        return user
+
+    def create_new_user_fail(self):
+        team = team_model.Team.new(
+            {
+                "full_team_name": "Test Team",
+            }
+        )
+        return team
+     # create app instance
+    def test_user_new(self):
+        app = create_test_app()
+        with app.app_context():
+                # init db
+                db.init_app(app)
+                # create driver instance
+                user = self.create_new_user_pass()
+                print('user', user)
+                self.assertEqual(user.id,'Test Team')
+                # drop db
+                db.session.remove()
+                db.drop_all()
 
 if __name__ == '__main__':
     unittest.main()

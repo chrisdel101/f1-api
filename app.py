@@ -3,7 +3,7 @@ from utilities import scraper
 from models import driver_model, team_model
 from flask import Flask
 from flask import render_template
-from flask import jsonify
+from flask import request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
@@ -83,10 +83,15 @@ def all():
     return 'Complete\n'
 
 
-@app.route('/test')
-def test():
-    print("Test, Test, Test")
-    return "Test, Test, Test"
+@app.route('/user', methods=['GET', 'POST'])
+def handle_user_data():
+    if request.method == 'GET':
+        return 'GET'
+    elif request.method == 'POST':
+        return 'POST'
+    else:
+        raise TypeError(
+            'Error in handle_user_data: HTTP method type must be POST of GET')
 
 
 if __name__ == '__main__':
