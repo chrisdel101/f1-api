@@ -782,7 +782,7 @@ class TestUserModel(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             users = self.create_multiple_new_users_pass(3)
-            self.assertTrue(user.length == 3)
+            self.assertTrue(len(users) == 3)
     # ------------ TESTS
     # create a new user
     def test_user_new(self):
@@ -847,7 +847,6 @@ class TestUserModel(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             user = self.create_new_user_pass()
-            print('user', user)
             self.assertEqual(user.id, self.ID)
             self.assertEqual(user.driver_data, self.DATA["driver_data"])
             self.assertEqual(user.team_data, self.DATA["team_data"])
@@ -891,32 +890,38 @@ class TestUserModel(unittest.TestCase):
             assert user not in db.session
             db.session.remove()
             db.drop_all()
-    # NEXT
+    
     def test_mutiple_users_delete(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            # user = self.create_new_user_pass()
-            # user.insert()
-            # # confirm added to DB
-            # assert user in db.session
-            # self.assertEqual(user.id, self.ID)
-            # user.delete(user.id)
-            # # confirm deleted from DB
-            # assert user not in db.session
-            # db.session.remove()
-            # db.drop_all()
+            users = self.create_multiple_new_users_pass(3)
+            for user in users:
+                user.insert()
+            # confirm all added to DB
+            assert users[0] in db.session
+            assert users[1] in db.session
+            assert users[2] in db.session
+            for user in users:
+                user.delete(user.id)
+            # confirm all deleted from DB
+            assert users[0] not in db.session
+            assert users[1] not in db.session
+            assert users[2] not in db.session
+            db.session.remove()
+            db.drop_all()
 
     def test_driver_not_exists_after_delete(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            driver = self.create_new_driver_pass()
-            self.assertEqual(driver.driver_name, 'Test Driver')
-            driver.insert()
-            driver.delete(driver.name_slug)
-            exists = driver.exists(driver.name_slug)
-            self.assertFalse(exists)
+            user = self.create_new_user_pass()
+            user.insert()
+            # check exists
+            self.assertTrue(user.exists(user.id))
+            user.delete(user.id)
+            # check not exists
+            self.assertFalse(user.exists(user.id))
             db.session.remove()
             db.drop_all()
             

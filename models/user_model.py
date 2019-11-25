@@ -28,7 +28,6 @@ class User(db.Model):
             d = cls()
             d.id = sender_id
             d.driver_data = data.get('driver_data')
-            # short version with spaces
             d.team_data = data.get('team_data')
             return d
         except Exception as e:
@@ -57,13 +56,11 @@ class User(db.Model):
     # sender_id is same as id, but id is seems like resvered var
     def exists(self, sender_id):
         try:
-            print('ID', sender_id)
-            print(self.query.filter_by(id=sender_id).first())
             if self.query.filter_by(id=sender_id).first():
                 return True
             return False
         except Exception as e:
-            print("Does not exist", e)
+            print("Error in exists", e)
             return False
 
     def as_dict(req):
