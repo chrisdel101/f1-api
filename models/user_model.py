@@ -22,7 +22,7 @@ class User(db.Model):
         )
 
     @classmethod
-    def new(cls, sender_id, data):
+    def new(cls, sender_id, data={}):
         try:
             db.create_all()
             d = cls()
@@ -43,6 +43,12 @@ class User(db.Model):
             # raise error sends it to exepct - Flask not catch properly
             db.session.rollback()
             raise TypeError('ID is None')
+
+    def update(self, data):
+        try:
+            pass
+        except Exception as e:
+            print('Update error', e)
 
     def delete(self, sender_id):
         d = self.query.filter_by(id=sender_id).first()
