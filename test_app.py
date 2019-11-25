@@ -493,7 +493,7 @@ class TestDriverModel(unittest.TestCase):
             db.drop_all()
     @unittest.skip #rewrite needed 
     def test_driver_insert_fail(self):
-        # should fail missing contstrainta
+        # should fail missing contstraint
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
@@ -751,35 +751,175 @@ class TestDriverController(unittest.TestCase):
 
         
 class TestUserModel(unittest.TestCase):
+    # --------- UTILS FUNCS
+    ID = 1111111111
+    DATA = {
+                "driver_data":['driver1','driver2','driver3'],
+                "team_data":['team1','team2','team3']
+            }
+    
     def create_new_user_pass(self):
-        user = user_model.User.new(
-            {
-                "id": 1111111111,
-            }, 
-            data={}
-        )
+        user = user_model.User.new(self.ID,self.DATA)
         return user
 
     def create_new_user_fail(self):
-        team = team_model.Team.new(
-            {
-                "full_team_name": "Test Team",
-            }
-        )
-        return team
-     # create app instance
+        user = user_model.User.new(None,self.DATA)
+        return user
+        
+    # creates list of users
+    def create_multiple_new_users_pass(self, num):
+        inner_id = self.ID
+        users = []
+        while num:
+            user = user_model.User.new(inner_id, self.DATA)
+            num -= 1
+            inner_id += 1
+            users.append(user)
+        return users
+    # tests above function util funcs
+    def test_create_multiple_new_users_pass(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            users = self.create_multiple_new_users_pass(3)
+            self.assertTrue(user.length == 3)
+    # ------------ TESTS
+    # create a new user
     def test_user_new(self):
         app = create_test_app()
         with app.app_context():
-                # init db
-                db.init_app(app)
-                # create driver instance
-                user = self.create_new_user_pass()
-                print('user', user)
-                self.assertEqual(user.id,'Test Team')
-                # drop db
-                db.session.remove()
-                db.drop_all()
+            # init db
+            db.init_app(app)
+            # create driver instance
+            user = self.create_new_user_pass()
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.driver_data, self.DATA["driver_data"])
+            self.assertEqual(user.team_data, self.DATA["team_data"])
+            # drop db
+            db.session.remove()
+            db.drop_all()
+
+    # insert a new user into DB
+    def test_user_insert_pass(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            user.insert()
+            assert user in db.session
+            db.session.remove()
+            db.drop_all()
+
+    @unittest.skip #error check not working    
+    def test_user_insert_fail(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_fail()
+            user.insert()
+            assert user not in db.session
+            # raises assertion will not work
+            self.assertRaises(TypeError('ID is None'), user.insert())
+            db.session.remove()
+            db.drop_all()
+
+    # check for teams that do not exist return false
+    def test_user_does_not_exists(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # create and insert new user
+            user = self.create_new_user_pass()
+            user.insert()
+            assert user in db.session
+            # check for a user with incorrect ID - fails
+            exists1 = user.exists(999)
+            exists2 = user.exists(42)
+            exists3 = user.exists('blah')
+            self.assertFalse(exists1)
+            self.assertFalse(exists2)
+            self.assertFalse(exists3)
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_does_exist(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            print('user', user)
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.driver_data, self.DATA["driver_data"])
+            self.assertEqual(user.team_data, self.DATA["team_data"])
+            # insert new user
+            user.insert()
+            # now check to ensure exists func works - id should match
+            exists = user.exists(user.id)
+            self.assertTrue(exists)
+            db.session.remove()
+            db.drop_all()
+
+    def test_multiple_users_do_exist(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            users = self.create_multiple_new_users_pass(3)
+            for user in users:
+                # insert each new user
+                user.insert()
+            # now check to ensure exists func works - id should match
+            exists1 = users[0].exists(users[0].id)
+            exists2 = users[1].exists(users[1].id)
+            exists3 = users[2].exists(users[2].id)
+            self.assertTrue(exists1)
+            self.assertTrue(exists2)
+            self.assertTrue(exists3)
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_delete(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            user.insert()
+            # confirm added to DB
+            assert user in db.session
+            self.assertEqual(user.id, self.ID)
+            user.delete(user.id)
+            # confirm deleted from DB
+            assert user not in db.session
+            db.session.remove()
+            db.drop_all()
+    # NEXT
+    def test_mutiple_users_delete(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # user = self.create_new_user_pass()
+            # user.insert()
+            # # confirm added to DB
+            # assert user in db.session
+            # self.assertEqual(user.id, self.ID)
+            # user.delete(user.id)
+            # # confirm deleted from DB
+            # assert user not in db.session
+            # db.session.remove()
+            # db.drop_all()
+
+    def test_driver_not_exists_after_delete(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            driver = self.create_new_driver_pass()
+            self.assertEqual(driver.driver_name, 'Test Driver')
+            driver.insert()
+            driver.delete(driver.name_slug)
+            exists = driver.exists(driver.name_slug)
+            self.assertFalse(exists)
+            db.session.remove()
+            db.drop_all()
+            
 
 if __name__ == '__main__':
     unittest.main()
