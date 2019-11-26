@@ -7,7 +7,7 @@ from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
 from models import driver_model, team_model, user_model
-from controllers import drivers_controller, teams_controller
+from controllers import drivers_controller, teams_controller, users_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
@@ -602,9 +602,8 @@ class TestTeamModel(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             team = self.create_new_team_fail()
-            team.insert()
-            assert team not in db.session
             self.assertRaises(AssertionError, team.insert())
+            assert team not in db.session
             db.session.remove()
             db.drop_all()
 
@@ -749,7 +748,15 @@ class TestDriverController(unittest.TestCase):
             driver = drivers_controller.show_single_driver('some-random-name')
             self.assertEqual(driver, 'No Driver with that name')
 
-        
+class TestUserController(unittest.TestCase):
+    def test_handle_user(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            res = users_controller.handle_user(1)
+            print('s',res)
+
+    
 class TestUserModel(unittest.TestCase):
     # --------- UTILS FUNCS
     ID = 1111111111
@@ -776,6 +783,14 @@ class TestUserModel(unittest.TestCase):
             inner_id += 1
             users.append(user)
         return users
+
+    def create_multiple_new_users_fail(self, num):
+        users = []
+        while num:
+            user = user_model.User.new(None, self.DATA)
+            users.append(user)
+            num -= 1
+        return users
     # tests above function util funcs
     def test_create_multiple_new_users_pass(self):
         app = create_test_app()
@@ -783,6 +798,22 @@ class TestUserModel(unittest.TestCase):
             db.init_app(app)
             users = self.create_multiple_new_users_pass(3)
             self.assertTrue(len(users) == 3)
+            for user in users:
+                # make into dict
+                user = vars(user)
+                self.assertTrue(user['id'] is not None)
+
+    def test_create_multiple_new_users_fail(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            users = self.create_multiple_new_users_fail(3)
+            self.assertTrue(len(users) == 3)
+            for user in users:
+                # make into dict
+                user = vars(user)
+                self.assertTrue(user['id'] is None)
+
     # ------------ TESTS
     # create a new user
     def test_user_new(self):
@@ -810,16 +841,14 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    @unittest.skip #error check not working    
     def test_user_insert_fail(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
             user = self.create_new_user_fail()
-            user.insert()
+            self.assertRaises(AssertionError, user.insert())
             assert user not in db.session
             # raises assertion will not work
-            self.assertRaises(TypeError('ID is None'), user.insert())
             db.session.remove()
             db.drop_all()
 
@@ -911,7 +940,7 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_driver_not_exists_after_delete(self):
+    def test_user_does_not_exists_after_delete(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
@@ -925,6 +954,52 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
             
+    def test_user_update_single_item(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            user.insert()
+            # check exists
+            self.assertTrue(user.exists(user.id))
+            # data with only one key changed
+            new_data = {
+                "driver_data":['driver1', 'driver5', 'driver6', 'driver7']
+            }
+            user.update(new_data)
+            # check that user data updated
+            self.assertTrue(user.driver_data == new_data['driver_data'])
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_update_multiple_items(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            users = self.create_multiple_new_users_pass(3)
+            for user in users:
+                user.insert()
+            # check exists
+            assert users[0] in db.session
+            assert users[1] in db.session
+            assert users[2] in db.session
+            # check data is set to default
+
+            new_data = {
+                "driver_data":['driver1', 'driver5', 'driver6', 'driver7']
+            }
+            for user in users:
+                # check for old data
+                self.assertTrue(user.driver_data == self.DATA['driver_data'])
+                user.update(new_data)
+                # check data has been changed
+                self.assertTrue(user.driver_data == new_data['driver_data'])
+                assert user in db.session
+
+            db.session.remove()
+            db.drop_all()
+
+
 
 if __name__ == '__main__':
     unittest.main()

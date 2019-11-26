@@ -10,8 +10,8 @@ def handle_user(user_id):
     exists = user.exists(user.id)
     if exists:
         print(user.update())
-    else
-    pass
+    else:
+        user.insert()
     return 'post'
     # check if user is in DB
     # if not, add
