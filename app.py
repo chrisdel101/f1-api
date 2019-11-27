@@ -88,7 +88,8 @@ def handle_user_data():
     if request.method == 'GET':
         return 'GET'
     elif request.method == 'POST':
-        return users_controller.handle_user(request.args.get('id'))
+        parsedJson = request.get_json()
+        return users_controller.handle_user(parsedJson)
     else:
         raise TypeError(
             'Error in handle_user_data: HTTP method type must be POST of GET')

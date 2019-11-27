@@ -2,17 +2,17 @@ from models import user_model
 from utilities import utils
 
 
-def handle_user(user_id):
-    # create new istance
-    user = user_model.User.new(user_id)
-    # check if exists
-    print(user)
-    exists = user.exists(user.id)
-    if exists:
-        print(user.update())
-    else:
-        user.insert()
-    return 'post'
-    # check if user is in DB
-    # if not, add
-    # if yes, update
+def handle_user(data):
+    try:
+        # create new istance
+        user = user_model.User.new(data['user_id'], data)
+        # check if exists
+        exists = user.exists(user.id)
+        if exists:
+            user.update(data)
+        else:
+            user.insert()
+        return 'complete'
+    except Exception as e:
+        print('Error in handle_user', e)
+        return 1

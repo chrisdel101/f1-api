@@ -749,11 +749,16 @@ class TestDriverController(unittest.TestCase):
             self.assertEqual(driver, 'No Driver with that name')
 
 class TestUserController(unittest.TestCase):
+    DATA = {
+        "driver_data": ["driver1", "driver2"],
+        "team_data": ["team1", "team2"],
+        "user_id": 2
+    }
     def test_handle_user(self):
-        app = create_real_app()
+        app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            res = users_controller.handle_user(1)
+            res = users_controller.handle_user(self.DATA)
             print('s',res)
 
     
