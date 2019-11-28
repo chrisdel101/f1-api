@@ -758,8 +758,13 @@ class TestUserController(unittest.TestCase):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            res = users_controller.handle_user(self.DATA)
-            print('s',res)
+            user = users_controller.handle_user(self.DATA)
+            self.assertEqual(user.driver_data, self.DATA['driver_data'] )
+            self.assertEqual(user.id, self.DATA['id'] )
+            assert user in db.session
+             # drop db
+            db.session.remove()
+            db.drop_all()
 
     
 class TestUserModel(unittest.TestCase):
@@ -807,6 +812,9 @@ class TestUserModel(unittest.TestCase):
                 # make into dict
                 user = vars(user)
                 self.assertTrue(user['id'] is not None)
+             # drop db
+            db.session.remove()
+            db.drop_all()
 
     def test_create_multiple_new_users_fail(self):
         app = create_test_app()
@@ -818,6 +826,9 @@ class TestUserModel(unittest.TestCase):
                 # make into dict
                 user = vars(user)
                 self.assertTrue(user['id'] is None)
+             # drop db
+            db.session.remove()
+            db.drop_all()
 
     # ------------ TESTS
     # create a new user

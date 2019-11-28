@@ -12,7 +12,7 @@ def handle_user(data):
             user.update(data)
         else:
             user.insert()
-        return 'complete'
+        return user
     except Exception as e:
         print('Error in handle_user', e)
         return 1

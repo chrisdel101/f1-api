@@ -28,6 +28,7 @@ def show_single_driver(name_slug):
             driver = vars(driver)
             return utils.serialize_row(driver)
         else:
-            return 'No Driver with that name'
+            print('No Driver with that name')
+            return None
     except Exception as e:
         print('error in driver_controller.show_single_driver', e)
