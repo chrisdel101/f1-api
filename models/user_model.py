@@ -1,3 +1,4 @@
+from sqlalchemy.orm import validates
 import os
 from database import db
 from sqlalchemy import text

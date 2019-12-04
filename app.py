@@ -89,7 +89,9 @@ def handle_user_data():
         return 'GET'
     elif request.method == 'POST':
         parsedJson = request.get_json()
-        # print(parsedJson)
+        if not parsedJson:
+            raise TypeError(
+                'Error in handle_user_data: input must be json')
         return users_controller.handle_user(parsedJson)
     else:
         raise TypeError(
