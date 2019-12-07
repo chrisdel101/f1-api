@@ -874,10 +874,11 @@ class TestUserModel(unittest.TestCase):
         with app.app_context():
             # init db
             db.init_app(app)
-            # create driver instance
+            # create driver instance w/o ID
             user = self.create_new_user_fail()
-            print('U', user)
-            # self.assertEqual(user.id, self.ID)
+            self.assertRaises(Exception, self.create_new_user_fail())
+            # check no new user created
+            self.assertEqual(user, None)
             # self.assertEqual(user.driver_data, self.DATA["driver_data"])
             # self.assertEqual(user.team_data, self.DATA["team_data"])
             # drop db
@@ -889,10 +890,10 @@ class TestUserModel(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             user = self.create_new_user_pass()
-            # user.insert()
-            # assert user in db.session
-            # db.session.remove()
-            # db.drop_all()
+            user.insert()
+            assert user in db.session
+            db.session.remove()
+            db.drop_all()
 
     def test_user_insert_fail(self):
         app = create_test_app()

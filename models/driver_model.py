@@ -48,7 +48,6 @@ class Driver(db.Model):
     def new(cls, scraper_dict):
         try:
             if os.environ['LOGS'] != 'off':
-                # if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
                 print('CREATE', scraper_dict)
             db.create_all()
             d = cls()

@@ -3,7 +3,7 @@ from utilities import scraper
 from models import driver_model, team_model
 from flask import Flask
 from flask import render_template
-from flask import request, jsonify
+from flask import request, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
@@ -11,6 +11,8 @@ from utilities import utils
 import scraper_runner
 import os
 import psycopg2
+import json
+from collections import namedtuple
 
 
 def create_app():
@@ -89,6 +91,8 @@ def handle_user_data():
         return 'GET'
     elif request.method == 'POST':
         parsedJson = request.get_json()
+        if os.environ['LOGS'] != 'off':
+            print('parsedJson', parsedJson)
         if not parsedJson:
             raise TypeError(
                 'Error in handle_user_data: input must be json')

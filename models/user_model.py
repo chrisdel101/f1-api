@@ -10,7 +10,7 @@ _slugify.separator = '_'
 
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True, unique=True)
+    id = db.Column(db.BigInteger, primary_key=True, unique=True)
     driver_data = db.Column(db.PickleType)
     team_data = db.Column(db.PickleType)
 
@@ -25,7 +25,11 @@ class User(db.Model):
     @classmethod
     # passed in data must be a dict in all cases
     def new(cls, sender_id, data={}):
+        print('here')
         try:
+            # if no id send to exception - to pass test
+            if sender_id == None:
+                raise ValueError
             db.create_all()
             d = cls()
             d.id = sender_id
