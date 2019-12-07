@@ -25,7 +25,7 @@ class User(db.Model):
     @classmethod
     # passed in data must be a dict in all cases
     def new(cls, sender_id, data={}):
-        print('here')
+        print('new', data)
         try:
             # if no id send to exception - to pass test
             if sender_id == None:
@@ -33,8 +33,8 @@ class User(db.Model):
             db.create_all()
             d = cls()
             d.id = sender_id
-            d.driver_data = data.get('driver_data')
-            d.team_data = data.get('team_data')
+            d.driver_data = data.get('drivers_arr')
+            d.team_data = data.get('teams_arr')
             return d
         except Exception as e:
             print('Error in User new:', e)
@@ -44,7 +44,6 @@ class User(db.Model):
         try:
             if not self.id:
                 raise AssertionError('insert Error: ID cannot be None')
-            # if self.id:
             db.session.add(self)
             db.session.commit()
             print('INSERT OKAY')
