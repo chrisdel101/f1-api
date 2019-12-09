@@ -1,9 +1,7 @@
 from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
 from models import driver_model, team_model
-from flask import Flask
-from flask import render_template
-from flask import request, jsonify, Response
+from flask import request, jsonify, Response, render_template, Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
@@ -13,10 +11,13 @@ import os
 import psycopg2
 import json
 from collections import namedtuple
+from flask_cors import CORS
+import flask
 
 
 def create_app():
     app = Flask(__name__)
+    CORS(app, resources={r"/foo": {"origins": None}})
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
@@ -48,6 +49,7 @@ migrate = Migrate(app, db)
 
 @app.route('/drivers')
 def all_drivers():
+    print(request.url)
     return jsonify(drivers_controller.show_all_drivers())
 
 
