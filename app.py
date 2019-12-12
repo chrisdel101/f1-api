@@ -1,7 +1,7 @@
 from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
 from models import driver_model, team_model
-from flask import request, jsonify, Response, render_template, Flask
+from flask import request, jsonify, Response, render_template, Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
@@ -11,13 +11,11 @@ import os
 import psycopg2
 import json
 from collections import namedtuple
-from flask_cors import CORS
-import flask
+# import flask
 
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r"/foo": {"origins": None}})
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
@@ -45,6 +43,26 @@ def create_app():
 app = create_app()['app']
 db = create_app()['db']
 migrate = Migrate(app, db)
+
+
+# runs before every req
+@app.before_request
+def check_auth():
+    # if no api_key return error
+    if request.headers.get("X-api-aey") != os.environ['API_KEY']:
+        return 'Access UnAuthorized\n'
+    else:
+        # run next func
+        return
+
+
+@app.route('/test')
+def testing_route():
+    res = make_response(jsonify({
+        "some_key": "some_value"
+    }))
+    # print(res.headers)
+    return res
 
 
 @app.route('/drivers')
