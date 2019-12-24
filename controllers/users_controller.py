@@ -1,9 +1,24 @@
 from models import user_model
 from utilities import utils
 from flask import make_response
+import bcrypt
 import os
 
 KEYS = ['drivers_arr', 'teams_arr', 'user_id']
+
+
+def login_user(credentials):
+    password = b"credentials['password']"
+    hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+
+    if bcrypt.checkpw(password, hashed):
+        print("It Matches!")
+    else:
+        print("It Does not Match :(")
+
+
+def create_new_user(data):
+    pass
 
 
 def handle_user(data):

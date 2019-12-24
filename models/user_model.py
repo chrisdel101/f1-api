@@ -11,6 +11,8 @@ _slugify.separator = '_'
 
 class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, unique=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
     driver_data = db.Column(db.PickleType)
     team_data = db.Column(db.PickleType)
 
@@ -39,7 +41,26 @@ class User(db.Model):
         except Exception as e:
             print('Error in User new:', e)
 
-    # not working propely
+    def encode_auth_token(self, user_id):
+        """
+        Generates the Auth Token
+        :return: string
+        """
+        try:
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
+                'iat': datetime.datetime.utcnow(),
+                'sub': user_id
+            }
+            return jwt.encode(
+                payload,
+                app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+        except Exception as e:
+            # not working propely
+            print("Error in encode_auth_token", e)
+
     def insert(self):
         try:
             if not self.id:

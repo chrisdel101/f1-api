@@ -108,6 +108,16 @@ def all():
     return 'Complete\n'
 
 
+@app.route('/login', methods=['POST'])
+def login():
+    # print('REQ+++', request.data)
+    parsedJsonCredentials = request.get_json(force=True)
+    if not request.is_json or not parsedJsonCredentials:
+        print('Error in /login json')
+        return TypeError('Error in /login json. Must be json.')
+    return users_controller.login_user(parsedJsonCredentials)
+
+
 @app.route('/user', methods=['GET', 'POST'])
 def udpate_user():
     if request.method == 'GET':
