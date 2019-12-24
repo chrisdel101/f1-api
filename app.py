@@ -49,19 +49,22 @@ migrate = Migrate(app, db)
 @app.before_request
 def check_auth():
     # if no api_key return error
-    if request.headers.get("X-api-aey") != os.environ['API_KEY']:
-        return 'Access UnAuthorized\n'
+    print(request.headers)
+    if request.headers.get("X-Api-Key") != os.environ['API_KEY']:
+        print('Unauthourized')
+        res = make_response()
+        res.status_code = 401
+        return res
     else:
+        print('access okay')
         # run next func
-        return
 
 
-@app.route('/test')
+@app.route('/test', methods=['GET', 'POST'])
 def testing_route():
-    res = make_response(jsonify({
-        "some_key": "some_value"
-    }))
-    # print(res.headers)
+    print('HERE')
+    res = make_response()
+    print('res', res)
     return res
 
 
@@ -106,17 +109,20 @@ def all():
 
 
 @app.route('/user', methods=['GET', 'POST'])
-def handle_user_data():
+def udpate_user():
     if request.method == 'GET':
         return 'GET'
     elif request.method == 'POST':
-        parsedJson = request.get_json()
+        print('req', request.data)
+        # True needed - force byte array into a dict
+        parsedJson = request.get_json(force=True)
+        print('par', parsedJson)
         if os.environ['LOGS'] != 'off':
             print('parsedJson', parsedJson)
         if not parsedJson:
             raise TypeError(
                 'Error in handle_user_data: input must be json')
-        return users_controller.handle_user(parsedJson)
+        return users_controller.udpate_user_data(parsedJson)
     else:
         raise TypeError(
             'Error in handle_user_data: HTTP method type must be POST of GET')
