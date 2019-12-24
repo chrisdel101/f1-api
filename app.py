@@ -118,6 +118,13 @@ def login():
     return users_controller.login_user(parsedJsonCredentials)
 
 
+@app.route('/register', method=['POST'])
+     parsedJsonCredentials = request.get_json(force=True)
+    if not request.is_json or not parsedJsonCredentials:
+        print('Error in /login json')
+        return TypeError('Error in /register json. Must be json.')
+    return users_controller.login_user(parsedJsonCredentials)
+
 @app.route('/user', methods=['GET', 'POST'])
 def udpate_user():
     if request.method == 'GET':
