@@ -30,11 +30,11 @@ class User(db.Model):
         print('data new', data)
         try:
             # if no id send to exception - to pass test
-            if sender_id == None:
+            if not sender_id:
                 raise ValueError('id cannot be None')
-            elif data['username'] == None:
+            elif not data.get('username'):
                 raise ValueError('username cannot be none')
-            elif data['password'] == None:
+            elif not data.get('password'):
                 raise ValueError('password cannot be none')
             db.create_all()
             d = cls()
@@ -74,7 +74,8 @@ class User(db.Model):
             db.session.commit()
             print('INSERT OKAY')
         except Exception as e:
-            print('Insert error', e)
+            print('Rollback:', e)
+            raise e
 
     # data is a dict
     def update(self, data):
