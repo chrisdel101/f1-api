@@ -832,7 +832,7 @@ class TestUserModel(unittest.TestCase):
             users.append(user)
         return users
 
-    def create_multiple_new_users_fail(self, num_of_users,type_of_failure ):
+    def create_multiple_new_users_None(self, num_of_users,type_of_failure ):
         if type_of_failure == 'username':
             users = []
             while num_of_users:
@@ -877,12 +877,12 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_create_multiple_new_users_fail_no_id(self):
+    def test_create_multiple_new_users_None_no_id(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            # users = self.create_multiple_new_users_fail(3)
-            self.assertRaises(Exception, self.create_multiple_new_users_fail(3))
+            # users = self.create_multiple_new_users_None(3)
+            self.assertRaises(Exception, self.create_multiple_new_users_None(3))
             db.session.remove()
             db.drop_all()
 
@@ -906,9 +906,7 @@ class TestUserModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance w/o ID
-            user = self.create_new_user_fail('id')
-
-            self.assertTrue(user == ValueError('id cannot be None'))
+            self.assertRaises(ValueError,self.create_new_user_fail, 'id')
             # check no new user created
             # self.assertEqual(user, None)
             # self.assertEqual(user.driver_data, self.DATA["driver_data"])

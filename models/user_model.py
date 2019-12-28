@@ -44,7 +44,7 @@ class User(db.Model):
             return d
         except Exception as e:
             print('Error in User new:', e)
-            return e
+            raise e
 
     def encode_auth_token(self, user_id):
         """
