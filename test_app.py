@@ -794,35 +794,72 @@ class TestUserModel(unittest.TestCase):
     # --------- UTILS FUNCS
     ID = 1111111111
     DATA = {
-                "driver_data":['driver1','driver2','driver3'],
-                "team_data":['team1','team2','team3']
+                "username":"username1",
+                "password":"password1"
             }
     
     def create_new_user_pass(self):
         user = user_model.User.new(self.ID,self.DATA)
         return user
 
-    def create_new_user_fail(self):
-        user = user_model.User.new(None,self.DATA)
-        return user
-        
+    def create_new_user_fail(self,type_of_failure):
+        if type_of_failure == 'username':
+            return user_model.User  .new(self.ID,{
+                'password': 'password123'
+            })
+        elif type_of_failure == 'password':
+             return user_model.User.new(self.ID,{
+                'username':'username123',
+            })
+        else:
+            # default
+            print('USER', user_model.User.new(None,{
+                'username':'username1',
+                'password':'password123'
+            }))
+            return user_model.User.new(None,{
+                'username':'username1',
+                'password':'password123'
+            })
     # creates list of users
-    def create_multiple_new_users_pass(self, num):
+    def create_multiple_new_users_pass(self, num_of_users):
         inner_id = self.ID
         users = []
-        while num:
+        while num_of_users:
             user = user_model.User.new(inner_id, self.DATA)
-            num -= 1
+            num_of_users -= 1
             inner_id += 1
             users.append(user)
         return users
 
-    def create_multiple_new_users_fail(self, num):
-        users = []
-        while num:
-            user = user_model.User.new(None, self.DATA)
-            users.append(user)
-            num -= 1
+    def create_multiple_new_users_fail(self, num_of_users,type_of_failure ):
+        if type_of_failure == 'username':
+            users = []
+            while num_of_users:
+                user = user_model.User.new(self.ID, {
+                    'password': 'password123'
+                })
+                users.append(user)
+                num_of_users  -= 1
+            return users
+        elif type_of_failure == 'password':
+            users = []
+            while num_of_users:
+                user = user_model.User.new(self.ID, {
+                    'username': 'username1'
+                })
+                users.append(user)
+                num_of_users  -= 1
+            return users
+        else:
+            users = []
+            while num_of_users:
+                user = user_model.User.new(None,{
+                'username':'username1',
+                'password':'password123'
+            })
+                users.append(user)
+                num_of_users  -= 1
         return users
     # ------------ TESTS
     # tests above function util funcs
@@ -840,17 +877,12 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_create_multiple_new_users_fail(self):
+    def test_create_multiple_new_users_fail_no_id(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            users = self.create_multiple_new_users_fail(3)
-            self.assertTrue(len(users) == 3)
-            for user in users:
-                # make into dict
-                user = vars(user)
-                self.assertTrue(user['id'] is None)
-             # drop db
+            # users = self.create_multiple_new_users_fail(3)
+            self.assertRaises(Exception, self.create_multiple_new_users_fail(3))
             db.session.remove()
             db.drop_all()
 
@@ -863,8 +895,7 @@ class TestUserModel(unittest.TestCase):
             # create driver instance
             user = self.create_new_user_pass()
             self.assertEqual(user.id, self.ID)
-            self.assertEqual(user.driver_data, self.DATA["driver_data"])
-            self.assertEqual(user.team_data, self.DATA["team_data"])
+           
             # drop db
             db.session.remove()
             db.drop_all()
@@ -875,10 +906,11 @@ class TestUserModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance w/o ID
-            user = self.create_new_user_fail()
-            self.assertRaises(Exception, self.create_new_user_fail())
+            user = self.create_new_user_fail('id')
+
+            self.assertTrue(user == ValueError('id cannot be None'))
             # check no new user created
-            self.assertEqual(user, None)
+            # self.assertEqual(user, None)
             # self.assertEqual(user.driver_data, self.DATA["driver_data"])
             # self.assertEqual(user.team_data, self.DATA["team_data"])
             # drop db

@@ -27,19 +27,24 @@ class User(db.Model):
     @classmethod
     # passed in data must be a dict in all cases
     def new(cls, sender_id, data={}):
-        print('new', data)
+        print('data new', data)
         try:
             # if no id send to exception - to pass test
             if sender_id == None:
-                raise ValueError
+                raise ValueError('id cannot be None')
+            elif data['username'] == None:
+                raise ValueError('username cannot be none')
+            elif data['password'] == None:
+                raise ValueError('password cannot be none')
             db.create_all()
             d = cls()
             d.id = sender_id
-            d.driver_data = data.get('drivers_arr')
-            d.team_data = data.get('teams_arr')
+            d.username = data.get('username')
+            d.password = data.get('password')
             return d
         except Exception as e:
             print('Error in User new:', e)
+            return e
 
     def encode_auth_token(self, user_id):
         """

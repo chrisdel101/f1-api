@@ -46,17 +46,17 @@ migrate = Migrate(app, db)
 
 
 # runs before every req
-@app.before_request
-def check_auth():
-    # if no api_key return error
-    print(request.headers)
-    if request.headers.get("X-Api-Key") != os.environ['API_KEY']:
-        print('Unauthourized')
-        res = make_response()
-        res.status_code = 401
-        return res
-    else:
-        print('access okay')
+# @app.before_request
+# def check_auth():
+#     # if no api_key return error
+#     print(request.headers)
+#     if request.headers.get("X-Api-Key") != os.environ['API_KEY']:
+#         print('Unauthourized')
+#         res = make_response()
+#         res.status_code = 401
+#         return res
+#     else:
+#         print('access okay')
         # run next func
 
 
@@ -118,8 +118,9 @@ def login():
     return users_controller.login_user(parsedJsonCredentials)
 
 
-@app.route('/register', method=['POST'])
-     parsedJsonCredentials = request.get_json(force=True)
+@app.route('/register', methods=['POST'])
+def register():
+    parsedJsonCredentials = request.get_json(force=True)
     if not request.is_json or not parsedJsonCredentials:
         print('Error in /login json')
         return TypeError('Error in /register json. Must be json.')
