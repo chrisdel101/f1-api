@@ -821,89 +821,8 @@ class TestUserModel(unittest.TestCase):
                 'username':'username1',
                 'password':'password123'
             })
-    # creates list of users
-    def create_multiple_new_users_pass(self, num_of_users):
-        inner_id = self.ID
-        users = []
-        while num_of_users:
-            user = user_model.User.new(inner_id, self.DATA)
-            num_of_users -= 1
-            inner_id += 1
-            users.append(user)
-        return users
-
-    def create_multiple_new_users_fail(self, num_of_users,type_of_failure ):
-        if type_of_failure == 'username':
-            users = []
-            while num_of_users:
-                user = user_model.User.new(self.ID, {
-                    'password': 'password123'
-                })
-                users.append(user)
-                num_of_users  -= 1
-            return users
-        elif type_of_failure == 'password':
-            users = []
-            while num_of_users:
-                user = user_model.User.new(self.ID, {
-                    'username': 'username1'
-                })
-                users.append(user)
-                num_of_users  -= 1
-            return users
-        else:
-            users = []
-            while num_of_users:
-                user = user_model.User.new(None,{
-                'username':'username1',
-                'password':'password123'
-            })
-                users.append(user)
-                num_of_users  -= 1
-        return users
-    # ------------ TESTS - above function util funcs
-    def test_create_multiple_new_users_pass(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            users = self.create_multiple_new_users_pass(3)
-            self.assertTrue(len(users) == 3)
-            for user in users:
-                # make into dict
-                user = vars(user)
-                self.assertTrue(user['id'] is not None)
-             # drop db
-            db.session.remove()
-            db.drop_all()
-
-    def test_create_multiple_new_users_fail_no_id(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            # users = self.create_multiple_new_users_fail(3)
-            self.assertRaises(ValueError, self.create_multiple_new_users_fail, 3, 'id')
-            db.session.remove()
-            db.drop_all()
-
-    def test_create_multiple_new_users_fail_no_username(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            # users = self.create_multiple_new_users_fail(3)
-            self.assertRaises(ValueError, self.create_multiple_new_users_fail, 5, 'username')
-            db.session.remove()
-            db.drop_all()
-
-    def test_create_multiple_new_users_fail_no_password(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            # users = self.create_multiple_new_users_fail(3)
-            self.assertRaises(ValueError, self.create_multiple_new_users_fail, 20, 'password')
-            db.session.remove()
-            db.drop_all()
-
-    # create new users success
+    # ------------ TESTS 
+    # test user.new() - success
     def test_user_new_pass(self):
         app = create_test_app()
         with app.app_context():
@@ -912,11 +831,13 @@ class TestUserModel(unittest.TestCase):
             # create driver instance
             user = self.create_new_user_pass()
             self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.username, self.DATA["username"])
+            self.assertEqual(user.password, self.DATA["password"])
             # drop db
             db.session.remove()
             db.drop_all()
 
-    # create new users failures
+    # test user.new() - failures
     def test_user_new_fail_no_id(self):
         app = create_test_app()
         with app.app_context():
@@ -946,7 +867,7 @@ class TestUserModel(unittest.TestCase):
             self.assertRaises(ValueError,self.create_new_user_fail, 'password')
             db.session.remove()
             db.drop_all()
-
+    # test user.insert()
     def test_user_insert_pass(self):
         app = create_test_app()
         with app.app_context():
@@ -956,81 +877,77 @@ class TestUserModel(unittest.TestCase):
             assert user in db.session
             db.session.remove()
             db.drop_all()
+
     # write a test model that creates user without id to test
     @unittest.skip
     def test_user_insert_fail(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)    
-            
             assert user not in db.session
             # raises assertion will not work
             db.session.remove()
             db.drop_all()
-
-    # check for user that do not exist return false
-    def test_user_does_not_exists(self):
-        app = create_test_app()
-        with app.app_context():
-            print('jell')
-            db.init_app(app)
-            # create and insert new user
-            with self.assertRaises(Exception) as raised:            self.create_multiple_new_users_pass(3)
-            # self.assertRaises(Exception, self.create_multiple_new_users_pass,2)
-            # user = self.create_new_user_pass()
-            # user.insert()
-            # assert user in db.session
-            # # check for a user with incorrect ID - fails
-            # exists1 = user.exists(999)
-            # exists2 = user.exists(42)
-            # exists3 = user.exists('blah')
-            # self.assertFalse(exists1)
-            # self.assertFalse(exists2)
-            # self.assertFalse(exists3)
-            db.session.remove()
-            db.drop_all()
-
+    # test user.exists()
     def test_user_does_exist(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            # user = self.create_new_user_pass()
-            # self.assertEqual(user.id, self.ID)
-            # self.assertEqual(user.username, self.DATA["username"])
-            # self.assertEqual(user.password, self.DATA["password"])
+            user = self.create_new_user_pass()
+            # check user.new works
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.username, self.DATA["username"])
+            self.assertEqual(user.password, self.DATA["password"])
             # # insert new user
-            # user.insert()
+            user.insert()
             # # now check to ensure exists func works - id should match
-            # exists = user.exists(user.id)
-            # self.assertTrue(exists)
+            exists = user.exists(user.id)
+            self.assertTrue(exists)
             db.session.remove()
             db.drop_all()
-
-    def test_multiple_users_do_exist(self):
+    # fails on unique constraint
+    def test_users_insert_fail_same_id(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            print('jell')
-            db.init_app(app)
-            # create and insert new user
-            users = self.create_multiple_new_users_pass(3)
-            for user in users:
-                # insert each new user
-                # with self.assertRaises(AssertionError) as raised:
-                if self.assertRaises(Exception,user.insert):
-                    print('hello')  
-                    # user.insert()
-            # now check to ensure exists func works - id should match
-            exists1 = users[0].exists(users[0].id)
-            exists2 = users[1].exists(users[1].id)
-            exists3 = users[2].exists(users[2].id)
+            # create and insert new user1
+            user1 = self.create_new_user_pass()
+            user1.insert()
+            # check exists okay
+            exists1 = user1.exists(user1.id)
             self.assertTrue(exists1)
-            self.assertTrue(exists2)
-            self.assertTrue(exists3)
+            # create second user 
+            user2 = self.create_new_user_pass()
+            # cause error b/c of identical id to user1
+            self.assertRaises(Exception,
+            user2.insert)
+            # check user 2 is not in db
+            exists2 = user2.exists(user2.id)
+            self.assertFalse(exists2)
             db.session.remove()
             db.drop_all()
-
-    def test_user_delete(self):
+    # fails on unique constraint
+    def test_users_insert_fail_same_username(self):
+            app = create_test_app()
+            with app.app_context():
+                db.init_app(app)
+                # create and insert new user1
+                user1 = user_model.User.new(1,self.DATA)
+                user1.insert()
+                # check exists okay
+                exists1 = user1.exists(user1.id)
+                self.assertTrue(exists1)
+                # create second user - same username
+                user2 = user_model.User.new(2,self.DATA)
+                self.assertRaises(Exception,
+                user2.insert)
+                 # check user 2 is not in db
+                exists2 = user2.exists(user2.id)
+                self.assertFalse(exists2)
+                db.session.remove()
+                db.drop_all()
+    # test user.delete()
+    def test_single_user_delete(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
@@ -1045,26 +962,43 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
     
+    # test user.delete()
     def test_mutiple_users_delete(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            users = self.create_multiple_new_users_pass(3)
-            for user in users:
-                user.insert()
+            # create 3 test users
+            user1 = user_model.User.new(1, {
+                'username':'username1',
+                'password':'password123'
+            })
+            user2 = user_model.User.new(2, {
+                'username':'username2',
+                'password':'password123'
+            })
+            user3 = user_model.User.new(3, {
+                'username':'username3',
+                'password':'password123'
+            })
+            # insert all users
+            user1.insert()
+            user2.insert()
+            user3.insert()
             # confirm all added to DB
-            assert users[0] in db.session
-            assert users[1] in db.session
-            assert users[2] in db.session
-            for user in users:
-                user.delete(user.id)
+            assert user1 in db.session
+            assert user2 in db.session
+            assert user3 in db.session
+            # delete all users
+            user1.delete(user1.id)
+            user2.delete(user2.id)
+            user3.delete(user3.id)
             # confirm all deleted from DB
-            assert users[0] not in db.session
-            assert users[1] not in db.session
-            assert users[2] not in db.session
+            assert user1 not in db.session
+            assert user2 not in db.session
+            assert user3 not in db.session
             db.session.remove()
             db.drop_all()
-
+    # test user.exists()
     def test_user_does_not_exists_after_delete(self):
         app = create_test_app()
         with app.app_context():
@@ -1087,40 +1021,25 @@ class TestUserModel(unittest.TestCase):
             user.insert()
             # check exists
             self.assertTrue(user.exists(user.id))
-            # data with only one key changed
+            # check user is indentical to original - driver and team and None
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.username, self.DATA['username'])
+            self.assertEqual(user.password, self.DATA['password'])
+            self.assertEqual(user.driver_data, self.DATA.get('driver_data'))
+            self.assertEqual(user.team_data, self.DATA.get('team_data'))
+            # add driver and team data
             new_data = {
-                "driver_data":['driver1', 'driver5', 'driver6', 'driver7']
+                "driver_data":['driver1', 'driver5', 'driver6', 'driver7'],
+                "team_data":['team1', 'team5', 'team6', 'team7']
             }
             user.update(new_data)
             # check that user data updated
             self.assertTrue(user.driver_data == new_data['driver_data'])
-            db.session.remove()
-            db.drop_all()
-
-    def test_user_update_multiple_items(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            users = self.create_multiple_new_users_pass(3)
-            for user in users:
-                user.insert()
-            # check exists
-            assert users[0] in db.session
-            assert users[1] in db.session
-            assert users[2] in db.session
-            # check data is set to default
-
-            new_data = {
-                "driver_data":['driver1', 'driver5', 'driver6', 'driver7']
-            }
-            for user in users:
-                # check for old data
-                self.assertTrue(user.driver_data == self.DATA['driver_data'])
-                user.update(new_data)
-                # check data has been changed
-                self.assertTrue(user.driver_data == new_data['driver_data'])
-                assert user in db.session
-
+            self.assertTrue(user.team_data == new_data['team_data'])
+            # check other data is still same and not altered
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.username, self.DATA['username'])
+            self.assertEqual(user.password, self.DATA['password'])
             db.session.remove()
             db.drop_all()
 
