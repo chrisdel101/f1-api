@@ -19,12 +19,15 @@ def authenticate_user(jsonCredentials):
 
 def register_user(parsedData):
     try:
-        print('parsed CIN', parsedData)
+        # print('parsed CIN', parsedData)
         user = user_model.User.new(parsedData['id'], parsedData)
         if user:
             user.insert()
+            if os.environ['LOGS'] != 'off':
+                print('user registered okay')
+            return user
     except Exception as e:
-        print('error in register_user', e)
+        print('exception in register_user', e)
         raise e
 
 

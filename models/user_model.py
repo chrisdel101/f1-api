@@ -3,6 +3,7 @@ import os
 from database import db
 from sqlalchemy import text
 import models
+import bcrypt
 from slugify import slugify, Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
@@ -27,7 +28,6 @@ class User(db.Model):
     @classmethod
     # passed in data must be a dict in all cases
     def new(cls, sender_id, data={}):
-        print('data new', data)
         try:
             # if no id send to exception - to pass test
             if not sender_id:
@@ -40,11 +40,17 @@ class User(db.Model):
             d = cls()
             d.id = sender_id
             d.username = data.get('username')
-            d.password = data.get('password')
+            d.password = cls.hash_password(data.get('password'))
+            print('new user', d)
             return d
         except Exception as e:
             print('Error in User new:', e)
             raise e
+
+    # hash password before storing
+    def hash_password(password):
+        password = bytes(password, encoding='utf-8')
+        return bcrypt.hashpw(password, bcrypt.gensalt())
 
     def encode_auth_token(self, user_id):
         """
@@ -85,6 +91,8 @@ class User(db.Model):
                 self.driver_data = data['driver_data']
             if data.get('team_data'):
                 self.team_data = data['team_data']
+            if data.get('password'):
+                self.password = self.hash_password(data['password'])
             # save to DB
             db.session.commit()
             print('UPDATE OKAY')

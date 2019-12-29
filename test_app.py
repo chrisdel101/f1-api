@@ -749,11 +749,62 @@ class TestDriverController(unittest.TestCase):
             self.assertEqual(driver, 'No Driver with that name')
 
 class TestUserController(unittest.TestCase):
+    # DATA = {
+    #     "driver_data": ["driver1", "driver2"],
+    #     "team_data": ["team1", "team2"],
+    #     "user_id": 2
+    # }
+    ID = 1111111111
     DATA = {
-        "driver_data": ["driver1", "driver2"],
-        "team_data": ["team1", "team2"],
-        "user_id": 2
-    }
+                "username":"username1",
+                "password":"password1"
+            }
+    # test combination of user new/insert
+    def test_register_user_success(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # register new user
+            user = users_controller.register_user({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            # confirm user exists
+            exists = user.exists(user.id)
+            self.assertTrue(exists)
+            # and in db
+            assert user in db.session
+            db.session.remove()
+            db.drop_all()
+
+    # test error raised when no id
+    def test_register_user_fail_id(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # raise error when ID is none
+            self.assertRaises(ValueError,users_controller.register_user,{
+                'id': None, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            db.session.remove()
+            db.drop_all()
+
+    def test_register_user_fail_username(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # raise error when username is none
+            self.assertRaises(ValueError,users_controller.register_user,{
+                'id': self.ID, 
+                'username':None,
+                'password': self.DATA['password']
+            })
+            db.session.remove()
+            db.drop_all()
+
     def test_handle_user(self):
         app = create_test_app()
         with app.app_context():
