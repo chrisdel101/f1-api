@@ -1,3 +1,4 @@
+import bcrypt
 import os
 import datetime
 from flask import jsonify
@@ -142,3 +143,16 @@ def log_None_values(dict_to_log):
             json.dump(dict_to_log, f, ensure_ascii=False, indent=4)
     except Exception as e:
         return('An error ocurred in utils.log_None_vals:', e)
+
+
+# hash password before storing
+def hash_password(password):
+    password = bytes(password, encoding='utf-8')
+    return bcrypt.hashpw(password, bcrypt.gensalt())
+
+
+# return T if matches else F
+def check_hashed_password(password, hashed):
+    # re-encode PW before checking
+    password = bytes(password, encoding='utf-8')
+    return bcrypt.checkpw(password, hashed)

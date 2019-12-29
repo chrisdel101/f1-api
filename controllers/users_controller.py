@@ -17,15 +17,19 @@ def authenticate_user(jsonCredentials):
         print("It Does not Match :(")
 
 
+# registers user to db -returns T if succesful, else F
 def register_user(parsedData):
-    try:
         # print('parsed CIN', parsedData)
+    try:
+        # create temp user obj
         user = user_model.User.new(parsedData['id'], parsedData)
         if user:
             user.insert()
             if os.environ['LOGS'] != 'off':
                 print('user registered okay')
-            return user
+            return True
+        else:
+            return False
     except Exception as e:
         print('exception in register_user', e)
         raise e

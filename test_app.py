@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, session
 import sqlite3
+import flask
 import os
 import unittest
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +8,7 @@ from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
 from models import driver_model, team_model, user_model
-from controllers import drivers_controller, teams_controller, users_controller
+from controllers import drivers_controller, teams_controller, session_controller, users_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
@@ -1107,7 +1108,34 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-class TestSessionController(unittest.TestCase)
+class TestSessionController(unittest.TestCase):
+    # use test_request_context https://flask.palletsprojects.com/en/1.1.x/quickstart/#context-locals
+    ID = 1111111111
+    DATA = {
+                "username":"username1",
+                "password":"password1"
+            }
+    COMBINE_DATA = DATA
+    COMBINE_DATA['id'] = ID
+    def create_test_user(self):
+            return user_model.User.new(self.ID,self.DATA)
+
+    def test_login_unregistered_user(self):
+        app = create_test_app()
+        with app.test_request_context('/login', method='POST'):
+            db.init_app(app)
+            logged_in = session_controller.login(session, self.COMBINE_DATA)
+            self.assertFalse(logged_in)
+
+    def test_login_registered_user(self):
+        app = create_test_app()
+        with app.test_request_context('/login', method='POST'):
+            db.init_app(app)
+            user = users_controller.register_user(self.COMBINE_DATA)
+            # assert registered success
+            self.assertTrue(user)
+            session_controller.login(session, self.COMBINE_DATA)
+
     
 
 if __name__ == '__main__':

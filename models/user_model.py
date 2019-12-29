@@ -3,7 +3,7 @@ import os
 from database import db
 from sqlalchemy import text
 import models
-import bcrypt
+from utilities import utils
 from slugify import slugify, Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
@@ -40,17 +40,12 @@ class User(db.Model):
             d = cls()
             d.id = sender_id
             d.username = data.get('username')
-            d.password = cls.hash_password(data.get('password'))
+            d.password = utils.hash_password(data.get('password'))
             print('new user', d)
             return d
         except Exception as e:
             print('user new error', e)
             raise e
-
-    # hash password before storing
-    def hash_password(password):
-        password = bytes(password, encoding='utf-8')
-        return bcrypt.hashpw(password, bcrypt.gensalt())
 
     def encode_auth_token(self, user_id):
         """
@@ -112,6 +107,7 @@ class User(db.Model):
 
     # sender_id is same as id, but id is seems like resvered var
     def exists(self, lookup, lookup_type='id'):
+        print(self, lookup, lookup_type)
         try:
             # try by username
             if lookup_type == 'username':

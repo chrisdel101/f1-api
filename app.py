@@ -1,8 +1,7 @@
-from controllers import drivers_controller, teams_controller, users_controller
+from controllers import drivers_controller, teams_controller, users_controller, session_controller
 from utilities import scraper
 from models import driver_model, team_model
 from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
-from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
@@ -113,29 +112,28 @@ def all():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # print('REQ+++', request.data)
-    parsedJsonCredentials = request.get_json(force=True)
-    # error if not json
-    if not request.is_json or not parsedJsonCredentials:
-        print('Error in /login json')
-        return TypeError('Error in /login json. Must be json.')
-    if parsedJsonCredentials['username'] in session:
-        print('Logged in as %s' %
-              escape(session[parsedJsonCredentials['username']]))
-        return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
-    else:
-        pass
-        # return users_controller.login_user(parsedJsonCredentials)
+    try:
+        # print('REQ+++', request.data)
+        parsedJsonCredentials = request.get_json()
+        # print('below', request.data)
+        # error if not json
+        if not request.is_json or not parsedJsonCredentials:
+            print('Error in /login json')
+            return TypeError('Error in /login json. Must be json.')
+        if parsedJsonCredentials['username'] in session:
+            print('Logged in as %s' %
+                  escape(session[parsedJsonCredentials['username']]))
+            return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
+        else:
+            print('bottom', request.data)
+            return session_controller.login(session, parsedJsonCredentials)
+    except Exception as e:
+        print('error in login route', e)
+        return e
 
 
 @app.route('/register', methods=['POST'])
 def register():
-    # if request.method == 'POST':
-    # try:
-    #     print('here')
-    # except e as Exception:
-    #     print('error in route', e)
-    # return 'IN'
     parsedData = request.get_json(force=True)
     if not request.is_json or not parsedData:
         print('Error in /login json')
