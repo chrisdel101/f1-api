@@ -31,6 +31,7 @@ def login(current_session, parsedJsonCredentials):
                 if matches:
                     if os.environ['LOGS'] != 'off':
                         print('user exists and PW success. login success')
+                    # add to session
                     current_session[parsedJsonCredentials['username']
                                     ] = parsedJsonCredentials['username']
                     return matches

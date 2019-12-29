@@ -1206,13 +1206,13 @@ class TestSessionController(unittest.TestCase):
             self.assertTrue(user)
             # add user to session
             session[self.COMBINE_DATA['username']] = self.COMBINE_DATA['username']
-            # attempt login with wrong password - doesn't matter since already in session
+            # attempt login with wrong password - tests it takes correct path inside func
             login = session_controller.login(session, {
                 'id':1111111,
                 'username':'username1',
                 'password': 'some-wrong-password'
             })
-            # assert login okay
+            # assert login okay b/c of session
             self.assertTrue(login)
             db.session.remove()
             db.drop_all()
