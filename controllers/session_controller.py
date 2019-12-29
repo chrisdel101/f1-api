@@ -8,8 +8,8 @@ import os
 # return T of F if user is logged in
 def login(current_session, parsedJsonCredentials):
     try:
-        print(current_session, parsedJsonCredentials)
-    # if logged in return confimation
+        # print(current_session, parsedJsonCredentials)
+        # if logged in return confimation
         if parsedJsonCredentials['username'] in current_session:
             if os.environ['LOGS'] != 'off':
                 print('Logged in as %s' %
@@ -28,7 +28,15 @@ def login(current_session, parsedJsonCredentials):
                 # check password matches DB password
                 matches = utils.check_hashed_password(
                     parsedJsonCredentials['password'], query.password)
-                print(matches)
+                if matches:
+                    if os.environ['LOGS'] != 'off':
+                        print('user exists and PW matches. Login okay', matches)
+                    return True
+                else:
+                    if os.environ['LOGS'] != 'off':
+                        print(
+                            'user exists and PW does not match. Login failed', matches)
+                    return False
 
                 # match PW
             else:

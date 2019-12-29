@@ -1133,23 +1133,36 @@ class TestSessionController(unittest.TestCase):
     def create_test_user(self):
             return user_model.User.new(self.ID,self.DATA)
 
-    def test_login_unregistered_user(self):
+    def test_login_fail_unregistered_user(self):
         app = create_test_app()
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             logged_in = session_controller.login(session, self.COMBINE_DATA)
             self.assertFalse(logged_in)
 
-    def test_login_registered_user(self):
+    def test_login_fail_incorrect_password(self):
         app = create_test_app()
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
+            logged_in = session_controller.login(session, self.COMBINE_DATA)
+            self.assertFalse(logged_in)
+
+    def test_login_success(self):
+        app = create_test_app()
+        with app.test_request_context('/login', method='POST'):
+            db.init_app(app)
+            # register test user
             user = users_controller.register_user(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(user)
-            session_controller.login(session, self.COMBINE_DATA)
+            # attempt login
+            login = session_controller.login(session, self.COMBINE_DATA)
+            # assert login okay
+            self.assertTrue(login)
+
 
     
 
 if __name__ == '__main__':
     unittest.main()
+

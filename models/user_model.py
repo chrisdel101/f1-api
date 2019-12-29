@@ -41,7 +41,8 @@ class User(db.Model):
             d.id = sender_id
             d.username = data.get('username')
             d.password = utils.hash_password(data.get('password'))
-            print('new user', d)
+            if os.environ['LOGS'] != 'off':
+                print('new user', d)
             return d
         except Exception as e:
             print('user new error', e)
@@ -107,13 +108,12 @@ class User(db.Model):
 
     # sender_id is same as id, but id is seems like resvered var
     def exists(self, lookup, lookup_type='id'):
-        print(self, lookup, lookup_type)
         try:
-            # try by username
+            # with username
             if lookup_type == 'username':
                 if self.query.filter_by(username=lookup).first():
                     return True
-            # try by id - default
+            # default - with id
             else:
                 if self.query.filter_by(id=lookup).first():
                     return True

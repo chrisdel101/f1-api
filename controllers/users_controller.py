@@ -7,19 +7,8 @@ import os
 KEYS = ['drivers_arr', 'teams_arr', 'user_id']
 
 
-def authenticate_user(jsonCredentials):
-    password = b"jsonCredentials['password']"
-    hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-
-    if bcrypt.checkpw(password, hashed):
-        print("It Matches!")
-    else:
-        print("It Does not Match :(")
-
-
 # registers user to db -returns T if succesful, else F
 def register_user(parsedData):
-        # print('parsed CIN', parsedData)
     try:
         # create temp user obj
         user = user_model.User.new(parsedData['id'], parsedData)
