@@ -1,6 +1,6 @@
 from models import user_model
 from utilities import utils
-from flask import make_response
+from flask import escape
 import bcrypt
 import os
 
@@ -8,8 +8,7 @@ import os
 # return T of F if user is logged in
 def login(current_session, parsedJsonCredentials):
     try:
-        # print(current_session, parsedJsonCredentials)
-        # if logged in return confimation
+        # if logged session return confimation
         if parsedJsonCredentials['username'] in current_session:
             if os.environ['LOGS'] != 'off':
                 print('Logged in as %s' %
@@ -28,20 +27,22 @@ def login(current_session, parsedJsonCredentials):
                 # check password matches DB password
                 matches = utils.check_hashed_password(
                     parsedJsonCredentials['password'], query.password)
+                # if match PW return T
                 if matches:
                     if os.environ['LOGS'] != 'off':
-                        print('user exists and PW matches. Login okay', matches)
-                    return True
+                        print('user exists and PW success. login success')
+                    current_session[parsedJsonCredentials['username']
+                                    ] = parsedJsonCredentials['username']
+                    return matches
+                # if not match return F
                 else:
                     if os.environ['LOGS'] != 'off':
                         print(
-                            'user exists and PW does not match. Login failed', matches)
-                    return False
-
-                # match PW
+                            'user exists but PW fails. login failed')
+                    return matches
             else:
                 if os.environ['LOGS'] != 'off':
-                    print('username does not exist. register user.')
+                    print('username does not exist. login failed')
                 return False
     except Exception as e:
         print('error in login', e)

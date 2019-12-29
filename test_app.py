@@ -32,6 +32,7 @@ def get_team_list(team_name, soup):
 def create_test_app():
     try:
         app = Flask(__name__)
+        app.secret_key = b'12345678910-not-my-real-key'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
             setup_testing_environment()
@@ -1139,15 +1140,48 @@ class TestSessionController(unittest.TestCase):
             db.init_app(app)
             logged_in = session_controller.login(session, self.COMBINE_DATA)
             self.assertFalse(logged_in)
+            db.session.remove()
+            db.drop_all()
 
     def test_login_fail_incorrect_password(self):
         app = create_test_app()
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
-            logged_in = session_controller.login(session, self.COMBINE_DATA)
-            self.assertFalse(logged_in)
+             # register test user
+            user = users_controller.register_user(self.COMBINE_DATA)
+            # assert registered success
+            self.assertTrue(user)
+            # attemp login wrong PW
+            login = session_controller.login(session, {
+                'id':1111111,
+                'username':'username1',
+                'password': 'some-wrong-password'
+            })
+            # check login fails
+            self.assertFalse(login)
+            db.session.remove()
+            db.drop_all()
 
-    def test_login_success(self):
+    def test_login_fail_incorrect_username(self):
+        app = create_test_app()
+        with app.test_request_context('/login', method='POST'):
+            db.init_app(app)
+             # register test user
+            user = users_controller.register_user(self.COMBINE_DATA)
+            # assert registered success
+            self.assertTrue(user)
+            # attemp login wrong username
+            login = session_controller.login(session, {
+                'id':1111111,
+                'username':'username2',
+                'password': 'some-password'
+            })
+            # check login fails
+            self.assertFalse(login)
+            db.session.remove()
+            db.drop_all()
+
+    def test_login_success_w_password_username(self):
         app = create_test_app()
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
@@ -1159,6 +1193,29 @@ class TestSessionController(unittest.TestCase):
             login = session_controller.login(session, self.COMBINE_DATA)
             # assert login okay
             self.assertTrue(login)
+            db.session.remove()
+            db.drop_all()
+
+    def test_login_success_in_session(self):
+        app = create_test_app()
+        with app.test_request_context('/login', method='POST'):
+            db.init_app(app)
+            # register test user
+            user = users_controller.register_user(self.COMBINE_DATA)
+            # assert registered success
+            self.assertTrue(user)
+            # add user to session
+            session[self.COMBINE_DATA['username']] = self.COMBINE_DATA['username']
+            # attempt login with wrong password - doesn't matter since already in session
+            login = session_controller.login(session, {
+                'id':1111111,
+                'username':'username1',
+                'password': 'some-wrong-password'
+            })
+            # assert login okay
+            self.assertTrue(login)
+            db.session.remove()
+            db.drop_all()
 
 
     
