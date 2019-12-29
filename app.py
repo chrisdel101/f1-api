@@ -1,7 +1,8 @@
 from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
 from models import driver_model, team_model
-from flask import request, jsonify, Response, render_template, Flask, make_response
+from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
+from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
@@ -16,6 +17,8 @@ from collections import namedtuple
 
 def create_app():
     app = Flask(__name__)
+    app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+    # Session(app)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
@@ -57,15 +60,15 @@ migrate = Migrate(app, db)
 #         return res
 #     else:
 #         print('access okay')
-        # run next func
+# run next func
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def testing_route():
-    print('HERE')
-    res = make_response()
-    print('res', res)
-    return res
+    pass
+    # res = make_response()
+    # print('res', res)
+    # return res
 
 
 @app.route('/drivers')
@@ -112,19 +115,33 @@ def all():
 def login():
     # print('REQ+++', request.data)
     parsedJsonCredentials = request.get_json(force=True)
+    # error if not json
     if not request.is_json or not parsedJsonCredentials:
         print('Error in /login json')
         return TypeError('Error in /login json. Must be json.')
-    return users_controller.login_user(parsedJsonCredentials)
+    if parsedJsonCredentials['username'] in session:
+        print('Logged in as %s' %
+              escape(session[parsedJsonCredentials['username']]))
+        return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
+    else:
+        pass
+        # return users_controller.login_user(parsedJsonCredentials)
 
 
 @app.route('/register', methods=['POST'])
 def register():
-    parsedJsonCredentials = request.get_json(force=True)
-    if not request.is_json or not parsedJsonCredentials:
+    # if request.method == 'POST':
+    # try:
+    #     print('here')
+    # except e as Exception:
+    #     print('error in route', e)
+    # return 'IN'
+    parsedData = request.get_json(force=True)
+    if not request.is_json or not parsedData:
         print('Error in /login json')
         return TypeError('Error in /register json. Must be json.')
-    return users_controller.login_user(parsedJsonCredentials)
+    return users_controller.register_user(parsedData)
+
 
 @app.route('/user', methods=['GET', 'POST'])
 def udpate_user():

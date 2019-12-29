@@ -7,8 +7,8 @@ import os
 KEYS = ['drivers_arr', 'teams_arr', 'user_id']
 
 
-def login_user(credentials):
-    password = b"credentials['password']"
+def authenticate_user(jsonCredentials):
+    password = b"jsonCredentials['password']"
     hashed = bcrypt.hashpw(password, bcrypt.gensalt())
 
     if bcrypt.checkpw(password, hashed):
@@ -17,8 +17,15 @@ def login_user(credentials):
         print("It Does not Match :(")
 
 
-def create_new_user(data):
-    pass
+def register_user(parsedData):
+    try:
+        print('parsed CIN', parsedData)
+        user = user_model.User.new(parsedData['id'], parsedData)
+        if user:
+            user.insert()
+    except Exception as e:
+        print('error in register_user', e)
+        raise e
 
 
 def handle_user(data):
