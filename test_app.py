@@ -321,6 +321,19 @@ class TestUtils(unittest.TestCase):
                 diff_class, driver_model.Driver)
             # print('RES', res)
             utils.log_None_values(res)
+    
+    def test_hash_password(self):
+        password = 'password123'
+        hashed = utils.hash_password(password)
+    #    check that hashed is not equal to text
+        self.assertNotEqual(password, hashed)
+
+    def test_check_hashed_password(self):
+        password = 'password123'
+        hashed = utils.hash_password(password)
+    #    check that hashed is not equal to text
+        matched = utils.check_hashed_password(password, hashed)
+        self.assertTrue(matched)
 
 
 class TestScraperRunner(unittest.TestCase):
