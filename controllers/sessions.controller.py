@@ -5,21 +5,25 @@ import bcrypt
 import os
 
 
-def authenticate(jsonCredentials):
-    password = b"jsonCredentials['password']"
-    hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-
-    if bcrypt.checkpw(password, hashed):
-        print("It Matches!")
-    else:
-        print("It Does not Match :(")
-
-
 def login(current_session, parsedJsonCredentials)
    # if logged in return confimation
    if parsedJsonCredentials['username'] in current_session:
-        print('Logged in as %s' %
-              escape(current_session[parsedJsonCredentials['username']]))
+        if os.environ['LOGS'] != 'off':
+            print('Logged in as %s' %
+                escape(current_session[parsedJsonCredentials['username']]))
         return 'Logged in as %s' % escape(current_session[parsedJsonCredentials['username']])
     # if not logged in authenticate
     else:
+        # check if user exists
+        if user_model.User.exists(parsedJsonCredentials, 'username'):
+            user = self.query.filter_by(username=parsedJsonCredentials['username']).first()
+            print('user', user)
+            # match PW
+        else:
+            if os.environ['LOGS'] != 'off':
+                print('username does not exist')
+            return 'user does not exist'
+            
+
+
+

@@ -883,7 +883,6 @@ class TestUserModel(unittest.TestCase):
             user = self.create_new_user_pass()
             self.assertEqual(user.id, self.ID)
             self.assertEqual(user.username, self.DATA["username"])
-            self.assertEqual(user.password, self.DATA["password"])
             # drop db
             db.session.remove()
             db.drop_all()
@@ -939,8 +938,8 @@ class TestUserModel(unittest.TestCase):
             # raises assertion will not work
             db.session.remove()
             db.drop_all()
-    # test user.exists()
-    def test_user_does_exist(self):
+    # test user.exists() with id param
+    def test_user_does_exist_by_id(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
@@ -948,11 +947,27 @@ class TestUserModel(unittest.TestCase):
             # check user.new works
             self.assertEqual(user.id, self.ID)
             self.assertEqual(user.username, self.DATA["username"])
-            self.assertEqual(user.password, self.DATA["password"])
             # # insert new user
             user.insert()
             # # now check to ensure exists func works - id should match
             exists = user.exists(user.id)
+            self.assertTrue(exists)
+            db.session.remove()
+            db.drop_all()
+
+    # test user.exists() with username param
+    def test_user_does_exist_by_username(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            # check user.new works
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.username, self.DATA["username"])
+            # # insert new user
+            user.insert()
+            # # now check to ensure exists func works - id should match
+            exists = user.exists(user.username, 'username')
             self.assertTrue(exists)
             db.session.remove()
             db.drop_all()
@@ -1075,7 +1090,6 @@ class TestUserModel(unittest.TestCase):
             # check user is indentical to original - driver and team and None
             self.assertEqual(user.id, self.ID)
             self.assertEqual(user.username, self.DATA['username'])
-            self.assertEqual(user.password, self.DATA['password'])
             self.assertEqual(user.driver_data, self.DATA.get('driver_data'))
             self.assertEqual(user.team_data, self.DATA.get('team_data'))
             # add driver and team data
@@ -1090,11 +1104,11 @@ class TestUserModel(unittest.TestCase):
             # check other data is still same and not altered
             self.assertEqual(user.id, self.ID)
             self.assertEqual(user.username, self.DATA['username'])
-            self.assertEqual(user.password, self.DATA['password'])
             db.session.remove()
             db.drop_all()
 
-
+class TestSessionController(unittest.TestCase)
+    
 
 if __name__ == '__main__':
     unittest.main()

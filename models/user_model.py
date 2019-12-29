@@ -44,7 +44,7 @@ class User(db.Model):
             print('new user', d)
             return d
         except Exception as e:
-            print('Error in User new:', e)
+            print('user new error', e)
             raise e
 
     # hash password before storing
@@ -97,7 +97,8 @@ class User(db.Model):
             db.session.commit()
             print('UPDATE OKAY')
         except Exception as e:
-            print('Update error', e)
+            print('user update error', e)
+            raise e
 
     def delete(self, sender_id):
         d = self.query.filter_by(id=sender_id).first()
@@ -106,17 +107,23 @@ class User(db.Model):
             db.session.commit()
             print('DELETE OKAY')
         except Exception as e:
-            print('Delete Error', e)
+            print('user delete error', e)
+            raise e
 
     # sender_id is same as id, but id is seems like resvered var
-    def exists(self, sender_id):
+    def exists(self, lookup, lookup_type='id'):
         try:
-            if self.query.filter_by(id=sender_id).first():
-                return True
+            # try by username
+            if lookup_type == 'username':
+                if self.query.filter_by(username=lookup).first():
+                    return True
+            # try by id - default
+            else:
+                if self.query.filter_by(id=lookup).first():
+                    return True
             return False
         except Exception as e:
-            print("Error in exists", e)
-            return False
+            print("error in exists", e)
 
     def as_dict(req):
         return {c.name: getattr(req, c.name) for c in req.__table__.columns}
