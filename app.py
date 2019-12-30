@@ -3,6 +3,7 @@ from utilities import scraper
 from models import driver_model, team_model
 from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 from flask_migrate import Migrate
 import json
 from utilities import utils
@@ -47,6 +48,12 @@ def create_app():
 app = create_app()['app']
 db = create_app()['db']
 migrate = Migrate(app, db)
+login_manager = LoginManager(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 
 # runs before every req

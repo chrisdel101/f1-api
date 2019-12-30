@@ -13,9 +13,12 @@ _slugify.separator = '_'
 class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, unique=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
-    password = db.Column(db.Binary(), nullable=False)
+    password = db.Column(db.LargeBinary(), nullable=False)
     driver_data = db.Column(db.PickleType)
     team_data = db.Column(db.PickleType)
+    is_authenticated = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    is_anonymous = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
@@ -50,6 +53,10 @@ class User(db.Model):
         except Exception as e:
             print('user new error', e)
             raise e
+
+    def get_id(self):
+        user_id = self.id.encode('utf-b')
+        return user_id
 
     def encode_auth_token(self, user_id):
         """

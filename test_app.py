@@ -13,6 +13,8 @@ from controllers import drivers_controller, teams_controller, session_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
+import flask_login
+from flask_login import current_user, login_manager, LoginManager
 
 
 # https://stackoverflow.com/a/50536837/5972531
@@ -1134,7 +1136,7 @@ class TestSessionController(unittest.TestCase):
     COMBINE_DATA = DATA
     COMBINE_DATA['id'] = ID
     def create_test_user(self):
-            return user_model.User.new(self.ID,self.DATA)
+        return user_model.User.new(self.ID,self.DATA)   
 
     def test_login_fail_unregistered_user(self):
         app = create_test_app()
@@ -1185,6 +1187,8 @@ class TestSessionController(unittest.TestCase):
 
     def test_login_success_w_password_username(self):
         app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             # register test user
@@ -1193,6 +1197,13 @@ class TestSessionController(unittest.TestCase):
             self.assertTrue(user)
             # attempt login
             login = session_controller.login(session, self.COMBINE_DATA)
+            @login_manager.user_loader
+            def load_user(user_id):
+                return User.get(self.ID)
+            query = user.query.filter_by(
+                    id=self.ID).first()
+            print(query)
+            print(current_user.is_active)
             # assert login okay
             self.assertTrue(login)
             db.session.remove()
