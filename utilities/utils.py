@@ -1,6 +1,7 @@
 import bcrypt
 import os
 import datetime
+from datetime import timedelta
 from flask import jsonify
 import json
 from utilities import utils
@@ -96,7 +97,7 @@ def create_driver_list(driver_list):
         print('an errot in utils.create_driver_list', e)
 
 
-# takes an instance and a model name - if new instance has None - record the props
+# takes an instance and a model name - if new instance has None - record the props - used to detect new changes
 def compare_current_to_stored(current_sql_instance, class_to_check):
     # in testing just return true to test
     if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
@@ -156,11 +157,12 @@ def check_hashed_password(password, hashed):
     try:
         # re-encode PW before checking
         password = bytes(password, encoding='utf-8')
-        # hashed = bytes(hashed, encoding='utf-8')
-        # print(type(password))
-        # print(type(hashed))
-        # password = password.decode('utf-8')
-        # print('PASS', password)
         return bcrypt.checkpw(password, hashed)
     except Exception as e:
         print('error in check_hashed_password', e)
+
+
+# set time for sessions to last
+def set_session_time(session, app, mins):
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=mins)

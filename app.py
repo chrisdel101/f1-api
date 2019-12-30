@@ -18,6 +18,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
         app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+        # app.permanent_session_lifetime = timedelta(hours=24)
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
         DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -26,6 +27,7 @@ def create_app():
             print('connection', conn)
     elif os.environ['FLASK_ENV'] == 'development':
         app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+        # app.permanent_session_lifetime = timedelta(hours=24)
         if os.environ['LOGS'] != 'off':
             print('app.py: dev DB')
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
@@ -48,25 +50,40 @@ migrate = Migrate(app, db)
 
 
 # runs before every req
-# @app.before_request
-# def check_auth():
-#     # if no api_key return error
-#     print(request.headers)
-#     if request.headers.get("X-Api-Key") != os.environ['API_KEY']:
-#         print('Unauthourized')
-#         res = make_response()
-#         res.status_code = 401
-#         return res
-#     else:
-#         print('access okay')
-# run next func
+if os.environ['AUTH'] != 'off':
+    @app.before_request
+    def check_incoming_authorization():
+        # if no api_key return error
+        print(request.headers)
+        if request.headers.get("X-Api-Key") != os.environ['API_KEY']:
+            print('Unauthourized')
+            res = make_response()
+            res.status_code = 401
+            return res
+        else:
+            print('access okay')
+
+if os.environ['FLASK_ENV'] == 'dev_testing':
+    @app.before_request
+    def make_session_permanent():
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=5)
+        print('session time')
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def testing_route():
-    pass
+    return 'hello'
     # res = make_response()
     # print('res', res)
+    # return res
+
+
+@app.route('/test-logged-in', methods=['GET', 'POST'])
+def testing_login():
+    # pass
+    # res = make_response()
+    print('res', res)
     # return res
 
 

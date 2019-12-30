@@ -2,6 +2,7 @@ from flask import Flask, session
 import sqlite3
 import flask
 import os
+from datetime import timedelta
 import unittest
 from flask_sqlalchemy import SQLAlchemy
 from utilities.scraper import driver_scraper, team_scraper
@@ -61,7 +62,6 @@ def create_real_app():
         return app
     except Exception as e:
         print('Error in create_real_app', e)
-
 
 class TestDriverScraper(unittest.TestCase):
 
@@ -273,19 +273,21 @@ class TestUtils(unittest.TestCase):
         driver_list = utils.create_driver_list(drivers)
         self.assertEqual(driver_list, expected)
 
+    @unittest.skip('need to redo with a DB with instances inside - currently just returns true')
     def test_compare_current_to_stored_true(self):
         app = create_real_app()
         with app.app_context():
             # init db
             db.init_app(app)
             # look up first driver in db
-            get_first_driver_sql = driver_model.Driver.query.all()[0]
+            get_first_driver_sql = driver_model.Driver.query.all()
+            print('get',get_first_driver_sql)
             res = utils.compare_current_to_stored(
                 get_first_driver_sql, driver_model.Driver)
+            print('res',res)
             self.assertTrue(res)
 
-    # new class contains none vals
-    @unittest.skip
+    @unittest.skip(' # new class contains none vals')
     def test_compare_current_to_stored_false(self):
         app = create_real_app()
         with app.app_context():
@@ -305,7 +307,7 @@ class TestUtils(unittest.TestCase):
             self.assertTrue(type(res) == dict)
             self.assertTrue(type(res) != bool)
 
-    @unittest.skip
+    @unittest.skip('needs update')
     def test_log_None_values(self):
         app = create_real_app()
         with app.app_context():
@@ -1196,7 +1198,7 @@ class TestSessionController(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_login_success_in_session(self):
+    def test_login_success_user_already_in_session(self):
         app = create_test_app()
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
@@ -1214,6 +1216,35 @@ class TestSessionController(unittest.TestCase):
             })
             # assert login okay b/c of session
             self.assertTrue(login)
+            db.session.remove()
+            db.drop_all()
+            
+    def test_login_then_test_user_still_in_session(self):
+        app = create_test_app()
+        with app.test_request_context('/login', method='POST'):
+            # add route to hit
+            @app.route('/test-login', methods=['GET', 'POST'])
+            def testing_route():
+                print('vars',vars(session))
+                if not session[self.COMBINE_DATA['username']]:
+                    print('not in session')
+                    return 404
+                print('in session')
+                return 200
+                
+            db.init_app(app)
+            # register test user
+            user = users_controller.register_user(self.COMBINE_DATA)
+            # assert registered success
+            self.assertTrue(user)
+            # login
+            login = session_controller.login(session, self.COMBINE_DATA)
+            # check login okay
+            self.assertTrue(login)
+            # try to call route where login is neccessary
+            with app.test_client() as c:
+                response = c.get('/test-login')
+                self.assertEqual(response.status_code, 200)
             db.session.remove()
             db.drop_all()
 
