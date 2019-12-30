@@ -24,9 +24,11 @@ def login(current_session, parsedJsonCredentials):
                 # find user in DB
                 query = user.query.filter_by(
                     username=parsedJsonCredentials['username']).first()
+                print('query', query)
                 # check password matches DB password
                 matches = utils.check_hashed_password(
                     parsedJsonCredentials['password'], query.password)
+                print('match', matches)
                 # if match PW return T
                 if matches:
                     if os.environ['LOGS'] != 'off':

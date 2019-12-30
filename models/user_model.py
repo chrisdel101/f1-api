@@ -12,8 +12,8 @@ _slugify.separator = '_'
 
 class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, unique=True)
-    username = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
+    username = db.Column(db.String(255), unique=True, nullable=False)
+    password = db.Column(db.Binary(), nullable=False)
     driver_data = db.Column(db.PickleType)
     team_data = db.Column(db.PickleType)
 
@@ -40,7 +40,10 @@ class User(db.Model):
             d = cls()
             d.id = sender_id
             d.username = data.get('username')
-            d.password = utils.hash_password(data.get('password'))
+            # hash password
+            password = utils.hash_password(data.get('password'))
+            print('PASSWORD', password)
+            d.password = password
             if os.environ['LOGS'] != 'off':
                 print('new user', d)
             return d

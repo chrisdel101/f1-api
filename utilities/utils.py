@@ -147,12 +147,20 @@ def log_None_values(dict_to_log):
 
 # hash password before storing
 def hash_password(password):
-    password = bytes(password, encoding='utf-8')
-    return bcrypt.hashpw(password, bcrypt.gensalt())
+    # password = bytes(password, encoding='utf-8')
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 
 # return T if matches else F
 def check_hashed_password(password, hashed):
-    # re-encode PW before checking
-    password = bytes(password, encoding='utf-8')
-    return bcrypt.checkpw(password, hashed)
+    try:
+        # re-encode PW before checking
+        password = bytes(password, encoding='utf-8')
+        # hashed = bytes(hashed, encoding='utf-8')
+        # print(type(password))
+        # print(type(hashed))
+        # password = password.decode('utf-8')
+        # print('PASS', password)
+        return bcrypt.checkpw(password, hashed)
+    except Exception as e:
+        print('error in check_hashed_password', e)
