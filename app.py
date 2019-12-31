@@ -1,9 +1,9 @@
+from flask_login import LoginManager
 from controllers import drivers_controller, teams_controller, users_controller, session_controller
 from utilities import scraper
-from models import driver_model, team_model
+from models import driver_model, team_model, user_model
 from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_migrate import Migrate
 import json
 from utilities import utils
@@ -16,6 +16,7 @@ from collections import namedtuple
 
 def create_app():
     app = Flask(__name__)
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
         app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
@@ -39,20 +40,26 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
     db = SQLAlchemy(app)
 
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     return user_model.User.get(user_id)
+
     return {
         'app': app,
         'db': db
     }
 
 
+login_manager = LoginManager()
 app = create_app()['app']
 db = create_app()['db']
 migrate = Migrate(app, db)
-login_manager = LoginManager(app)
+login_manager.init_app(app)
 
 
 @login_manager.user_loader
 def load_user(user_id):
+    print('INNER')
     return User.get(user_id)
 
 

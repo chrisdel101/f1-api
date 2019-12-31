@@ -2,7 +2,7 @@ from models import user_model
 from utilities import utils
 import flask
 from flask import escape
-from flask_login import login_user
+from flask_login import login_user, current_user
 import bcrypt
 import os
 
@@ -36,11 +36,14 @@ def login(current_session, parsedJsonCredentials):
                     if os.environ['LOGS'] != 'off':
                         print('user exists and PW success. login success')
                     # login user
-                    login_user(user)
-                    # authenticate user
-                    user.is_authenticated = True
-                    print('Logged in successfully.', user.is_active)
-                    return matches
+                    try:
+                        login_user(user)
+                        # authenticate user
+                        # user.is_authenticated = True
+                        print('Logged in successfully.', current_user.username)
+                        return matches
+                    except Exception as e:
+                        print('error in inner e', e)
                 # if not match return F
                 else:
                     if os.environ['LOGS'] != 'off':

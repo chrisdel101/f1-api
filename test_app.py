@@ -1199,11 +1199,11 @@ class TestSessionController(unittest.TestCase):
             login = session_controller.login(session, self.COMBINE_DATA)
             @login_manager.user_loader
             def load_user(user_id):
-                return User.get(self.ID)
-            query = user.query.filter_by(
+                return user_model.User.get(self.ID)
+            query = user_model.User.query.filter_by(
                     id=self.ID).first()
-            print(query)
-            print(current_user.is_active)
+            print('test query', query)
+            print(vars(current_user))
             # assert login okay
             self.assertTrue(login)
             db.session.remove()

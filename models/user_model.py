@@ -1,24 +1,16 @@
-from sqlalchemy.orm import validates
 import os
 from database import db
-from sqlalchemy import text
 import models
 from utilities import utils
-from slugify import slugify, Slugify
-_slugify = Slugify()
-_slugify = Slugify(to_lower=True)
-_slugify.separator = '_'
+from flask_login import UserMixin
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.BigInteger, primary_key=True, unique=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.LargeBinary(), nullable=False)
     driver_data = db.Column(db.PickleType)
     team_data = db.Column(db.PickleType)
-    is_authenticated = db.Column(db.Boolean, default=False)
-    is_active = db.Column(db.Boolean, default=True)
-    is_anonymous = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
@@ -55,7 +47,7 @@ class User(db.Model):
             raise e
 
     def get_id(self):
-        user_id = self.id.encode('utf-b')
+        user_id = self.id.encode('utf-8')
         return user_id
 
     def encode_auth_token(self, user_id):
