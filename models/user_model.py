@@ -47,7 +47,7 @@ class User(UserMixin, db.Model):
             raise e
 
     def get_id(self):
-        user_id = self.id.encode('utf-8')
+        user_id = str(self.id).encode('utf-8')
         return user_id
 
     def encode_auth_token(self, user_id):

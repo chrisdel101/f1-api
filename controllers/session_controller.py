@@ -37,6 +37,7 @@ def login(current_session, parsedJsonCredentials):
                         print('user exists and PW success. login success')
                     # login user
                     try:
+                        print('USER', user)
                         login_user(user)
                         # authenticate user
                         # user.is_authenticated = True
