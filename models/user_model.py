@@ -46,10 +46,6 @@ class User(UserMixin, db.Model):
             print('user new error', e)
             raise e
 
-    def get_id(self):
-        user_id = str(self.id).encode('utf-8')
-        return user_id
-
     def encode_auth_token(self, user_id):
         """
         Generates the Auth Token

@@ -34,17 +34,16 @@ def login(current_session, parsedJsonCredentials):
                 # if match PW return T
                 if matches:
                     if os.environ['LOGS'] != 'off':
-                        print('user exists and PW success. login success')
+                        print('user exists and PW success.')
                     # login user
                     try:
-                        print('USER', user)
+                        # flask-login
                         login_user(user)
-                        # authenticate user
-                        # user.is_authenticated = True
-                        print('Logged in successfully.', current_user.username)
-                        return matches
+                        print('Logged in successfully:', current_user.username)
+                        return current_session
                     except Exception as e:
                         print('error in inner e', e)
+                        raise e
                 # if not match return F
                 else:
                     if os.environ['LOGS'] != 'off':

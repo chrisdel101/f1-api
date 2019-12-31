@@ -1,4 +1,4 @@
-from flask import Flask, session
+from flask import Flask, session, make_response 
 import sqlite3
 import flask
 import os
@@ -14,7 +14,7 @@ from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
 import flask_login
-from flask_login import current_user, login_manager, LoginManager
+from flask_login import current_user, login_manager, LoginManager, login_required
 
 
 # https://stackoverflow.com/a/50536837/5972531
@@ -40,6 +40,14 @@ def create_test_app():
         if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
             setup_testing_environment()
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+         # @login_manager.user_loader
+            # def load_user(user_id):
+            #     user_id = str(SELF.ID).encode('utf-8')
+            #     return user_model.User.get(self.ID)
+            # query = user_model.User.query.filter_by(
+            #         id=self.ID).first()
+            # print('user', user.is_active())
+            # print('current user', current_user)
         return app
     except Exception as e:
         print('Error in create_test_app', e)
@@ -1152,9 +1160,9 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
              # register test user
-            user = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register_user(self.COMBINE_DATA)
             # assert registered success
-            self.assertTrue(user)
+            self.assertTrue(is_registred)
             # attemp login wrong PW
             login = session_controller.login(session, {
                 'id':1111111,
@@ -1171,9 +1179,9 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
              # register test user
-            user = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register_user(self.COMBINE_DATA)
             # assert registered success
-            self.assertTrue(user)
+            self.assertTrue(is_registred)
             # attemp login wrong username
             login = session_controller.login(session, {
                 'id':1111111,
@@ -1184,29 +1192,19 @@ class TestSessionController(unittest.TestCase):
             self.assertFalse(login)
             db.session.remove()
             db.drop_all()
-
+    # tests login overall login funcionality inc authorization
     def test_login_success_w_password_username(self):
         app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             # register test user
-            user = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register_user(self.COMBINE_DATA)
             # assert registered success
-            self.assertTrue(user)
+            self.assertTrue(is_registred)
             # attempt login
-            login = session_controller.login(session, self.COMBINE_DATA)
-            @login_manager.user_loader
-            def load_user(user_id):
-                user_id = str(SELF.ID).encode('utf-8')
-                return user_model.User.get(self.ID)
-            query = user_model.User.query.filter_by(
-                    id=self.ID).first()
-            print('test query', query)
-            print(current_user.username)
+            is_logged = session_controller.login(session, self.COMBINE_DATA)
             # assert login okay
-            self.assertTrue(login)
+            self.assertTrue(is_logged)
             db.session.remove()
             db.drop_all()
 
@@ -1215,9 +1213,9 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             # register test user
-            user = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register_user(self.COMBINE_DATA)
             # assert registered success
-            self.assertTrue(user)
+            self.assertTrue(is_registred)
             # add user to session
             session[self.COMBINE_DATA['username']] = self.COMBINE_DATA['username']
             # attempt login with wrong password - tests it takes correct path inside func
@@ -1233,26 +1231,38 @@ class TestSessionController(unittest.TestCase):
             
     def test_login_then_test_user_still_in_session(self):
         app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
+            db.init_app(app)
+            @login_manager.user_loader
+            # login loader
+            def load_user(user_id):
+                print('====HERE====')
+                return user_model.User.get(self.ID)
             # add route to hit
             @app.route('/test-login', methods=['GET', 'POST'])
+            # @login_required
             def testing_route():
-                print('vars',vars(session))
-                if not session[self.COMBINE_DATA['username']]:
-                    print('not in session')
-                    return 404
+                print('+++current user++++', current_user.username)
                 print('in session')
-                return 200
-                
-            db.init_app(app)
+                res = make_response()
+                res.status_code = 200
+                return res
+            # query = user_model.User.query.filter_by(
+            #         id=self.ID).first()
+            # print('user', user.is_active())
+            
             # register test user
-            user = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register_user(self.COMBINE_DATA)
             # assert registered success
-            self.assertTrue(user)
+            self.assertTrue(is_registred)
             # login
             login = session_controller.login(session, self.COMBINE_DATA)
             # check login okay
             self.assertTrue(login)
+            self.assertEqual(current_user.username, self.DATA['username'])
+            # print('+++current user++++', current_user.username)
             # try to call route where login is neccessary
             with app.test_client() as c:
                 response = c.get('/test-login')

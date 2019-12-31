@@ -1,17 +1,15 @@
-from flask_login import LoginManager
+import json
+import os
+import psycopg2
+import scraper_runner
+from flask_login import LoginManager, current_user, login_required
 from controllers import drivers_controller, teams_controller, users_controller, session_controller
 from utilities import scraper
 from models import driver_model, team_model, user_model
 from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-import json
 from utilities import utils
-import scraper_runner
-import os
-import psycopg2
-import json
-from collections import namedtuple
 
 
 def create_app():
@@ -93,12 +91,13 @@ def testing_route():
     # return res
 
 
-@app.route('/test-logged-in', methods=['GET', 'POST'])
+@app.route('/test-login', methods=['GET', 'POST'])
+@login_required
 def testing_login():
-    # pass
-    # res = make_response()
-    print('res', res)
-    # return res
+    print('+++current user++++', current_user.username)
+    res = make_response()
+    res.status_code = 200
+    return res
 
 
 @app.route('/drivers')
@@ -157,7 +156,9 @@ def login():
             return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
         else:
             print('bottom', request.data)
-            return session_controller.login(session, parsedJsonCredentials)
+            temp = session_controller.login(session, parsedJsonCredentials)
+            session = temp
+            return "complete"
     except Exception as e:
         print('error in login route', e)
         return e
