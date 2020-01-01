@@ -3,6 +3,8 @@ from database import db
 import models
 from utilities import utils
 from flask_login import UserMixin
+import jwt
+import datetime
 
 
 class User(UserMixin, db.Model):
@@ -47,10 +49,6 @@ class User(UserMixin, db.Model):
             raise e
 
     def encode_auth_token(self, user_id):
-        """
-        Generates the Auth Token
-        :return: string
-        """
         try:
             payload = {
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
@@ -59,12 +57,26 @@ class User(UserMixin, db.Model):
             }
             return jwt.encode(
                 payload,
-                app.config.get('SECRET_KEY'),
+                os.environ['SECRET_KEY'],
                 algorithm='HS256'
             )
         except Exception as e:
             # not working propely
             print("Error in encode_auth_token", e)
+            raise e
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        try:
+            payload = jwt.decode(
+                auth_token, os.environ['SECRET_KEY'], algorithms='HS256')
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            print('Signature expired. Please log in again.')
+            return 'Signature expired. Please log in again.'
+        except jwt.InvalidTokenError:
+            print('Invalid token. Please log in again.')
+            return 'Invalid token. Please log in again.'
 
     def insert(self):
         try:

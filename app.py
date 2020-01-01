@@ -147,29 +147,28 @@ def all():
 def login():
     try:
         if request.method == 'GET':
-            print('here')
+            print('GET')
             return flask.render_template('login.jinja')
         # print('REQ+++', request.data)
          # hardcode ID for now - format for browser test
-        parsedJsonCredentials = {
-            'id': 1234567891012983,
-            'username': request.form.get('username'),
-            'password': request.form.get('password')
-        }
-        # parsedJsonCredentials = request.get_json()
-        # # print('below', request.data)
-        # # error if not json
-        # if not request.is_json or not parsedJsonCredentials:
-        #     print('Error in /login json')
-        #     return TypeError('Error in /login json. Must be json.')
-        # if parsedJsonCredentials['username'] in session:
-        #     print('Logged in as %s' %
-        #           escape(session[parsedJsonCredentials['username']]))
-        #     return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
-        #     # if not logged in authenticate
-        # else:
-        print('bottom', parsedJsonCredentials)
-        session_controller.login(parsedJsonCredentials)
+        # parsedJsonCredentials = {
+        #     'id': 1234567891012983,
+        #     'username': request.form.get('username'),
+        #     'password': request.form.get('password')
+        # }
+        parsedJsonCredentials = request.get_json()
+        # error if not json
+        if not request.is_json or not parsedJsonCredentials:
+            print('Error in /login json')
+            return TypeError('Error in /login json. Must be json.')
+        if parsedJsonCredentials['username'] in session:
+            print('Logged in as %s' %
+                  escape(session[parsedJsonCredentials['username']]))
+            return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
+            # if not logged in authenticate
+        else:
+            print('bottom', parsedJsonCredentials)
+            session_controller.login(parsedJsonCredentials)
         return "complete\n"
     except Exception as e:
         print('error in login route', e)

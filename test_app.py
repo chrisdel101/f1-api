@@ -1134,6 +1134,34 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
+    def test_encode_auth_token(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            db.session.add(user)
+            db.session.commit()
+            auth_token = user.encode_auth_token(user.id)
+            print(auth_token, 'AUTH')
+            self.assertTrue(isinstance(auth_token, bytes))
+            db.session.remove()
+            db.drop_all()
+
+    def test_decode_auth_token(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            db.session.add(user)
+            db.session.commit()
+            auth_token = user.encode_auth_token(user.id)
+            self.assertTrue(isinstance(auth_token, bytes))
+            # should decode to user ID
+            self.assertTrue(user_model.User.decode_auth_token(auth_token) == self.I)
+            db.session.remove()
+            db.drop_all()
+
+
 class TestSessionController(unittest.TestCase):
     # use test_request_context https://flask.palletsprojects.com/en/1.1.x/quickstart/#context-locals
     ID = 1111111111
