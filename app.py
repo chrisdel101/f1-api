@@ -178,6 +178,7 @@ def login():
 @app.route('/register', methods=['POST'])
 def register():
     parsedData = request.get_json(force=True)
+    print(parsedData)
     if not request.is_json or not parsedData:
         print('Error in /login json')
         return TypeError('Error in /register json. Must be json.')

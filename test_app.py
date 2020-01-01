@@ -787,31 +787,29 @@ class TestUserController(unittest.TestCase):
                 "password":"password1"
             }
     # test combination of user new/insert
-    def test_register_user_success(self):
+    def test_register_success(self):
         app = create_test_app()
-        with app.app_context():
+        # with app.app_context():
+        with app.test_request_context('/register', method='POST'):
             db.init_app(app)
             # register new user
-            user = users_controller.register_user({
+            res = users_controller.register({
                 'id':self.ID, 
                 'username':self.DATA['username'],
                 'password': self.DATA['password']
             })
-            # confirm user exists
-            exists = user.exists(user.id)
-            self.assertTrue(exists)
-            # and in db
-            assert user in db.session
+            # check correct status code            
+            self.assertEqual(res[1], 201)
             db.session.remove()
             db.drop_all()
 
     # test error raised when no id
-    def test_register_user_fail_id(self):
+    def test_register_fail_id(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
             # raise error when ID is none
-            self.assertRaises(ValueError,users_controller.register_user,{
+            self.assertRaises(ValueError,users_controller.register,{
                 'id': None, 
                 'username':self.DATA['username'],
                 'password': self.DATA['password']
@@ -819,54 +817,40 @@ class TestUserController(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_register_user_fail_username(self):
+    def test_register_fail_username(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
             # raise error when username is none
-            self.assertRaises(ValueError,users_controller.register_user,{
+            self.assertRaises(ValueError,users_controller.register,{
                 'id': self.ID, 
                 'username':None,
                 'password': self.DATA['password']
             })
             db.session.remove()
             db.drop_all()
-
-    def test_handle_user(self):
+            
+    def test_register_fail_already_exists(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            user = users_controller.handle_user(self.DATA)
-            self.assertEqual(user.driver_data, self.DATA['driver_data'] )
-            self.assertEqual(user.id, self.DATA['id'] )
-            assert user in db.session
-             # drop db
+            # raise error when username is none
+            res1 = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            # check correct status code on first entry          
+            self.assertEqual(res1[1], 201)
+            res2  = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            print('res2', res2)
             db.session.remove()
             db.drop_all()
-    
-    def test_filter_user_data_removed(self):
-        keys_allowed = ['driver_data', 'team_data', 'user_id']
-        data_copy = self.DATA.copy()
-        # confirm not extract data
-        self.assertNotIn('hello', data_copy)
-        # check it was added okay
-        data_copy['hello'] = 'hello'
-        self.assertIn('hello', data_copy)
-        # add new key to data
-        print()
-        new_data = users_controller._filter_user_data(data_copy, keys_allowed)
-        self.assertNotIn('hello', new_data)
 
-    def test_filter_user_data_added(self):
-        keys_allowed = ['driver_data', 'team_data', 'user_id', 'hello']
-        data_copy = self.DATA.copy()
-        # confirm not extract data
-        self.assertNotIn('hello', data_copy)
-        # check it was added okay
-        data_copy['hello'] = 'hello'
-        self.assertIn('hello', data_copy)
-        new_data = users_controller._filter_user_data(data_copy, keys_allowed)
-        self.assertIn('hello', new_data)
     
 class TestUserModel(unittest.TestCase):
     # --------- UTILS FUNCS
@@ -1157,7 +1141,7 @@ class TestUserModel(unittest.TestCase):
             auth_token = user.encode_auth_token(user.id)
             self.assertTrue(isinstance(auth_token, bytes))
             # should decode to user ID
-            self.assertTrue(user_model.User.decode_auth_token(auth_token) == self.I)
+            self.assertTrue(user_model.User.decode_auth_token(auth_token) == self.ID)
             db.session.remove()
             db.drop_all()
 
@@ -1188,7 +1172,7 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
              # register test user
-            is_registred = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(is_registred)
             # attemp login wrong PW
@@ -1207,7 +1191,7 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
              # register test user
-            is_registred = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(is_registred)
             # attemp login wrong username
@@ -1226,7 +1210,7 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             # register test user
-            is_registred = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(is_registred)
             # attempt login
@@ -1241,7 +1225,7 @@ class TestSessionController(unittest.TestCase):
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             # register test user
-            is_registred = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(is_registred)
             # add user to session
@@ -1284,7 +1268,7 @@ class TestSessionController(unittest.TestCase):
             # print('user', user.is_active())
             
             # register test user
-            is_registred = users_controller.register_user(self.COMBINE_DATA)
+            is_registred = users_controller.register(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(is_registred)
             # login
