@@ -1239,8 +1239,9 @@ class TestSessionController(unittest.TestCase):
             def load_user(user_id):
                 user = user_model.User.query.filter_by(
                     id=user_id).first()
-                print('QQQ', query)
+                print('QQQ', user)
                 return user
+            return
             # add route to hit
             @app.route('/test-login', methods=['GET', 'POST'])
                 # @login_required
@@ -1259,7 +1260,7 @@ class TestSessionController(unittest.TestCase):
             # assert registered success
             self.assertTrue(is_registred)
             # login
-            login = session_controller.login(session, self.COMBINE_DATA)
+            login = session_controller.login(self.COMBINE_DATA)
             # check login okay
             self.assertTrue(login)
             # self.assertEqual(current_user.username, self.DATA['username'])

@@ -11,7 +11,6 @@ import os
 def login(parsedJsonCredentials):
     try:
         # create temp user obj
-        print('here')
         user = user_model.User.new(
             parsedJsonCredentials['id'], parsedJsonCredentials)
         # check if user obj exists in DB

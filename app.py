@@ -60,7 +60,7 @@ login_manager.init_app(app)
 def load_user(user_id):
     user = user_model.User.query.filter_by(
         id=user_id).first()
-    print('QQQ', user)
+    print('USER_LOADER', user)
     return user
 
 
@@ -143,79 +143,6 @@ def all():
     return 'Complete\n'
 
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     try:
-#         if request.method == 'GET':
-#             print('here')
-#             return flask.render_template('login.jinja')
-#         print('REQ+++', request)
-#         form_data = {
-#             'username': request.form.get('username'),
-#             'password': request.form.get('password')
-#         }
-#         print('FORM', form_data)
-#         # return form_data
-#         # error if not json
-#         if form_data['username'] in session:
-#             print('Logged in as %s' %
-#                   escape(session[form_data['username']]))
-#             return 'Logged in as %s' % escape(session[form_data['username']])
-#             # if not logged in authenticate
-#         else:
-#             print('bottom', request.data)
-#             try:
-#                 # lookup id to create instance
-#                 user_id = user_model.User.query.filter_by(
-#                     username=form_data['username']).first().id
-#                 # create temp user obj
-#                 user = user_model.User.new(
-#                     user_id, form_data)
-#                 # print('USER==', user)
-#                 # check if user obj exists in DB
-#                 if user.exists(form_data['username'], 'username'):
-#                     # find user in DB
-#                     query = user.query.filter_by(
-#                         username=form_data['username']).first()
-#                     print('query', query)
-#                     # check password matches DB password
-#                     matches = utils.check_hashed_password(
-#                         form_data['password'], query.password)
-#                     print('match', matches)
-#                     # if match PW return T
-#                     if matches:
-#                         if os.environ['LOGS'] != 'off':
-#                             print('user exists and PW success.')
-#                         # login user
-#                         try:
-#                             # flask-login
-#                             login_user(user, remember=True)
-#                             flask.flash('Logged in successfully.')
-#                             print('Logged in successfully:',
-#                                   current_user.username)
-#                             return 'matches'
-#                         except Exception as e:
-#                             print('error in inner e', e)
-#                             raise e
-#                     # if not match return F
-#                     else:
-#                         if os.environ['LOGS'] != 'off':
-#                             print(
-#                                 'user exists but PW fails. login failed')
-#                         return matches
-#                 else:
-#                     if os.environ['LOGS'] != 'off':
-#                         print('username does not exist. login failed')
-#                     return False
-#             except Exception as e:
-#                 print('error in login', e)
-#                 raise e
-
-#             return "complete"
-#     except Exception as e:
-#         print('error in login route', e)
-#         return e
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     try:
@@ -223,17 +150,27 @@ def login():
             print('here')
             return flask.render_template('login.jinja')
         # print('REQ+++', request.data)
-        # parsedJsonCredentials = request.get_json()
+         # hardcode ID for now - format for browser test
         parsedJsonCredentials = {
-            # hardcode ID for now
             'id': 1234567891012983,
             'username': request.form.get('username'),
             'password': request.form.get('password')
         }
+        # parsedJsonCredentials = request.get_json()
+        # # print('below', request.data)
+        # # error if not json
+        # if not request.is_json or not parsedJsonCredentials:
+        #     print('Error in /login json')
+        #     return TypeError('Error in /login json. Must be json.')
+        # if parsedJsonCredentials['username'] in session:
+        #     print('Logged in as %s' %
+        #           escape(session[parsedJsonCredentials['username']]))
+        #     return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
+        #     # if not logged in authenticate
+        # else:
         print('bottom', parsedJsonCredentials)
         session_controller.login(parsedJsonCredentials)
-
-        return "complete"
+        return "complete\n"
     except Exception as e:
         print('error in login route', e)
         return e
