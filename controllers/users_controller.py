@@ -10,12 +10,11 @@ KEYS = ['drivers_arr', 'teams_arr', 'user_id']
 # registers user to db -returns response and code
 def register(parsedData):
     try:
-        # create temp user obj
-        print(parsedData)
-        exists = user_model.User.exists(parsedData['id'])
-        print('EX', exists)
-        user = user_model.User.new(parsedData['id'], parsedData)
-        if user:
+        # if user with this id exists - no instance
+        exists_on_class = user_model.User.exists_on_class(parsedData['id'])
+        if not exists_on_class:
+            # create temp user obj
+            user = user_model.User.new(parsedData['id'], parsedData)
             user.insert()
             auth_token = user.encode_auth_token(user.id)
             responseObject = {

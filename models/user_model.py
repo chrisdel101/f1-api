@@ -5,6 +5,8 @@ from utilities import utils
 from flask_login import UserMixin
 import jwt
 import datetime
+import sqlite3
+import sqlalchemy
 
 
 class User(UserMixin, db.Model):
@@ -130,6 +132,28 @@ class User(UserMixin, db.Model):
             return False
         except Exception as e:
             print("error in exists", e)
+
+    @classmethod
+    def exists_on_class(cls, lookup, lookup_type='id'):
+        try:
+            # with username
+            if lookup_type == 'username':
+                if cls.query.filter_by(username=lookup).first():
+                    return True
+            # default - with id
+            else:
+                if cls.query.filter_by(id=lookup).first():
+                    return True
+            return False
+        except sqlalchemy.exc.OperationalError as e:
+            print('no such table: user')
+            return False
+        except Exception as e:
+            print('an error in exists_on_class', e)
+            raise e
+
+        # except Exception as e:
+        #     print("error in exists", e)
 
     def as_dict(req):
         return {c.name: getattr(req, c.name) for c in req.__table__.columns}

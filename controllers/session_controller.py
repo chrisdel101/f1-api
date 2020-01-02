@@ -1,8 +1,8 @@
 from models import user_model
 from utilities import utils
 import flask
-from flask import escape
-from flask_login import login_user, current_user
+from flask import escape, make_response, jsonify
+from flask_login import LoginManager, current_user, login_required, login_user
 import bcrypt
 import os
 
@@ -33,9 +33,16 @@ def login(parsedJsonCredentials):
                     login_user(user, remember=True)
                     print('Logged in successfully:',
                           current_user.username)
-                    return matches
+                    auth_token = user.encode_auth_token(user.id)
+                    if auth_token:
+                        responseObject = {
+                            'status': 'success',
+                            'message': 'Successfully logged in.',
+                            'auth_token': auth_token.decode()
+                        }
+                    return make_response(jsonify(responseObject)), 200
                 except Exception as e:
-                    print('error in inner e', e)
+                    print('error in login inner e', e)
                     raise e
             # if not match return F
             else:

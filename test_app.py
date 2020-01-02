@@ -804,7 +804,7 @@ class TestUserController(unittest.TestCase):
             db.drop_all()
 
     # test error raised when no id
-    def test_register_fail_id(self):
+    def test_register_fail_no_id(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
@@ -817,7 +817,7 @@ class TestUserController(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_register_fail_username(self):
+    def test_register_fail_no_username(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
@@ -982,6 +982,35 @@ class TestUserModel(unittest.TestCase):
             self.assertTrue(exists)
             db.session.remove()
             db.drop_all()
+
+    # test user_on_class.exists() with id param
+    def test_user_exist_on_class_by_id(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            # check user.new works
+            self.assertEqual(user.id, self.ID)
+            self.assertEqual(user.username, self.DATA["username"])
+            # # insert new user
+            user.insert()
+            # # now check to ensure exists func works - id should match
+            exists = user_model.User.exists_on_class(user.id)
+            self.assertTrue(exists)
+            db.session.remove()
+            db.drop_all()
+
+    # test user_on_class.exists() fails
+    def test_user_exist_on_class_fails_user_not_exist(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # check is a user exists - no instance
+            exists = user_model.User.exists_on_class(self.ID)
+            self.assertFalse(exists)
+            db.session.remove()
+            db.drop_all()
+
     # fails on unique constraint
     def test_users_insert_fail_same_id(self):
         app = create_test_app()
@@ -1160,15 +1189,19 @@ class TestSessionController(unittest.TestCase):
 
     def test_login_fail_unregistered_user(self):
         app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
-            logged_in = session_controller.login(session, self.COMBINE_DATA)
+            logged_in = session_controller.login(self.COMBINE_DATA)
             self.assertFalse(logged_in)
             db.session.remove()
             db.drop_all()
 
     def test_login_fail_incorrect_password(self):
         app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
              # register test user
@@ -1176,7 +1209,7 @@ class TestSessionController(unittest.TestCase):
             # assert registered success
             self.assertTrue(is_registred)
             # attemp login wrong PW
-            login = session_controller.login(session, {
+            login = session_controller.login({
                 'id':1111111,
                 'username':'username1',
                 'password': 'some-wrong-password'
@@ -1188,6 +1221,8 @@ class TestSessionController(unittest.TestCase):
 
     def test_login_fail_incorrect_username(self):
         app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
              # register test user
@@ -1195,7 +1230,7 @@ class TestSessionController(unittest.TestCase):
             # assert registered success
             self.assertTrue(is_registred)
             # attemp login wrong username
-            login = session_controller.login(session, {
+            login = session_controller.login({
                 'id':1111111,
                 'username':'username2',
                 'password': 'some-password'
@@ -1207,40 +1242,22 @@ class TestSessionController(unittest.TestCase):
     # tests login overall login funcionality inc authorization
     def test_login_success_w_password_username(self):
         app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
         with app.test_request_context('/login', method='POST'):
             db.init_app(app)
             # register test user
             is_registred = users_controller.register(self.COMBINE_DATA)
+            print('IS', is_registred)
             # assert registered success
             self.assertTrue(is_registred)
             # attempt login
-            is_logged = session_controller.login(session, self.COMBINE_DATA)
-            # assert login okay
-            self.assertTrue(is_logged)
+            is_logged = session_controller.login(self.COMBINE_DATA)
+            # check 200 status
+            self.assertEqual(is_logged[1], 200)
             db.session.remove()
             db.drop_all()
 
-    def test_login_success_user_already_in_session(self):
-        app = create_test_app()
-        with app.test_request_context('/login', method='POST'):
-            db.init_app(app)
-            # register test user
-            is_registred = users_controller.register(self.COMBINE_DATA)
-            # assert registered success
-            self.assertTrue(is_registred)
-            # add user to session
-            session[self.COMBINE_DATA['username']] = self.COMBINE_DATA['username']
-            # attempt login with wrong password - tests it takes correct path inside func
-            login = session_controller.login(session, {
-                'id':1111111,
-                'username':'username1',
-                'password': 'some-wrong-password'
-            })
-            # assert login okay b/c of session
-            self.assertTrue(login)
-            db.session.remove()
-            db.drop_all()
-            
     def test_login_then_test_user_still_in_session(self):
         app = create_test_app()
         login_manager = LoginManager()
@@ -1253,7 +1270,6 @@ class TestSessionController(unittest.TestCase):
                     id=user_id).first()
                 print('QQQ', user)
                 return user
-            return
             # add route to hit
             @app.route('/test-login', methods=['GET', 'POST'])
                 # @login_required
