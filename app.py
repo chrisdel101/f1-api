@@ -185,6 +185,13 @@ def register():
     return users_controller.register_user(parsedData)
 
 
+@app.route('/user-status')
+def status():
+    auth_header = request.headers.get('Authorization')
+    print('auth', auth_header)
+    # return users_controller.status(auth_header)
+
+
 @app.route('/user', methods=['GET', 'POST'])
 def udpate_user():
     if request.method == 'GET':

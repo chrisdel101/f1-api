@@ -33,14 +33,15 @@ def login(parsedJsonCredentials):
                     login_user(user, remember=True)
                     print('Logged in successfully:',
                           current_user.username)
+                    # make auth token
                     auth_token = user.encode_auth_token(user.id)
                     if auth_token:
                         responseObject = {
                             'status': 'success',
-                            'message': 'Successfully logged in.',
+                            'message': 'logged in',
                             'auth_token': auth_token.decode()
                         }
-                    return make_response(jsonify(responseObject)), 200
+                    return make_response(jsonify(responseObject), 200)
                 except Exception as e:
                     print('error in login inner e', e)
                     raise e

@@ -1,4 +1,5 @@
-from flask import Flask, session, make_response 
+from flask import Flask, session, make_response
+import json
 import sqlite3
 import flask
 import os
@@ -786,6 +787,8 @@ class TestUserController(unittest.TestCase):
                 "username":"username1",
                 "password":"password1"
             }
+    COMBINE_DATA = DATA
+    COMBINE_DATA['id'] = ID
     # test combination of user new/insert
     def test_register_success(self):
         app = create_test_app()
@@ -850,6 +853,26 @@ class TestUserController(unittest.TestCase):
             print('res2', res2)
             db.session.remove()
             db.drop_all()
+
+    def test_user_status(self):
+        app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
+        with app.test_request_context('/user-status', method='GET'):
+            db.init_app(app)
+            res = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            login_res = session_controller.login(self.COMBINE_DATA)
+            print(login_res)
+            # check registerd ok
+            self.assertEqual(res.status_code, 201)
+            res_data = json.loads(res.get_data())
+            auth_token = make_response(res_data['auth_token'])
+            print(auth_token.data)
+            users_controller.status(auth_token)
 
     
 class TestUserModel(unittest.TestCase):
@@ -1254,53 +1277,18 @@ class TestSessionController(unittest.TestCase):
             # attempt login
             is_logged = session_controller.login(self.COMBINE_DATA)
             # check 200 status
-            self.assertEqual(is_logged[1], 200)
-            db.session.remove()
-            db.drop_all()
-
-    def test_login_then_test_user_still_in_session(self):
-        app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', method='POST'):
-            db.init_app(app)
-            @login_manager.user_loader
-            def load_user(user_id):
-                user = user_model.User.query.filter_by(
-                    id=user_id).first()
-                print('QQQ', user)
-                return user
-            # add route to hit
-            @app.route('/test-login', methods=['GET', 'POST'])
-                # @login_required
-            def testing_route():
-                print('+++current user++++', current_user.username)
-                print('in session')
-                res = make_response()
-                res.status_code = 200
-                return res
-            # query = user_model.User.query.filter_by(
-            #         id=self.ID).first()
-            # print('user', user.is_active())
-            
-            # register test user
             is_registred = users_controller.register(self.COMBINE_DATA)
             # assert registered success
             self.assertTrue(is_registred)
-            # login
-            login = session_controller.login(self.COMBINE_DATA)
+            # login response
+            res = session_controller.login(self.COMBINE_DATA)
             # check login okay
-            self.assertTrue(login)
-            # self.assertEqual(current_user.username, self.DATA['username'])
-            print('+++current user++++', current_user.username)
-            # try to call route where login is neccessary
-            with app.test_client() as c:
-                response = c.get('/test-login')
-                self.assertEqual(response.status_code, 200)
+            res_data = json.loads(res.get_data())
+            self.assertEqual(res_data['status'], 'success')
+            self.assertEqual(res_data['message'], 'logged in')
+            self.assertEqual(res.status_code, 200)
             db.session.remove()
             db.drop_all()
-
-
     
 
 if __name__ == '__main__':

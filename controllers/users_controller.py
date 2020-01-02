@@ -1,13 +1,11 @@
 from models import user_model
-from utilities import utils
 from flask import make_response, jsonify
 import bcrypt
 import os
 
-KEYS = ['drivers_arr', 'teams_arr', 'user_id']
-
-
 # registers user to db -returns response and code
+
+
 def register(parsedData):
     try:
         # if user with this id exists - no instance
@@ -19,12 +17,12 @@ def register(parsedData):
             auth_token = user.encode_auth_token(user.id)
             responseObject = {
                 'status': 'success',
-                'message': 'Successfully registered.',
+                'message': 'registered',
                 'auth_token': auth_token.decode()
             }
             if os.environ['LOGS'] != 'off':
                 print('user registered okay')
-            return make_response((responseObject)), 201
+            return make_response(jsonify(responseObject), 201)
         else:
             if os.environ['LOGS'] != 'off':
                 print('user already exists')
@@ -32,7 +30,42 @@ def register(parsedData):
                 'status': 'fail',
                 'message': 'User already exists. Please Log in.',
             }
-            return make_response(jsonify(responseObject)), 202
+            return make_response(jsonify(responseObject), 202)
     except Exception as e:
         print('exception in user_controller.register', e)
         raise e
+
+
+def status(auth_header):
+    # get the auth token
+    if auth_header:
+        auth_token = str(auth_header.data).split(" ")
+    else:
+        auth_token = ''
+    print('auth', auth_header.data)
+    if auth_token:
+        resp = user_model.User.decode_auth_token(auth_token)
+        print('pre', resp)
+        if not isinstance(resp, str):
+            user = User.query.filter_by(id=resp).first()
+            responseObject = {
+                'status': 'success',
+                'data': {
+                    'user_id': user.id,
+                    'email': user.email,
+                    'admin': user.admin,
+                    'registered_on': user.registered_on
+                }
+            }
+            return make_response(jsonify(responseObject)), 200
+        responseObject = {
+            'status': 'fail',
+            'message': resp
+        }
+        return make_response(jsonify(responseObject)), 401
+    else:
+        responseObject = {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }
+        return make_response(jsonify(responseObject))
