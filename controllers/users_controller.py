@@ -17,7 +17,6 @@ def register(parsedData):
             user = user_model.User.new(parsedData['id'], parsedData)
             user.insert()
             auth_token = user.encode_auth_token(user.id)
-            print('DECODE', user_model.User.decode_auth_token(auth_token))
             responseObject = {
                 'status': 'success',
                 'message': 'registered',
@@ -39,6 +38,7 @@ def register(parsedData):
         raise e
 
 
+# takes a response or a byte string
 def status(auth_header):
     # if byte string type
     if type(auth_header) == 'bytes':
@@ -49,7 +49,6 @@ def status(auth_header):
     else:
         auth_token = ''
     if auth_token:
-        print('auth status', auth_header)
         resp = user_model.User.decode_auth_token(auth_token)
         if not isinstance(resp, str):
             user = user_model.User.query.filter_by(id=resp).first()
@@ -62,7 +61,7 @@ def status(auth_header):
                     # 'registered_on': user.registered_on
                 }
             }
-            return make_response(jsonify(responseObject)), 200
+            return make_response(jsonify(responseObject), 200)
         responseObject = {
             'status': 'fail',
             'message': resp

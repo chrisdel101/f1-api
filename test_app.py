@@ -854,28 +854,44 @@ class TestUserController(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_user_status(self):
+    def test_user_status_after_registration(self):
         app = create_test_app()
-        # login_manager = LoginManager()
-        # login_manager.init_app(app)
         with app.app_context():
             db.init_app(app)
-            # print(flask.request.path)
-            res = users_controller.register({
+            reg_res = users_controller.register({
                 'id':self.ID, 
                 'username':self.DATA['username'],
                 'password': self.DATA['password']
             })
-            # login_res = session_controller.login(self.COMBINE_DATA)
-            # print(login_res)
+            # check registered ok
+            self.assertEqual(reg_res.status_code, 201)
+            status_res = users_controller.status(reg_res)
+            self.assertEqual(status_res.status_code, 200)
+            self.assertEqual(json.loads(status_res.data)['status'],'success' )
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_status_after_login(self):
+        app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
+        with app.test_request_context('/login', 'POST'):
+            db.init_app(app)
+            # print(flask.request.path)
+            reg_res = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
             # check registerd ok
-            self.assertEqual(res.status_code, 201)
-            # res_data = json.loads(res.get_data())
-            # auth_token = bytes(res_data['auth_token'], encoding='utf-8')
-            # auth_token = 'Bearer ' + str(auth_token.data)
-            # print('auth', type(res) == flask.wrappers.Response)
-            # return
-            users_controller.status(res)
+            self.assertEqual(reg_res.status_code, 201)
+            login_res = session_controller.login(self.COMBINE_DATA)
+            # check login okay
+            self.assertEqual(login_res.status_code, 200)
+            status_res = users_controller.status(login_res)
+            # check status okay
+            self.assertEqual(status_res.status_code, 200)
+            self.assertEqual(json.loads(status_res.data)['status'],'success' )
 
     
 class TestUserModel(unittest.TestCase):

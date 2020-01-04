@@ -41,7 +41,6 @@ class User(UserMixin, db.Model):
             d.username = data.get('username')
             # hash password
             password = utils.hash_password(data.get('password'))
-            print('PASSWORD', password)
             d.password = password
             if os.environ['LOGS'] != 'off':
                 print('new user', d)
@@ -70,8 +69,6 @@ class User(UserMixin, db.Model):
     @staticmethod
     def decode_auth_token(auth_token):
         try:
-            print('TOKEN', type(auth_token))
-            print('TOKEN', auth_token)
             payload = jwt.decode(
                 auth_token, os.environ['SECRET_KEY'], algorithms='HS256')
             return payload['sub']
