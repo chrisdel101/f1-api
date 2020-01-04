@@ -776,124 +776,6 @@ class TestDriverController(unittest.TestCase):
             driver = drivers_controller.show_single_driver('some-random-name')
             self.assertEqual(driver, 'No Driver with that name')
 
-class TestUserController(unittest.TestCase):
-    # DATA = {
-    #     "driver_data": ["driver1", "driver2"],
-    #     "team_data": ["team1", "team2"],
-    #     "user_id": 2
-    # }
-    ID = 1111111111
-    DATA = {
-                "username":"username1",
-                "password":"password1"
-            }
-    COMBINE_DATA = DATA
-    COMBINE_DATA['id'] = ID
-    # test combination of user new/insert
-    def test_register_success(self):
-        app = create_test_app()
-        # with app.app_context():
-        with app.test_request_context('/register', method='POST'):
-            db.init_app(app)
-            # register new user
-            res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
-                'password': self.DATA['password']
-            })
-            # check correct status code            
-            self.assertEqual(res.status_code, 201)
-            db.session.remove()
-            db.drop_all()
-
-    # test error raised when no id
-    def test_register_fail_no_id(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            # raise error when ID is none
-            self.assertRaises(ValueError,users_controller.register,{
-                'id': None, 
-                'username':self.DATA['username'],
-                'password': self.DATA['password']
-            })
-            db.session.remove()
-            db.drop_all()
-
-    def test_register_fail_no_username(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            # raise error when username is none
-            self.assertRaises(ValueError,users_controller.register,{
-                'id': self.ID, 
-                'username':None,
-                'password': self.DATA['password']
-            })
-            db.session.remove()
-            db.drop_all()
-            
-    def test_register_fail_already_exists(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            # raise error when username is none
-            res1 = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
-                'password': self.DATA['password']
-            })
-            # check correct status code on first entry          
-            self.assertEqual(res1[1], 201)
-            res2  = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
-                'password': self.DATA['password']
-            })
-            print('res2', res2)
-            db.session.remove()
-            db.drop_all()
-
-    def test_user_status_after_registration(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            reg_res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
-                'password': self.DATA['password']
-            })
-            # check registered ok
-            self.assertEqual(reg_res.status_code, 201)
-            status_res = users_controller.status(reg_res)
-            self.assertEqual(status_res.status_code, 200)
-            self.assertEqual(json.loads(status_res.data)['status'],'success' )
-            db.session.remove()
-            db.drop_all()
-
-    def test_user_status_after_login(self):
-        app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', 'POST'):
-            db.init_app(app)
-            # print(flask.request.path)
-            reg_res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
-                'password': self.DATA['password']
-            })
-            # check registerd ok
-            self.assertEqual(reg_res.status_code, 201)
-            login_res = session_controller.login(self.COMBINE_DATA)
-            # check login okay
-            self.assertEqual(login_res.status_code, 200)
-            status_res = users_controller.status(login_res)
-            # check status okay
-            self.assertEqual(status_res.status_code, 200)
-            self.assertEqual(json.loads(status_res.data)['status'],'success' )
-
-    
 class TestUserModel(unittest.TestCase):
     # --------- UTILS FUNCS
     ID = 1111111111
@@ -1219,6 +1101,138 @@ class TestUserModel(unittest.TestCase):
             db.drop_all()
 
 
+class TestUserController(unittest.TestCase):
+    # DATA = {
+    #     "driver_data": ["driver1", "driver2"],
+    #     "team_data": ["team1", "team2"],
+    #     "user_id": 2
+    # }
+    ID = 1111111111
+    DATA = {
+                "username":"username1",
+                "password":"password1"
+            }
+    COMBINE_DATA = DATA
+    COMBINE_DATA['id'] = ID
+    # test combination of user new/insert
+    def test_register_success(self):
+        app = create_test_app()
+        # with app.app_context():
+        with app.test_request_context('/register', method='POST'):
+            db.init_app(app)
+            # register new user
+            res = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            # check correct status code            
+            self.assertEqual(res.status_code, 201)
+            db.session.remove()
+            db.drop_all()
+
+    # test error raised when no id
+    def test_register_fail_no_id(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # raise error when ID is none
+            self.assertRaises(ValueError,users_controller.register,{
+                'id': None, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            db.session.remove()
+            db.drop_all()
+
+    def test_register_fail_no_username(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # raise error when username is none
+            self.assertRaises(ValueError,users_controller.register,{
+                'id': self.ID, 
+                'username':None,
+                'password': self.DATA['password']
+            })
+            db.session.remove()
+            db.drop_all()
+            
+    def test_register_fail_already_exists(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # raise error when username is none
+            res1 = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            # check correct status code on first entry          
+            self.assertEqual(res1[1], 201)
+            res2  = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            print('res2', res2)
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_status_after_registration(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            reg_res = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            # check registered ok
+            self.assertEqual(reg_res.status_code, 201)
+            status_res = users_controller.status(reg_res)
+            self.assertEqual(status_res.status_code, 200)
+            self.assertEqual(json.loads(status_res.data)['status'],'success' )
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_status_after_login(self):
+        app = create_test_app()
+        login_manager = LoginManager()
+        login_manager.init_app(app)
+        with app.test_request_context('/login', 'POST'):
+            db.init_app(app)
+            # print(flask.request.path)
+            reg_res = users_controller.register({
+                'id':self.ID, 
+                'username':self.DATA['username'],
+                'password': self.DATA['password']
+            })
+            # check registerd ok
+            self.assertEqual(reg_res.status_code, 201)
+            login_res = session_controller.login(self.COMBINE_DATA)
+            # check login okay
+            self.assertEqual(login_res.status_code, 200)
+            status_res = users_controller.status(login_res)
+            # check status okay
+            self.assertEqual(status_res.status_code, 200)
+            self.assertEqual(json.loads(status_res.data)['status'],'success' )
+
+    
+    def test_login_fail_unregistered_user(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # reg_res = users_controller.register({
+            #     'id':self.ID, 
+            #     'username':self.DATA['username'],
+            #     'password': self.DATA['password']
+            # })
+            # self.assertEqual(reg_res.status_code, 201)
+            logged_in = session_controller.login(self.COMBINE_DATA)
+            self.assertFalse(logged_in)
+            db.session.remove()
+            db.drop_all()
 
 class TestSessionController(unittest.TestCase):
     # use test_request_context https://flask.palletsprojects.com/en/1.1.x/quickstart/#context-locals
@@ -1232,16 +1246,6 @@ class TestSessionController(unittest.TestCase):
     def create_test_user(self):
         return user_model.User.new(self.ID,self.DATA)   
 
-    def test_login_fail_unregistered_user(self):
-        app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', method='POST'):
-            db.init_app(app)
-            logged_in = session_controller.login(self.COMBINE_DATA)
-            self.assertFalse(logged_in)
-            db.session.remove()
-            db.drop_all()
 
     def test_login_fail_incorrect_password(self):
         app = create_test_app()

@@ -162,14 +162,9 @@ def login():
         if not parsedJsonCredentials:
             print('Error in /login json')
             return TypeError('Error in /login json. Must be json.')
-        if parsedJsonCredentials['username'] in session:
-            print('Logged in as %s' %
-                  escape(session[parsedJsonCredentials['username']]))
-            return 'Logged in as %s' % escape(session[parsedJsonCredentials['username']])
-            # if not logged in authenticate
-        else:
-            print('bottom', parsedJsonCredentials)
-            session_controller.login(parsedJsonCredentials)
+
+        print('bottom', parsedJsonCredentials)
+        users_controller.login(parsedJsonCredentials)
         return "complete\n"
     except Exception as e:
         print('error in login route', e)
