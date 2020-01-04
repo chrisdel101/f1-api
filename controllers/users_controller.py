@@ -39,10 +39,10 @@ def register(parsedData):
 def status(auth_header):
     # get the auth token
     if auth_header:
-        auth_token = str(auth_header.data).split(" ")
+        auth_token = str(auth_header).split(" ")
     else:
         auth_token = ''
-    print('auth', auth_header.data)
+    # print('auth', auth_header.data)
     if auth_token:
         resp = user_model.User.decode_auth_token(auth_token)
         print('pre', resp)
