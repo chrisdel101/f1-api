@@ -4,7 +4,7 @@ import psycopg2
 import scraper_runner
 import flask
 from flask_login import LoginManager, current_user, login_required, login_user
-from controllers import drivers_controller, teams_controller, users_controller, session_controller
+from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
 from models import driver_model, team_model, user_model
 from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape

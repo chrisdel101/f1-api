@@ -10,7 +10,7 @@ from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
 from utilities import utils
 from models import driver_model, team_model, user_model
-from controllers import drivers_controller, teams_controller, session_controller, users_controller
+from controllers import drivers_controller, teams_controller, users_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
@@ -1163,13 +1163,13 @@ class TestUserController(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             # raise error when username is none
-            res1 = users_controller.register({
+            reg_res = users_controller.register({
                 'id':self.ID, 
                 'username':self.DATA['username'],
                 'password': self.DATA['password']
             })
             # check correct status code on first entry          
-            self.assertEqual(res1[1], 201)
+            self.assertEqual(reg_res.status_code, 201)
             res2  = users_controller.register({
                 'id':self.ID, 
                 'username':self.DATA['username'],
@@ -1198,9 +1198,7 @@ class TestUserController(unittest.TestCase):
 
     def test_user_status_after_login(self):
         app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', 'POST'):
+        with app.app_context():
             db.init_app(app)
             # print(flask.request.path)
             reg_res = users_controller.register({
@@ -1210,7 +1208,7 @@ class TestUserController(unittest.TestCase):
             })
             # check registerd ok
             self.assertEqual(reg_res.status_code, 201)
-            login_res = session_controller.login(self.COMBINE_DATA)
+            login_res = users_controller.login(self.COMBINE_DATA)
             # check login okay
             self.assertEqual(login_res.status_code, 200)
             status_res = users_controller.status(login_res)
@@ -1218,105 +1216,68 @@ class TestUserController(unittest.TestCase):
             self.assertEqual(status_res.status_code, 200)
             self.assertEqual(json.loads(status_res.data)['status'],'success' )
 
-    
     def test_login_fail_unregistered_user(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            # reg_res = users_controller.register({
-            #     'id':self.ID, 
-            #     'username':self.DATA['username'],
-            #     'password': self.DATA['password']
-            # })
-            # self.assertEqual(reg_res.status_code, 201)
-            logged_in = session_controller.login(self.COMBINE_DATA)
+            logged_in = users_controller.login(self.COMBINE_DATA)
             self.assertFalse(logged_in)
             db.session.remove()
             db.drop_all()
-
-class TestSessionController(unittest.TestCase):
-    # use test_request_context https://flask.palletsprojects.com/en/1.1.x/quickstart/#context-locals
-    ID = 1111111111
-    DATA = {
-                "username":"username1",
-                "password":"password1"
-            }
-    COMBINE_DATA = DATA
-    COMBINE_DATA['id'] = ID
-    def create_test_user(self):
-        return user_model.User.new(self.ID,self.DATA)   
-
-
-    def test_login_fail_incorrect_password(self):
-        app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', method='POST'):
-            db.init_app(app)
-             # register test user
-            is_registred = users_controller.register(self.COMBINE_DATA)
-            # assert registered success
-            self.assertTrue(is_registred)
-            # attemp login wrong PW
-            login = session_controller.login({
-                'id':1111111,
-                'username':'username1',
-                'password': 'some-wrong-password'
-            })
-            # check login fails
-            self.assertFalse(login)
-            db.session.remove()
-            db.drop_all()
-
+    
     def test_login_fail_incorrect_username(self):
         app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', method='POST'):
+        with app.app_context():
             db.init_app(app)
              # register test user
-            is_registred = users_controller.register(self.COMBINE_DATA)
-            # assert registered success
-            self.assertTrue(is_registred)
+            reg_res = users_controller.register(self.COMBINE_DATA)
+            # check registerd ok
+            self.assertEqual(reg_res.status_code, 201)
             # attemp login wrong username
-            login = session_controller.login({
+            login_res = users_controller.login({
                 'id':1111111,
                 'username':'username2',
                 'password': 'some-password'
             })
             # check login fails
-            self.assertFalse(login)
+            self.assertFalse(login_res)
             db.session.remove()
             db.drop_all()
+
+    def test_login_fail_incorrect_password(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+             # register test user
+            reg_res = users_controller.register(self.COMBINE_DATA)
+            # check registerd ok
+            self.assertEqual(reg_res.status_code, 201)
+            # attemp login wrong PW
+            login_res = users_controller.login({
+                'id':1111111,
+                'username':'username1',
+                'password': 'some-wrong-password'
+            })
+            # check login fails
+            self.assertFalse(login_res)
+            db.session.remove()
+
     # tests login overall login funcionality inc authorization
     def test_login_success_w_password_username(self):
         app = create_test_app()
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-        with app.test_request_context('/login', method='POST'):
+        with app.app_context():
             db.init_app(app)
             # register test user
-            is_registred = users_controller.register(self.COMBINE_DATA)
-            print('IS', is_registred)
-            # assert registered success
-            self.assertTrue(is_registred)
+            reg_res = users_controller.register(self.COMBINE_DATA)
+            # check registerd ok
+            self.assertEqual(reg_res.status_code, 201)
             # attempt login
-            is_logged = session_controller.login(self.COMBINE_DATA)
-            # check 200 status
-            is_registred = users_controller.register(self.COMBINE_DATA)
-            # assert registered success
-            self.assertTrue(is_registred)
-            # login response
-            res = session_controller.login(self.COMBINE_DATA)
-            # check login okay
-            res_data = json.loads(res.get_data())
-            self.assertEqual(res_data['status'], 'success')
-            self.assertEqual(res_data['message'], 'logged in')
-            self.assertEqual(res.status_code, 200)
+            login_res = users_controller.login(self.COMBINE_DATA)
+            self.assertEqual(json.loads(login_res.data)['status'], 'success')
+            self.assertEqual(json.loads(login_res.data)['message'], 'logged in')
+            self.assertEqual(login_res.status_code, 200)
             db.session.remove()
-            db.drop_all()
-    
-
+     
 if __name__ == '__main__':
     unittest.main()
 

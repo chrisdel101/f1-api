@@ -4,6 +4,7 @@ import bcrypt
 import flask
 import os
 import json
+from utilities import utils
 
 # registers user to db -returns response and code
 
@@ -53,14 +54,8 @@ def login(parsedJsonCredentials):
                 parsedJsonCredentials['password'], query.password)
             # if match PW return T
             if matches:
-                if os.environ['LOGS'] != 'off':
-                    print('user exists and PW success.')
                 # login user
                 try:
-                    # flask-login
-                    login_user(user, remember=True)
-                    print('Logged in successfully:',
-                          current_user.username)
                     # make auth token
                     auth_token = user.encode_auth_token(user.id)
                     if auth_token:
@@ -69,6 +64,8 @@ def login(parsedJsonCredentials):
                             'message': 'logged in',
                             'auth_token': auth_token.decode()
                         }
+                    if os.environ['LOGS'] != 'off':
+                        print('user exists and PW success.')
                     return make_response(jsonify(responseObject), 200)
                 except Exception as e:
                     print('error in login inner e', e)
