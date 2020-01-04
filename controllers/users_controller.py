@@ -1,7 +1,9 @@
 from models import user_model
 from flask import make_response, jsonify
 import bcrypt
+import flask
 import os
+import json
 
 # registers user to db -returns response and code
 
@@ -15,6 +17,7 @@ def register(parsedData):
             user = user_model.User.new(parsedData['id'], parsedData)
             user.insert()
             auth_token = user.encode_auth_token(user.id)
+            print('DECODE', user_model.User.decode_auth_token(auth_token))
             responseObject = {
                 'status': 'success',
                 'message': 'registered',
@@ -37,24 +40,26 @@ def register(parsedData):
 
 
 def status(auth_header):
-    # get the auth token
-    if auth_header:
-        auth_token = str(auth_header).split(" ")
+    # if byte string type
+    if type(auth_header) == 'bytes':
+        auth_token = auth_header
+    # if response type
+    elif type(auth_header) == flask.wrappers.Response:
+        auth_token = json.loads(auth_header.data)['auth_token']
     else:
         auth_token = ''
-    # print('auth', auth_header.data)
     if auth_token:
+        print('auth status', auth_header)
         resp = user_model.User.decode_auth_token(auth_token)
-        print('pre', resp)
         if not isinstance(resp, str):
-            user = User.query.filter_by(id=resp).first()
+            user = user_model.User.query.filter_by(id=resp).first()
             responseObject = {
                 'status': 'success',
                 'data': {
                     'user_id': user.id,
-                    'email': user.email,
-                    'admin': user.admin,
-                    'registered_on': user.registered_on
+                    'username': user.username,
+                    # 'admin': user.admin,
+                    # 'registered_on': user.registered_on
                 }
             }
             return make_response(jsonify(responseObject)), 200

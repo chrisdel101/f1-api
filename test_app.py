@@ -802,7 +802,7 @@ class TestUserController(unittest.TestCase):
                 'password': self.DATA['password']
             })
             # check correct status code            
-            self.assertEqual(res[1], 201)
+            self.assertEqual(res.status_code, 201)
             db.session.remove()
             db.drop_all()
 
@@ -869,12 +869,13 @@ class TestUserController(unittest.TestCase):
             # login_res = session_controller.login(self.COMBINE_DATA)
             # print(login_res)
             # check registerd ok
-            # self.assertEqual(res.status_code, 201)
-            res_data = json.loads(res.get_data())
-            auth_token = make_response(res_data['auth_token'])
-            auth_token = 'Bearer ' + str(auth_token.data)
-            print('auth', auth_token)
-            users_controller.status(auth_token)
+            self.assertEqual(res.status_code, 201)
+            # res_data = json.loads(res.get_data())
+            # auth_token = bytes(res_data['auth_token'], encoding='utf-8')
+            # auth_token = 'Bearer ' + str(auth_token.data)
+            # print('auth', type(res) == flask.wrappers.Response)
+            # return
+            users_controller.status(res)
 
     
 class TestUserModel(unittest.TestCase):
@@ -910,6 +911,35 @@ class TestUserModel(unittest.TestCase):
             })
     # ------------ TESTS 
     # test user.new() - success
+    def test_encode_auth_token(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            db.session.add(user)
+            db.session.commit()
+            auth_token = user.encode_auth_token(user.id)
+            # print(auth_token, 'AUTH')
+            self.assertTrue(isinstance(auth_token, bytes))
+            db.session.remove()
+            db.drop_all()
+
+    def test_decode_auth_token(self):
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            user = self.create_new_user_pass()
+            db.session.add(user)
+            db.session.commit()
+            auth_token = user.encode_auth_token(user.id)
+            print('ENCODE', auth_token)
+            self.assertTrue(isinstance(auth_token, bytes))
+            # should decode to user ID
+            self.assertTrue(user_model.User.decode_auth_token(auth_token) == self.ID)
+            decode  = user_model.User.decode_auth_token(auth_token)
+            print('DECODE', decode)
+            db.session.remove()
+            db.drop_all()
     def test_user_new_pass(self):
         app = create_test_app()
         with app.app_context():
@@ -1172,32 +1202,6 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def test_encode_auth_token(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            user = self.create_new_user_pass()
-            db.session.add(user)
-            db.session.commit()
-            auth_token = user.encode_auth_token(user.id)
-            print(auth_token, 'AUTH')
-            self.assertTrue(isinstance(auth_token, bytes))
-            db.session.remove()
-            db.drop_all()
-
-    def test_decode_auth_token(self):
-        app = create_test_app()
-        with app.app_context():
-            db.init_app(app)
-            user = self.create_new_user_pass()
-            db.session.add(user)
-            db.session.commit()
-            auth_token = user.encode_auth_token(user.id)
-            self.assertTrue(isinstance(auth_token, bytes))
-            # should decode to user ID
-            self.assertTrue(user_model.User.decode_auth_token(auth_token) == self.ID)
-            db.session.remove()
-            db.drop_all()
 
 
 class TestSessionController(unittest.TestCase):

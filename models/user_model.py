@@ -70,6 +70,8 @@ class User(UserMixin, db.Model):
     @staticmethod
     def decode_auth_token(auth_token):
         try:
+            print('TOKEN', type(auth_token))
+            print('TOKEN', auth_token)
             payload = jwt.decode(
                 auth_token, os.environ['SECRET_KEY'], algorithms='HS256')
             return payload['sub']
