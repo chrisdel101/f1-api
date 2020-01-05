@@ -3,7 +3,6 @@ import os
 import psycopg2
 import scraper_runner
 import flask
-import loader
 from flask_login import LoginManager, current_user, login_required, login_user
 from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
@@ -12,23 +11,54 @@ from flask import request, jsonify, Response, render_template, Flask, session, m
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from utilities import utils
+from datetime import timedelta
 
 
-a = loader.App()
-# print(vars(a))
+class App:
+    def __init__(self):
+        print('init')
+
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
+            app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+            # app.permanent_session_lifetime = timedelta(hours=24)
+            app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
+            DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            if os.environ['LOGS'] != 'off':
+                print('app.py: Prod DB')
+                print('connection', conn)
+        elif os.environ['FLASK_ENV'] == 'development':
+            app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+            # app.permanent_session_lifetime = timedelta(hours=24)
+            if os.environ['LOGS'] != 'off':
+                print('app.py: dev DB')
+            app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
+        elif os.environ['FLASK_ENV'] == 'dev_testing':
+            app.testing = True
+            app.secret_key = b'12345678910-not-my-real-key'
+            if os.environ['LOGS'] != 'off':
+                print('app.py: testing DB')
+            app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
+            # app = app.test_client()
+        db = SQLAlchemy(app)
+
+        return {
+            'app': app,
+            'db': db
+        }
+
+
+# if os.environ['FLASK_ENV'] != 'dev_testing':
+#     print('CREATE', os.environ[
+#         'FLASK_ENV'])
+a = App()
 app = a.create_app()['app']
 db = a.create_app()['db']
 # db = app.create_app()
 migrate = Migrate(app, db)
-
-
-# @login_manager.user_loader
-# def load_user(user_id):
-#     user = user_model.User.query.filter_by(
-#         id=user_id).first()
-#     print('USER_LOADER', user)
-#     return user
-
 
 # runs before every req
 if os.environ['AUTH'] != 'off':
@@ -54,9 +84,9 @@ if os.environ['FLASK_ENV'] == 'dev_testing':
 
 @app.route('/test', methods=['GET', 'POST'])
 def testing_route():
+    print('HELLO')
     return 'hello'
     # res = make_response()
-    # print('res', res)
     # return res
 
 

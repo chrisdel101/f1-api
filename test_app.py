@@ -17,7 +17,7 @@ import psycopg2
 import flask_login
 from flask_login import current_user, login_manager, LoginManager, login_required
 import loader
-from loader import App
+from app import app
 
 
 # https://stackoverflow.com/a/50536837/5972531
@@ -43,14 +43,6 @@ def create_test_app():
         if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
             setup_testing_environment()
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
-         # @login_manager.user_loader
-            # def load_user(user_id):
-            #     user_id = str(SELF.ID).encode('utf-8')
-            #     return user_model.User.get(self.ID)
-            # query = user_model.User.query.filter_by(
-            #         id=self.ID).first()
-            # print('user', user.is_active())
-            # print('current user', current_user)
         return app
     except Exception as e:
         print('Error in create_test_app', e)
@@ -1280,20 +1272,15 @@ class TestUserController(unittest.TestCase):
             self.assertEqual(login_res.status_code, 200)
             db.session.remove()
 
+
 class TestRoutes(unittest.TestCase):
-    # app = loader.App()
-    app  = loader.App().create_app()['app']
-    print(vars(app))
-    # print(app['app'])
-    # print(vars(app['app']))
-    app.testing = True
-    # @app.route('/test')
-    # def test():
-    #     print('hello')
-    with app.test_client() as c:
-            print(c)
+    def test_test_route(self):
+        app.testing = True
+        test_app = app.test_client()
+        with test_app as c:
             r = c.get('/test')
-            print(r)
+            self.assertEqual(r.status_code, 200)
+            
      
 if __name__ == '__main__':
     unittest.main()
