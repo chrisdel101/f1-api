@@ -3,6 +3,7 @@ import os
 import psycopg2
 import scraper_runner
 import flask
+import loader
 from flask_login import LoginManager, current_user, login_required, login_user
 from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
@@ -13,55 +14,20 @@ from flask_migrate import Migrate
 from utilities import utils
 
 
-def create_app():
-    app = Flask(__name__)
-
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
-        app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
-        # app.permanent_session_lifetime = timedelta(hours=24)
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
-        DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        if os.environ['LOGS'] != 'off':
-            print('app.py: Prod DB')
-            print('connection', conn)
-    elif os.environ['FLASK_ENV'] == 'development':
-        app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
-        # app.permanent_session_lifetime = timedelta(hours=24)
-        if os.environ['LOGS'] != 'off':
-            print('app.py: dev DB')
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DEV_DB']
-    elif os.environ['FLASK_ENV'] == 'dev_testing':
-        app.secret_key = b'12345678910-not-my-real-key'
-        if os.environ['LOGS'] != 'off':
-            print('app.py: testing DB')
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
-    db = SQLAlchemy(app)
-
-    # @login_manager.user_loader
-    # def load_user(user_id):
-    #     return user_model.User.get(user_id)
-
-    return {
-        'app': app,
-        'db': db
-    }
-
-
-login_manager = LoginManager()
-app = create_app()['app']
-db = create_app()['db']
+a = loader.App()
+# print(vars(a))
+app = a.create_app()['app']
+db = a.create_app()['db']
+# db = app.create_app()
 migrate = Migrate(app, db)
-login_manager.init_app(app)
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    user = user_model.User.query.filter_by(
-        id=user_id).first()
-    print('USER_LOADER', user)
-    return user
+# @login_manager.user_loader
+# def load_user(user_id):
+#     user = user_model.User.query.filter_by(
+#         id=user_id).first()
+#     print('USER_LOADER', user)
+#     return user
 
 
 # runs before every req

@@ -16,6 +16,8 @@ from dotenv import load_dotenv, find_dotenv
 import psycopg2
 import flask_login
 from flask_login import current_user, login_manager, LoginManager, login_required
+import loader
+from loader import App
 
 
 # https://stackoverflow.com/a/50536837/5972531
@@ -1277,6 +1279,21 @@ class TestUserController(unittest.TestCase):
             self.assertEqual(json.loads(login_res.data)['message'], 'logged in')
             self.assertEqual(login_res.status_code, 200)
             db.session.remove()
+
+class TestRoutes(unittest.TestCase):
+    # app = loader.App()
+    app  = loader.App().create_app()['app']
+    print(vars(app))
+    # print(app['app'])
+    # print(vars(app['app']))
+    app.testing = True
+    # @app.route('/test')
+    # def test():
+    #     print('hello')
+    with app.test_client() as c:
+            print(c)
+            r = c.get('/test')
+            print(r)
      
 if __name__ == '__main__':
     unittest.main()
