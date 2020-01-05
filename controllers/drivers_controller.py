@@ -1,9 +1,11 @@
 from models import driver_model
 from utilities import utils
 from slugify import slugify
-
+import sqlalchemy
 
 # make data into arr of dicts
+
+
 def make_slug_dict(arr):
     result_arr = []
     for item in arr:
@@ -16,8 +18,12 @@ def make_slug_dict(arr):
 
 
 def show_all_drivers():
-    arr = driver_model.Driver.query.all()
-    return make_slug_dict(arr)
+    try:
+        arr = driver_model.Driver.query.all()
+        return make_slug_dict(arr)
+    except sqlalchemy.exc.OperationalError:
+        print('Operations error: possibily no table exists in DB')
+        return('Operations error: possibily no table exists in DB')
 
 
 def show_single_driver(name_slug):

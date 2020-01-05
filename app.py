@@ -15,8 +15,6 @@ from datetime import timedelta
 
 
 class App:
-    def __init__(self):
-        print('init')
 
     def create_app(self):
         app = Flask(__name__)
@@ -41,8 +39,7 @@ class App:
             app.secret_key = b'12345678910-not-my-real-key'
             if os.environ['LOGS'] != 'off':
                 print('app.py: testing DB')
-            app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////test_db.db"
-            # app = app.test_client()
+            app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
         db = SQLAlchemy(app)
 
         return {
@@ -51,13 +48,9 @@ class App:
         }
 
 
-# if os.environ['FLASK_ENV'] != 'dev_testing':
-#     print('CREATE', os.environ[
-#         'FLASK_ENV'])
 a = App()
 app = a.create_app()['app']
 db = a.create_app()['db']
-# db = app.create_app()
 migrate = Migrate(app, db)
 
 # runs before every req
@@ -73,13 +66,6 @@ if os.environ['AUTH'] != 'off':
             return res
         else:
             print('access okay')
-
-if os.environ['FLASK_ENV'] == 'dev_testing':
-    @app.before_request
-    def make_session_permanent():
-        session.permanent = True
-        app.permanent_session_lifetime = timedelta(minutes=5)
-        print('session time')
 
 
 @app.route('/test', methods=['GET', 'POST'])
@@ -169,8 +155,8 @@ def login():
 
 @app.route('/register', methods=['POST'])
 def register():
-    parsedData = request.get_json(force=True)
-    print(parsedData)
+    parsedData = request.get_json()
+    print('parsed', parsedData)
     if not request.is_json or not parsedData:
         print('Error in /login json')
         return TypeError('Error in /register json. Must be json.')
@@ -181,7 +167,7 @@ def register():
 def status():
     auth_header = request.headers.get('Authorization')
     print('auth', auth_header)
-    # return users_controller.status(auth_header)
+    # return users_control  ler.status(auth_header)
 
 
 @app.route('/user', methods=['GET', 'POST'])

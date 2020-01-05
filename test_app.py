@@ -22,6 +22,7 @@ from app import app
 
 # https://stackoverflow.com/a/50536837/5972531
 def setup_testing_environment():
+    print('RUNS')
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
 
@@ -1275,12 +1276,40 @@ class TestUserController(unittest.TestCase):
 
 class TestRoutes(unittest.TestCase):
     def test_test_route(self):
-        app.testing = True
         test_app = app.test_client()
         with test_app as c:
             r = c.get('/test')
             self.assertEqual(r.status_code, 200)
             
+     
+    def test_drivers_route(self):
+        # app.testing = True
+        test_app = app.test_client()
+        with test_app as c:
+            r = c.get('/drivers')
+            self.assertEqual(r.status_code, 200)
+        
+    def test_register_route(self):
+        test_app = app.test_client()
+        with test_app as c:
+            r = c.get('/register')
+            # cannot receive GET - should be 405
+            self.assertEqual(r.status_code, 405)
+
+    def test_register_route(self):
+        test_app = app.test_client()
+        credentials = {   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "password123"
+        }
+        credentials = json.dumps(credentials)
+        setup_testing_environment()
+        with test_app as c:
+            r = c.post('/register', data=credentials, content_type='application/json')
+            # cannot receive GET - should be 405
+            self.assertEqual(r.status_code, 201)
+
      
 if __name__ == '__main__':
     unittest.main()
