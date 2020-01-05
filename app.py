@@ -144,10 +144,7 @@ def login():
         if not parsedJsonCredentials:
             print('Error in /login json')
             return TypeError('Error in /login json. Must be json.')
-
-        print('bottom', parsedJsonCredentials)
-        users_controller.login(parsedJsonCredentials)
-        return "complete\n"
+        return users_controller.login(parsedJsonCredentials)
     except Exception as e:
         print('error in login route', e)
         return e
@@ -160,6 +157,7 @@ def register():
     if not request.is_json or not parsedData:
         print('Error in /login json')
         return TypeError('Error in /register json. Must be json.')
+    # print('RES', users_controller.register(parsedData))
     return users_controller.register(parsedData)
 
 

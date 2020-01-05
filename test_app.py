@@ -1289,14 +1289,14 @@ class TestRoutes(unittest.TestCase):
             r = c.get('/drivers')
             self.assertEqual(r.status_code, 200)
         
-    def test_register_route(self):
+    def test_register_route_fail(self):
         test_app = app.test_client()
         with test_app as c:
             r = c.get('/register')
             # cannot receive GET - should be 405
             self.assertEqual(r.status_code, 405)
 
-    def test_register_route(self):
+    def test_register_route_pass(self):
         test_app = app.test_client()
         credentials = {   
             "id":"1234567891012983",
@@ -1309,6 +1309,42 @@ class TestRoutes(unittest.TestCase):
             r = c.post('/register', data=credentials, content_type='application/json')
             # cannot receive GET - should be 405
             self.assertEqual(r.status_code, 201)
+
+    def test_login_route_pass(self):
+        test_app = app.test_client()
+        credentials = {   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "password123"
+        }
+        credentials = json.dumps(credentials)
+        setup_testing_environment()
+        with test_app as c:
+            r1 = c.post('/register', data=credentials, content_type='application/json')
+             # cannot receive GET - should be 405
+            self.assertEqual(r1.status_code, 201)
+            r2 = c.post('/login', data=credentials, content_type='application/json')
+            # cannot receive GET - should be 405
+            self.assertEqual(r2.status_code, 200)
+            self.assertEqual(json.loads(r2.get_data())['status'], 'success')
+
+    def test_login_route_fail_not_exist(self):
+        test_app = app.test_client()
+        credentials = {   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "password123"
+        }
+        credentials = json.dumps(credentials)
+        setup_testing_environment()
+        with test_app as c:
+            r2 = c.post('/login', data=credentials, content_type='application/json')
+            print(r2.get_data())
+            # cannot receive GET - should be 405
+            self.assertEqual(r2.status_code, 404)
+            self.assertTrue(json.loads(r2.get_data())['logged_in'] == False)
+            self.assertTrue(json.loads(r2.get_data())['message'] == 'not logged in')
+            self.assertTrue(json.loads(r2.get_data())['status'] == 'failed')
 
      
 if __name__ == '__main__':

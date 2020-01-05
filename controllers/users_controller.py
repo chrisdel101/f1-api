@@ -62,7 +62,8 @@ def login(parsedJsonCredentials):
                         responseObject = {
                             'status': 'success',
                             'message': 'logged in',
-                            'auth_token': auth_token.decode()
+                            'auth_token': auth_token.decode(),
+                            'logged_in': True
                         }
                     if os.environ['LOGS'] != 'off':
                         print('user exists and PW success.')
@@ -79,7 +80,13 @@ def login(parsedJsonCredentials):
         else:
             if os.environ['LOGS'] != 'off':
                 print('username does not exist. login failed')
-            return False
+            responseObject = {
+                'status': 'failed',
+                'message': 'not logged in',
+                'logged_in': False
+            }
+            print("HERE")
+            return make_response(jsonify(responseObject), 404)
     except Exception as e:
         print('error in login', e)
         raise e
