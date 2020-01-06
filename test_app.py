@@ -1281,7 +1281,6 @@ class TestRoutes(unittest.TestCase):
             r = c.get('/test')
             self.assertEqual(r.status_code, 200)
             
-     
     def test_drivers_route(self):
         # app.testing = True
         test_app = app.test_client()
@@ -1321,7 +1320,6 @@ class TestRoutes(unittest.TestCase):
         setup_testing_environment()
         with test_app as c:
             r1 = c.post('/register', data=credentials, content_type='application/json')
-             # cannot receive GET - should be 405
             self.assertEqual(r1.status_code, 201)
             r2 = c.post('/login', data=credentials, content_type='application/json')
             # cannot receive GET - should be 405
@@ -1346,6 +1344,49 @@ class TestRoutes(unittest.TestCase):
             self.assertTrue(json.loads(r2.get_data())['message'] == 'not logged in')
             self.assertTrue(json.loads(r2.get_data())['status'] == 'failed')
 
+    def test_login_route_fail_incorrect_password(self):
+        test_app = app.test_client()
+        credentials = {   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "password123"
+        }
+        credentials = json.dumps(credentials)
+        setup_testing_environment()
+        with test_app as c:
+            r1 = c.post('/register', data=credentials, content_type='application/json')
+            self.assertEqual(r1.status_code, 201)
+            # login with wrong PW
+            r2 = c.post('/login', data=json.dumps({   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "wrong"
+            }), content_type='application/json')
+            self.assertEqual(r2.status_code, 401)
+            self.assertTrue(json.loads(r2.get_data())['logged_in'] == False)
+            self.assertTrue(json.loads(r2.get_data())['message'] == 'not logged in')
+            self.assertTrue(json.loads(r2.get_data())['status'] == 'failed')
+
+    def test_status(self):
+        test_app = app.test_client()
+        credentials = {   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "password123"
+        }
+        credentials = json.dumps(credentials)
+        setup_testing_environment()
+        with test_app as c:
+            r1 = c.post('/register', data=credentials, content_type='application/json')
+            self.assertEqual(r1.status_code, 201)
+            # print('reg token', json.loads(r1.get_data())['auth_token'])
+            r2 = c.get('/user-status',  
+                headers=dict(
+                Authorization='Bearer ' + json.loads(r1.get_data())['auth_token'])
+                )
+            self.assertEqual(json.loads(r2.get_data())['message'], 'user verified')
+            self.assertEqual(r2.status_code, 200)
+            self.assertEqual(json.loads(r2.get_data())['data']['user_id'], 1234567891012983)
      
 if __name__ == '__main__':
     unittest.main()

@@ -164,8 +164,7 @@ def register():
 @app.route('/user-status')
 def status():
     auth_header = request.headers.get('Authorization')
-    print('auth', auth_header)
-    # return users_control  ler.status(auth_header)
+    return users_controller.status(auth_header)
 
 
 @app.route('/user', methods=['GET', 'POST'])

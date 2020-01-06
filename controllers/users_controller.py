@@ -76,7 +76,12 @@ def login(parsedJsonCredentials):
                 if os.environ['LOGS'] != 'off':
                     print(
                         'user exists but PW fails. login failed')
-                return matches
+                responseObject = {
+                    'status': 'failed',
+                    'message': 'not logged in',
+                    'logged_in': False
+                }
+                return make_response(jsonify(responseObject), 401)
         else:
             if os.environ['LOGS'] != 'off':
                 print('username does not exist. login failed')
@@ -85,7 +90,6 @@ def login(parsedJsonCredentials):
                 'message': 'not logged in',
                 'logged_in': False
             }
-            print("HERE")
             return make_response(jsonify(responseObject), 404)
     except Exception as e:
         print('error in login', e)
@@ -95,7 +99,10 @@ def login(parsedJsonCredentials):
 # takes a response or a byte string
 def status(auth_header):
     # if byte string type
-    if type(auth_header) == 'bytes':
+    if isinstance(auth_header, str):
+        auth_token = auth_header.split(" ")[1]
+        # print('HEADER', auth_token)
+    elif type(auth_header) == 'bytes':
         auth_token = auth_header
     # if response type
     elif type(auth_header) == flask.wrappers.Response:
@@ -108,6 +115,7 @@ def status(auth_header):
             user = user_model.User.query.filter_by(id=resp).first()
             responseObject = {
                 'status': 'success',
+                'message': 'user verified',
                 'data': {
                     'user_id': user.id,
                     'username': user.username,
