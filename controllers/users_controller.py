@@ -16,6 +16,7 @@ def register(parsedData):
         if not exists_on_class:
             # create temp user obj
             user = user_model.User.new(parsedData['id'], parsedData)
+            # user ID gets turned into INT in DB`
             user.insert()
             auth_token = user.encode_auth_token(user.id)
             responseObject = {
@@ -56,8 +57,8 @@ def login(parsedJsonCredentials):
             if matches:
                 # login user
                 try:
-                    # make auth token
-                    auth_token = user.encode_auth_token(user.id)
+                    # make auth token - convert ID to int to match DB version
+                    auth_token = user.encode_auth_token(int(user.id))
                     if auth_token:
                         responseObject = {
                             'status': 'success',
@@ -65,6 +66,9 @@ def login(parsedJsonCredentials):
                             'auth_token': auth_token.decode(),
                             'logged_in': True
                         }
+                        # print('response login', type(
+                        # responseObject['auth_token']))
+
                     if os.environ['LOGS'] != 'off':
                         print('user exists and PW success.')
                     return make_response(jsonify(responseObject), 200)
@@ -99,6 +103,7 @@ def login(parsedJsonCredentials):
 # takes a response or a byte string
 def status(auth_header):
     # if byte string type
+    # print(type(auth_header))
     if isinstance(auth_header, str):
         auth_token = auth_header.split(" ")[1]
         # print('HEADER', auth_token)

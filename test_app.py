@@ -1367,7 +1367,7 @@ class TestRoutes(unittest.TestCase):
             self.assertTrue(json.loads(r2.get_data())['message'] == 'not logged in')
             self.assertTrue(json.loads(r2.get_data())['status'] == 'failed')
 
-    def test_status(self):
+    def test_status_token_success_register(self):
         test_app = app.test_client()
         credentials = {   
             "id":"1234567891012983",
@@ -1379,7 +1379,6 @@ class TestRoutes(unittest.TestCase):
         with test_app as c:
             r1 = c.post('/register', data=credentials, content_type='application/json')
             self.assertEqual(r1.status_code, 201)
-            # print('reg token', json.loads(r1.get_data())['auth_token'])
             r2 = c.get('/user-status',  
                 headers=dict(
                 Authorization='Bearer ' + json.loads(r1.get_data())['auth_token'])
@@ -1387,6 +1386,31 @@ class TestRoutes(unittest.TestCase):
             self.assertEqual(json.loads(r2.get_data())['message'], 'user verified')
             self.assertEqual(r2.status_code, 200)
             self.assertEqual(json.loads(r2.get_data())['data']['user_id'], 1234567891012983)
+
+    def test_status_token_success_login(self):
+        test_app = app.test_client()
+        credentials = {   
+            "id":"1234567891012983",
+            "username": "username_321",
+            "password": "password123"
+        }
+        credentials = json.dumps(credentials)
+        setup_testing_environment()
+        with test_app as c:
+            r1 = c.post('/register', data=credentials, content_type='application/json')
+            self.assertEqual(r1.status_code, 201)
+            
+            r2 = c.post('/login', data=credentials,content_type='application/json')
+            self.assertEqual(r2.status_code, 200)
+          
+            r3 = c.get('/user-status',  
+                headers=dict(
+                    Authorization='Bearer ' + json.loads(r2.get_data())['auth_token']
+                    )
+                )
+            self.assertEqual(json.loads(r3.get_data())['message'], 'user verified')
+            self.assertEqual(r3.status_code, 200)
+            self.assertEqual(json.loads(r3.get_data())['data']['user_id'], 1234567891012983)
      
 if __name__ == '__main__':
     unittest.main()

@@ -139,7 +139,7 @@ def login():
         #     'password': request.form.get('password')
         # }
         parsedJsonCredentials = request.get_json()
-        print('PARSE', parsedJsonCredentials)
+        # print('PARSE', parsedJsonCredentials)
         # error if not json
         if not parsedJsonCredentials:
             print('Error in /login json')
@@ -153,7 +153,7 @@ def login():
 @app.route('/register', methods=['POST'])
 def register():
     parsedData = request.get_json()
-    print('parsed', parsedData)
+    # print('parsed', parsedData)
     if not request.is_json or not parsedData:
         print('Error in /login json')
         return TypeError('Error in /register json. Must be json.')
