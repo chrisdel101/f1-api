@@ -66,9 +66,6 @@ def login(parsedJsonCredentials):
                             'auth_token': auth_token.decode(),
                             'logged_in': True
                         }
-                        # print('response login', type(
-                        # responseObject['auth_token']))
-
                     if os.environ['LOGS'] != 'off':
                         print('user exists and PW success.')
                     return make_response(jsonify(responseObject), 200)

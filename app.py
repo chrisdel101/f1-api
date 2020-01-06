@@ -9,6 +9,7 @@ from utilities import scraper
 from models import driver_model, team_model, user_model
 from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
 from flask_migrate import Migrate
 from utilities import utils
 from datetime import timedelta
@@ -40,14 +41,16 @@ class App:
             if os.environ['LOGS'] != 'off':
                 print('app.py: testing DB')
             app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+            engine = create_engine('sqlite:///:memory:')
         db = SQLAlchemy(app)
-
+        app.db = db
         return {
             'app': app,
             'db': db
         }
 
 
+# if os.environ['FLASK_ENV'] != 'dev_testing':
 a = App()
 app = a.create_app()['app']
 db = a.create_app()['db']
