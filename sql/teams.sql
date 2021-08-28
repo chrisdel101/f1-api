@@ -4,6 +4,7 @@ CREATE TABLE team
     full_team_name VARCHAR(200),
     team_name_slug VARCHAR(50),
     url_name_slug VARCHAR(50),
+    name VARCHAR(50),
     base VARCHAR(100),
     team_chief VARCHAR(100),
     technical_chief VARCHAR(100),
@@ -14,7 +15,8 @@ CREATE TABLE team
     fastest_laps VARCHAR(50),
     main_image VARCHAR(500),
     flag_img_url VARCHAR(500),
-    logo_url VARCHAR(500),
+    main_logo_url VARCHAR(500),
+    small_logo_url VARCHAR(500),
     podium_finishes VARCHAR(50),
     championship_titles VARCHAR(50),
     drivers_scraped BYTEA
