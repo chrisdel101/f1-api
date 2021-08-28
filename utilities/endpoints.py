@@ -20,4 +20,4 @@ def team_endpoint(team):
 
 
 def standings_endpoint():
-    return "https://www.formula1.com/en/results.html/2019/drivers.html"
+    return "https://www.formula1.com/en/results.html/2021/drivers.html"
