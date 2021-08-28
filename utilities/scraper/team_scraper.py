@@ -64,7 +64,7 @@ def scrape_all_team_names():
 
 # takes in dict, adds main img then returns dict
 def get_main_image(scraper_dict, url_name_slug, force_overwrite=False):
-    print("TEAMZZ", url_name_slug)
+    # print("TEAMZZ", url_name_slug)
     page = requests.get(endpoints.team_endpoint(
         url_name_slug), headers=headers)
     page.encoding = 'utf-8'
@@ -93,11 +93,11 @@ def get_main_image(scraper_dict, url_name_slug, force_overwrite=False):
         return scraper_dict
 
 
-def get_flag_img_url(scraper_dict, li, url_name_slug):
+def get_flag_img_url(scraper_dict, li, url_name_slug, force_overwrite=False):
     if type(scraper_dict) is not dict:
         ValueError('Warning: get_flag_img_url must take a dict.')
-    if 'flag_img_url' in scraper_dict:
-        # return unchanged dict
+    if 'flag_img_url' in scraper_dict and not force_overwrite:
+            # return unchanged dict
         return scraper_dict
     if li.find('span', {'class', 'teamteaser-flag'}):
         l = li.find('span', {'class', 'teamteaser-flag'})
@@ -113,20 +113,29 @@ def get_flag_img_url(scraper_dict, li, url_name_slug):
         return scraper_dict
 
 
-def get_logo_url(scraper_dict, li, url_name_slug):
+def get_logo_url(scraper_dict, url_name_slug, force_overwrite=False):
+    print('END', endpoints.team_endpoint(
+        url_name_slug))
+    page = requests.get(endpoints.team_endpoint(
+        url_name_slug), headers=headers)
+    page.encoding = 'utf-8'
+    soup = BeautifulSoup(page.text, 'html.parser')
     if type(scraper_dict) is not dict:
         ValueError('Warning: get_logo_url must take a dict.')
-    if 'logo_url' in scraper_dict:
+    if 'logo_url' in scraper_dict and not force_overwrite:
         # return unchanged dict
         return scraper_dict
-    if li.find('div', {'class', 'teamteaser-sponsor'}):
-        if scraper_dict['url_name_slug'] == url_name_slug:
-            l = li.find('div', {'class', 'teamteaser-sponsor'})
-            if l.find('img'):
-                logo_src = l.find('img')['src']
-                logo_img = "{0}/{1}".format(
-                    endpoints.home_endpoint(), logo_src)
-                scraper_dict['logo_url'] = logo_img
+    # get stats_container
+    stats_container = soup.find('section', {'class', 'stats'})
+    if stats_container:
+        # find img src
+        img_src = stats_container.find(
+            'div', {'class', 'brand-logo'}).find('img')['src']
+        # combine into proper endpoint
+        logo_url = "{0}/{1}".format(
+            endpoints.home_endpoint(), img_src)
+        # add to dict
+        scraper_dict['logo_url'] = logo_url
         return scraper_dict
     else:
         print('Warning: No logo_img found.')
@@ -215,9 +224,7 @@ def iterate_teams_markup(scraper_dict):
         # - call each function
             scraper_dict = get_main_image(
                 scraper_dict, url_name_slug, True)
-            scraper_dict = get_flag_img_url(
-                scraper_dict, team, url_name_slug)
-            scraper_dict = get_logo_url(scraper_dict, team, url_name_slug)
+            scraper_dict = get_logo_url(scraper_dict, url_name_slug, True)
             scraper_dict = get_podium_finishes(
                 scraper_dict, team, url_name_slug)
             scraper_dict = get_championship_titles(
