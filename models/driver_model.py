@@ -48,7 +48,7 @@ class Driver(db.Model):
     def new(cls, scraper_dict):
         try:
             if os.environ['LOGS'] != 'off':
-                print('CREATE', scraper_dict)
+                print('CREATE DRIVER', scraper_dict)
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')

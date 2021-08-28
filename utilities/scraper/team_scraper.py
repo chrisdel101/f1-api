@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 import os
+
+from user_agent.base import USER_AGENT_TEMPLATE
 from utilities import endpoints, utils
 from user_agent import generate_user_agent
 from slugify import slugify, Slugify
@@ -27,52 +29,68 @@ def _team_page_scrape():
 # takes url and index to choose size from list
 def _change_team_img_size(src, list_index):
     # replace scraped img size with one the sizes below
-    regex = "image[\d]+x[\d]+.img.[\d]+.(medium|small|large)"
+    regex = "image[\d]+.img.[\d]+.(medium|small|large)"
     sizes = ['320', '640', '768', '1536']
-    r = "image16x9.img.{0}.medium".format(sizes[list_index])
+    r = "image1.img.{0}.medium".format(sizes[list_index])
     sub = re.sub(regex, r, src)
+    if os.environ['LOGS'] != 'off':
+        if src == sub:
+            print('_change_team_img_size: DIMS not changed')
+         # get team id from team lookup
     return sub
+
+# scrape all team names - returns a list of dicts
 
 
 def scrape_all_team_names():
     soup = _team_page_scrape()
-    ul_teams_list = soup.find('ul', {'class', 'teamindex-teamteasers'})
-    li_team_list = ul_teams_list.find_all('li')
+    # get all divs will teams as children
+    teams_list_markup = soup.find_all('div', {'class', 'name'})
     teams_endpoint = []
-    for team in li_team_list:
-        if team.find('h2'):
+    for team in teams_list_markup:
+        if team.contents:
+            # index for span with name
+            name_span = team.contents[3]
             team_dict = {}
-            name_slug = "".join(_slugify(team.find('h2').text).split())
+            name_slug = "".join(_slugify(name_span.text).split())
             team_dict['name_slug'] = name_slug
-            name = " ".join(team.find('h2').text.split())
+            name = " ".join(name_span.text.split())
             team_dict['name'] = name
             teams_endpoint.append(team_dict)
-        # print("ENDPOINTS", teams_endpoint)
+    if os.environ['LOGS'] != 'off':
+        print("TEAM NAMES", teams_endpoint)
     return teams_endpoint
 
 
-def get_main_image(scraper_dict, li, url_name_slug):
+# takes in dict, adds main img then returns dict
+def get_main_image(scraper_dict, url_name_slug, force_overwrite=False):
+    print("TEAMZZ", url_name_slug)
+    page = requests.get(endpoints.team_endpoint(
+        url_name_slug), headers=headers)
+    page.encoding = 'utf-8'
+    soup = BeautifulSoup(page.text, 'html.parser')
     if type(scraper_dict) is not dict:
         ValueError('Warning: get_main_image must take a dict.')
-    if 'main_image' in scraper_dict:
-        # return unchanged dict
+    if 'main_image' in scraper_dict and not force_overwrite:
+        # return unchanged dict if already there
         return scraper_dict
-        # find main team img
-    if li.find('div', {'class', 'teamteaser-image'}) and li.find('div', {'class', 'teamteaser-image'}).find('img'):
-        main_img_src = li.find(
-            'div', {'class', 'teamteaser-image'}).find('img')['src']
-        # resize img
+    # find main team img
+    carousel = soup.find('section', {'class', 'main-gallery'})
+    if carousel:
+        # take first image available, get src
+        main_img_src = carousel.find(
+            'img')['src']
+        # resize img b/c scrape is wrong
         main_img_src = _change_team_img_size(main_img_src, 3)
-        main_img = "{0}/{1}".format(
+        # form into full URL
+        main_img_url = "{0}/{1}".format(
             endpoints.home_endpoint(), main_img_src)
-        # if slug param matches slug of scraperx_dict-
-        # - attach main_img to current team
-        if scraper_dict['url_name_slug'] == url_name_slug:
-            scraper_dict['main_image'] = main_img
+        # add to dict
+        scraper_dict['main_image'] = main_img_url
         return scraper_dict
     else:
         print("Warning: No main_img found")
-        return scaper_dict
+        return scraper_dict
 
 
 def get_flag_img_url(scraper_dict, li, url_name_slug):
@@ -181,31 +199,30 @@ def iterate_teams_markup(scraper_dict):
         print('Change DICT', scraper_dict)
     if type(scraper_dict) is not dict:
         return
+    url_name_slug = scraper_dict['url_name_slug']
     try:
-        soup = _team_page_scrape()
-        all_teams = soup.find('ul', {'class', 'teamindex-teamteasers'})
+        # soup = _team_page_scrape()
+        # all_teams = soup.find_all('div', {'class', 'name'})
+        # print("ALL", all_teams)
         # loop over all teams on the page
         # if match scraper_dict team_name to list li
-        for li in all_teams.find_all('li'):
-            if li.find('a'):
-
-                # # strip all text to get matching url_name_slug
-                team_name = li.find('a')['href']
-                team_name = team_name.split('/')[-1]
-                url_name_slug = team_name.replace('.html', '').strip()
-                if os.environ['LOGS'] != 'off':
-                    if os.environ['FLASK_ENV'] == 'development':
-                        print('LIST', url_name_slug)
-                # - call each function
-                scraper_dict = get_main_image(scraper_dict, li, url_name_slug)
-                scraper_dict = get_flag_img_url(
-                    scraper_dict, li, url_name_slug)
-                scraper_dict = get_logo_url(scraper_dict, li, url_name_slug)
-                scraper_dict = get_podium_finishes(
-                    scraper_dict, li, url_name_slug)
-                scraper_dict = get_championship_titles(
-                    scraper_dict, li, url_name_slug)
-                scraper_dict = get_drivers(scraper_dict, li, url_name_slug)
+        # for team in all_teams:
+        print('CURRENT TEAM', scraper_dict['team_name_slug'])
+        # if team.contents:
+        if os.environ['LOGS'] != 'off':
+            if os.environ['FLASK_ENV'] == 'development':
+                print('LIST', url_name_slug)
+        # - call each function
+            scraper_dict = get_main_image(
+                scraper_dict, url_name_slug, True)
+            scraper_dict = get_flag_img_url(
+                scraper_dict, team, url_name_slug)
+            scraper_dict = get_logo_url(scraper_dict, team, url_name_slug)
+            scraper_dict = get_podium_finishes(
+                scraper_dict, team, url_name_slug)
+            scraper_dict = get_championship_titles(
+                scraper_dict, team, url_name_slug)
+            scraper_dict = get_drivers(scraper_dict, team, url_name_slug)
         return scraper_dict
 
     except Exception as e:
@@ -233,12 +250,12 @@ def scrape_single_team_stats(team_slug):
     team_dict = {}
     try:
         if team_details.find_all('tr'):
-            # loop over html
+                # loop over html
             for team in team_details.find_all('tr'):
-                # print('Team', team)
-                # # loop over all wanted details
+                    # print('Team', team)
+                    # # loop over all wanted details
                 for detail in details:
-                    #     # if they match add to driver object
+                        #     # if they match add to driver object
                     if team.span and team.span.text == detail:
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text

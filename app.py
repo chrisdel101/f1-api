@@ -13,6 +13,7 @@ from sqlalchemy import create_engine
 from flask_migrate import Migrate
 from utilities import utils
 from datetime import timedelta
+from utilities.scraper import team_scraper, driver_scraper
 
 
 class App:
@@ -92,6 +93,14 @@ def testing_login():
 def all_drivers():
     print(request.url)
     return jsonify(drivers_controller.show_all_drivers())
+
+
+@app.route('/drivers-test', methods=['GET'])
+def testing_route2():
+
+    return "test"
+    # res = make_response()
+    # return res
 
 
 @app.route('/drivers/<driver_slug>')

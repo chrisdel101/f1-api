@@ -22,23 +22,29 @@ def scrape_drivers(fail=False):
     team_match_driver = None
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
-    # print(all_drivers)
+    print('DRIVERS', all_drivers)
     # - get all driver standings
     standings = driver_scraper.scrape_all_drivers_standings()
+    print('STANDINGS', standings)
     # - loop over names
     for driver in all_drivers:
         # slugify name
         driver_slug = slugify(driver).lower()
+        # print('D', driver_slug)
         # scrape more driver data
         new_driver_dict = driver_scraper.apply_scraper_func1_complete_driver(
             driver_slug)
+        # print('NEW', new_driver_dict)
         # add etxra data to obj
         new_driver_dict = driver_scraper.apply_scraper_func2_complete_driver(
             driver_slug, new_driver_dict)
         # print('dri', new_driver_dict)
+        # print('NEW2', new_driver_dict)
+        # print('STANDINGS', standings)
         i = 0
         # match standing with current driver
         while standings:
+            print('STANDINGS i', standings[i])
             if driver_slug == standings[i].get('name_slug'):
                 new_driver_dict['points'] = standings[i].get('points')
                 new_driver_dict['position'] = standings[i].get('position')
@@ -95,23 +101,20 @@ def scrape_drivers(fail=False):
 def scrape_teams():
     # -get all driver names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
-    # print(all_teams)
     # - loop over names
     for team in all_teams:
-        # comes with all drivers list
         team_name_slug = team['name_slug']
-        # convert to url_slug
+        # convert to url_slug - name with caps
         url_name_slug = utils.create_url_name_slug(team)
         # scrape each team
         new_dict = team_scraper.scrape_single_team_stats(url_name_slug)
-
         # add slug to model
         new_dict['team_name_slug'] = team_name_slug
         # add url slug to model
         new_dict['url_name_slug'] = url_name_slug
         # add main_ing to current team obj- add drivers
         new_dict = team_scraper.iterate_teams_markup(new_dict)
-        # print('DD', new_dict)
+        print("TTT", team_name_slug)
         # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
         # check value of driver
