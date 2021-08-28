@@ -22,10 +22,10 @@ def scrape_drivers(fail=False):
     team_match_driver = None
     # -get all driver names
     all_drivers = driver_scraper.scrape_all_driver_names()
-    print('DRIVERS', all_drivers)
+    # print('DRIVERS', all_drivers)
     # - get all driver standings
     standings = driver_scraper.scrape_all_drivers_standings()
-    print('STANDINGS', standings)
+    # print('STANDINGS', standings)
     # - loop over names
     for driver in all_drivers:
         # slugify name
@@ -104,23 +104,22 @@ def scrape_teams():
     # - loop over names
     for team in all_teams:
         team_name_slug = team['name_slug']
-        # convert to url_slug - name with caps
+        # convert to url_slug - name with starting cap
         url_name_slug = utils.create_url_name_slug(team)
         # scrape each team
         new_dict = team_scraper.scrape_single_team_stats(url_name_slug)
-        # add slug to model
+        # add slug to dict
         new_dict['team_name_slug'] = team_name_slug
-        # add url slug to model
+        # add url slug to dict
         new_dict['url_name_slug'] = url_name_slug
-        # add main_ing to current team obj- add drivers
-        new_dict = team_scraper.iterate_teams_markup(new_dict)
-        print("TTT", team_name_slug)
+        # add shorter version of name
+        new_dict['name'] = team['name']
+        # add additional markuop and drivers to dict
+        new_dict = team_scraper.add_imgs_markup(new_dict)
         # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
-        # check value of driver
-        # test = driver_model.Driver.query.filter(
-        # driver_model.Driver.name_slug == 'alexander-albon').first()
-        # print("TEST", test)
+    #    if team exists delete old instance
         if d.exists(team_name_slug):
             d.delete(team_name_slug)
+        # add to model
         d.insert()
