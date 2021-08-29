@@ -1,10 +1,6 @@
 from database import db
-from sqlalchemy import text
-from .driver_model import Driver
-from slugify import slugify, Slugify
+from slugify import Slugify
 import os
-_slugify = Slugify()
-_slugify = Slugify(to_lower=True)
 
 
 class Team(db.Model):
@@ -32,10 +28,8 @@ class Team(db.Model):
     podium_finishes = db.Column(db.String(25))
     championship_titles = db.Column(db.String(25))
     drivers_scraped = db.Column(db.PickleType)
-    # drivers_list = db.relationship(
-    #     'Driver', backref='team_name', lazy=True)
-
 #   https://stackoverflow.com/a/44595303/5972531
+
     def __repr__(self):
         return "<{klass} @{id:x} {attrs}>".format(
             klass=self.__class__.__name__,
@@ -76,11 +70,6 @@ class Team(db.Model):
 
         except Exception as e:
             print('Create error', e)
-
-    def add_drivers(self, drivers_list):
-        # loop over and find matching team slug
-        for driver in drivers:
-            print(driver)
 
     def insert(self):
         try:
