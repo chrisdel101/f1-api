@@ -1,13 +1,10 @@
-from controllers import drivers_controller, teams_controller
 from bs4 import BeautifulSoup
 import requests
 import os
 
-from user_agent.base import USER_AGENT_TEMPLATE
 from utilities import endpoints, utils
 from user_agent import generate_user_agent
-from slugify import slugify, Slugify
-import sys
+from slugify import Slugify
 import re
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)

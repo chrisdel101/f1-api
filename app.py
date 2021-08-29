@@ -1,19 +1,14 @@
-import json
 import os
 import psycopg2
 import scraper_runner
 import flask
-from flask_login import LoginManager, current_user, login_required, login_user
+from flask_login import current_user, login_required
 from controllers import drivers_controller, teams_controller, users_controller
 from utilities import scraper
-from models import driver_model, team_model, user_model
-from flask import request, jsonify, Response, render_template, Flask, session, make_response, escape
+from flask import request, jsonify, Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from flask_migrate import Migrate
-from utilities import utils
-from datetime import timedelta
-from utilities.scraper import team_scraper, driver_scraper
 
 
 class App:

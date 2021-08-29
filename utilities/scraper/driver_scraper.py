@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup, UnicodeDammit
 import requests
 import re
 from user_agent import generate_user_agent
-from slugify import slugify, Slugify
+from slugify import Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'

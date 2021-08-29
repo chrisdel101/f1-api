@@ -1,7 +1,5 @@
 import os
 from database import db
-from sqlalchemy import text
-import models
 from slugify import slugify, Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
