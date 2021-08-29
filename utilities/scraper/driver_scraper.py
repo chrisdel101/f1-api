@@ -55,7 +55,6 @@ def scrape_all_driver_names():
     drivers_list = soup.find(class_='drivers').ul
     drivers = []
     drivers_list = drivers_list.find_all('li')
-    text = drivers_list[0].text
 
     for driver in drivers_list:
         # remove whitespace
@@ -77,19 +76,13 @@ def scrape_all_drivers_standings():
             href = row.find('a')['href']
             # extract name slug
             name_slug = _extract_name_from_url(href)
-            # split slug on dash
-            name = name_slug.split('-')
-
-            a = row.find('a')
-            driver_last_name = a.find(
-                'span', {'class', 'hide-for-mobile'}).text
             points = row.find('td', {'class', 'bold'}).text
             position = row.find('td', {'class', 'dark'}).text
             drivers.append(
                 {
                     'name_slug': name_slug,
                     'points': points,
-                    'position': position
+                    'standings_position': position
                 }
             )
     return drivers
@@ -177,6 +170,7 @@ def scrape_driver_details_func1(name_slug):
                'Grands Prix entered',
                'World Championships',
                'Highest race finish',
+               'Highest race finish',
                'Highest grid position',
                'Date of birth',
                'Place of birth',
@@ -211,7 +205,7 @@ def scrape_driver_details_func1(name_slug):
         return("An error occured creating driver data.", e)
 
 
-def apply_scraper_func1_complete_driver(name_slug):
+def scrape_driver_stats(name_slug):
     if type(name_slug) is not str:
         raise TypeError('get_complete_driver_data must take a string.')
     driver_dict = {}
