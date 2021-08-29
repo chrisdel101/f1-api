@@ -159,13 +159,13 @@ class TestDriverScraper(unittest.TestCase):
         self.assertEqual(result2['driver_number'], '8')
 
     def test_apply_scraper_func1_complete_driver(self):
-        result1 = driver_scraper.apply_scraper_func1_complete_driver(
+        result1 = driver_scraper.scrape_driver_stats(
             'sebastian-vettel'
         )
         self.assertTrue(type(result1) == dict)
         self.assertEqual(result1['country'], 'Germany')
         # test all manual additions
-        result2 = driver_scraper.apply_scraper_func1_complete_driver(
+        result2 = driver_scraper.scrape_driver_stats(
             'romain-grosjean'
         )
         self.assertEqual(result2['country'], 'France')

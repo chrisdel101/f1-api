@@ -25,29 +25,23 @@ def scrape_drivers(fail=False):
     # print('DRIVERS', all_drivers)
     # - get all driver standings
     standings = driver_scraper.scrape_all_drivers_standings()
-    # print('STANDINGS', standings)
     # - loop over names
     for driver in all_drivers:
         # slugify name
         driver_slug = slugify(driver).lower()
-        # print('D', driver_slug)
         # scrape more driver data
-        new_driver_dict = driver_scraper.apply_scraper_func1_complete_driver(
+        new_driver_dict = driver_scraper.scrape_driver_stats(
             driver_slug)
-        # print('NEW', new_driver_dict)
         # add etxra data to obj
         new_driver_dict = driver_scraper.apply_scraper_func2_complete_driver(
             driver_slug, new_driver_dict)
-        # print('dri', new_driver_dict)
-        # print('NEW2', new_driver_dict)
-        # print('STANDINGS', standings)
         i = 0
         # match standing with current driver
         while standings:
-            print('STANDINGS i', standings[i])
             if driver_slug == standings[i].get('name_slug'):
                 new_driver_dict['points'] = standings[i].get('points')
-                new_driver_dict['position'] = standings[i].get('position')
+                new_driver_dict['standings_position'] = standings[i].get(
+                    'standings_position')
                 # remove item from list so not looped over again
                 standings.pop(i)
                 i = 0
@@ -70,10 +64,10 @@ def scrape_drivers(fail=False):
                 team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
             # print('match', team_match_driver)
 
-            if os.environ['LOGS'] != 'off':
-                print('TEAM DATA', team_match_driver)
-                print('\n')
-                # get team id from team lookup
+            # if os.environ['LOGS'] != 'off':
+            #     print('TEAM DATA', team_match_driver)
+            #     print('\n')
+            # get team id from team lookup
             team_id = team_match_driver.id
             # print('YYY', team_id)
             # # add foreign key to driver
