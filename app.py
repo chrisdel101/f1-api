@@ -4,7 +4,6 @@ import scraper_runner
 import flask
 from flask_login import current_user, login_required
 from controllers import drivers_controller, teams_controller, users_controller
-from utilities import scraper
 from flask import request, jsonify, Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine

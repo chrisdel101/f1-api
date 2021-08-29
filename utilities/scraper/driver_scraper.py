@@ -1,5 +1,5 @@
-from utilities import endpoints, utils
-from bs4 import BeautifulSoup, UnicodeDammit
+from utilities import endpoints
+from bs4 import BeautifulSoup
 import requests
 import re
 from user_agent import generate_user_agent
@@ -45,10 +45,9 @@ def _extract_name_from_url(url):
     name = name[:-1][::-1]
     return name
 
+
 # - scrape all drivers names of the page -
 # - return list
-
-
 def scrape_all_driver_names():
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
