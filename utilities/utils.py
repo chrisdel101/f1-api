@@ -88,8 +88,8 @@ def create_driver_list(driver_list):
         new_list = []
         for driver in driver_list:
             d = {
-                'driver_name': driver,
-                'name_slug': slugify(driver).lower()
+                'driver_name': driver.strip(),
+                'name_slug': slugify(driver).lower().strip()
             }
             new_list.append(d)
         return new_list
