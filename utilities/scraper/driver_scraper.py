@@ -218,10 +218,11 @@ def scrape_driver_stats(name_slug):
 
 def apply_scraper_func2_complete_driver(name_slug, driver_dict):
     try:
-        driver_dict['main_image'] = get_main_image(name_slug)
-        driver_dict['driver_name'] = get_driver_name(name_slug)
-        driver_dict['driver_number'] = get_driver_number(name_slug)
-        driver_dict['flag_img_url'] = get_driver_flag(name_slug)
+        driver_dict['main_image'] = get_main_image(name_slug).strip()
+        driver_dict['driver_name'] = get_driver_name(name_slug).strip()
+        print('NAME', driver_dict['driver_name'])
+        driver_dict['driver_number'] = get_driver_number(name_slug).strip()
+        driver_dict['flag_img_url'] = get_driver_flag(name_slug).strip()
         return driver_dict
     except Exception as e:
         return('Error in apply_scraper_set2_complete_driver', e)

@@ -35,7 +35,7 @@ def scrape_drivers(fail=False):
             driver_slug, new_driver_dict)
         i = 0
         # match standing with current driver
-        while standings:
+        while i < len(standings):
             if driver_slug == standings[i].get('name_slug'):
                 new_driver_dict['points'] = standings[i].get('points')
                 new_driver_dict['standings_position'] = standings[i].get(
