@@ -1,3 +1,4 @@
+import datetime
 # endpoints
 def home_endpoint():
     return "https://www.formula1.com"
@@ -20,4 +21,5 @@ def team_endpoint(team):
 
 
 def standings_endpoint():
-    return "https://www.formula1.com/en/results.html/2021/drivers.html"
+    current_year = datetime.datetime.now().year
+    return f'https://www.formula1.com/en/results.html/{current_year}/drivers.html'
