@@ -24,6 +24,8 @@ import app
 print('APP', app)
 
 # https://stackoverflow.com/a/50536837/5972531
+
+
 def setup_testing_environment():
     print('RUNS')
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
@@ -72,6 +74,7 @@ def create_real_app():
     except Exception as e:
         print('Error in create_real_app', e)
 
+
 class TestDriverScraper(unittest.TestCase):
 
     def test_change_driver_image_size_medium(self):
@@ -95,12 +98,17 @@ class TestDriverScraper(unittest.TestCase):
         self.assertTrue(len(result) > 0)
         res1 = result[0]
         self.assertTrue('points' in res1)
-        self.assertTrue('position' in res1)
-        self.assertEqual(res1['position'], '1')
+        self.assertTrue('standings_position' in res1)
+        self.assertEqual(res1['standings_position'], '1')
+        res2 = result[1]
+        self.assertTrue('points' in res2)
+        self.assertTrue('standings_position' in res2)
+        self.assertEqual(res2['standings_position'], '2')
 
     def test_get_main_image_url(self):
-        self.assertEqual(
-            driver_scraper.get_main_image("sergio-perez"), 'https://www.formula1.com//content/fom-website/en/drivers/sergio-perez/_jcr_content/image.img.1536.medium.jpg/1554818944774.jpg')
+        # check for subStr
+        self.assertTrue('formula1.com//content/fom-website/en/drivers/sergio-perez' in
+                        driver_scraper.get_main_image("sergio-perez"))
         self.assertRaises(TypeError, driver_scraper.get_main_image, 4)
 
     def test_get_driver_name(self):
@@ -118,10 +126,10 @@ class TestDriverScraper(unittest.TestCase):
         self.assertRaises(TypeError, driver_scraper.get_driver_number, True)
 
     def test_get_driver_flag_url(self):
-        self.assertEqual(driver_scraper.get_driver_flag(
-            "lance-stroll"), "https://www.formula1.com//content/fom-website/en/drivers/lance-stroll/_jcr_content/countryFlag.img.jpg/1422627083354.jpg")
-        self.assertEqual(driver_scraper.get_driver_flag(
-            "george-russell"), "https://www.formula1.com//content/fom-website/en/drivers/george-russell/_jcr_content/countryFlag.img.jpg/1422627084440.jpg")
+        self.assertTrue(('content/fom-website/en/drivers/lance-stroll' and 'countryFlag') in driver_scraper.get_driver_flag(
+            "lance-stroll"))
+        self.assertTrue(('content/fom-website/en/drivers/george-russell' and 'countryFlag') in driver_scraper.get_driver_flag(
+            "george-russell"))
         self.assertRaises(TypeError, driver_scraper.get_driver_number, 33)
 
     def scrape_driver_details_func1(self):
@@ -145,18 +153,18 @@ class TestDriverScraper(unittest.TestCase):
             })
         self.assertTrue(type(result1) == dict)
         self.assertTrue(
-            'https://www.formula1.com//content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.1536.medium' in result1['main_image'])
-        # test all manual additions
+            'content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image' in result1['main_image'])
+
         result2 = driver_scraper.apply_scraper_func2_complete_driver(
-            'romain-grosjean', {
-                'driver_name': 'Romain Grosjean'
+            'lewis-hamilton', {
+                'driver_name': 'Lewis Hamilton'
             })
         self.assertTrue(
-            'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/countryFlag.img.gif' in result2['flag_img_url'])
+            'content/fom-website/en/drivers/lewis-hamilton/_jcr_content/countryFlag' in result2['flag_img_url'])
         self.assertTrue(
-            'https://www.formula1.com//content/fom-website/en/drivers/romain-grosjean/_jcr_content/image.img.1536.medium' in result2['main_image'])
-        self.assertEqual(result2['driver_name'], 'Romain Grosjean')
-        self.assertEqual(result2['driver_number'], '8')
+            'content/fom-website/en/drivers/lewis-hamilton/_jcr_content/image' in result2['main_image'])
+        self.assertEqual(result2['driver_name'], 'Lewis Hamilton')
+        self.assertEqual(result2['driver_number'], '44')
 
     def test_apply_scraper_func1_complete_driver(self):
         result1 = driver_scraper.scrape_driver_stats(
@@ -166,41 +174,41 @@ class TestDriverScraper(unittest.TestCase):
         self.assertEqual(result1['country'], 'Germany')
         # test all manual additions
         result2 = driver_scraper.scrape_driver_stats(
-            'romain-grosjean'
+            'lewis-hamilton'
         )
-        self.assertEqual(result2['country'], 'France')
-        self.assertEqual(result2['date_of_birth'], '17/04/1986')
+        self.assertEqual(result2['country'], 'United Kingdom')
+        self.assertEqual(result2['date_of_birth'], '07/01/1985')
 
 
 class TestTeamScraper(unittest.TestCase):
 
     def test_change_team_image_size_medium(self):
-            res = team_scraper._change_team_img_size(
-                "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
-            self.assertTrue('640' in res)
+        res = team_scraper._change_team_img_size(
+            "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
+        self.assertTrue('640' in res)
 
     def test_change_team_image_size_large(self):
-            res = team_scraper._change_team_img_size(
-                "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 2)
-            print(res)
-            self.assertTrue('768' in res)
+        res = team_scraper._change_team_img_size(
+            "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 2)
+        print(res)
+        self.assertTrue('768' in res)
 
     def test_scrape_all_team_names(self):
-        result=team_scraper.scrape_all_team_names()
+        result = team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
 
     def test_get_main_image(self):
-        soup=team_scraper._team_page_scrape()
-        ferrariList=get_team_list('Ferrari', soup)
-        ferrari_data={
+        soup = team_scraper._team_page_scrape()
+        ferrariList = get_team_list('Ferrari', soup)
+        ferrari_data = {
             'url_name_slug': "Ferrari",
         }
         team_scraper.get_main_image(
             ferrari_data, ferrariList, 'Ferrari')
         self.assertTrue('main_image' in ferrari_data)
-        williamsList=get_team_list('Williams', soup)
-        williams_data={
+        williamsList = get_team_list('Williams', soup)
+        williams_data = {
             'url_name_slug': "Williams",
         }
         team_scraper.get_main_image(
@@ -208,9 +216,9 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue('main_image' in williams_data)
 
     def test_get_driver_flag_url(self):
-        soup=team_scraper._team_page_scrape()
-        williamsList=get_team_list('Williams', soup)
-        williams_dict={
+        soup = team_scraper._team_page_scrape()
+        williamsList = get_team_list('Williams', soup)
+        williams_dict = {
             'url_name_slug': 'Williams'
         }
         team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
@@ -234,8 +242,8 @@ class TestTeamScraper(unittest.TestCase):
         team_scraper.get_championship_titles(
             racing_point_data, racingPointList, 'Racing-Point')
         self.assertTrue('championship_titles' in racing_point_data)
-        MercedesList=get_team_list('Mercedes', soup)
-        mercedes_data={
+        MercedesList = get_team_list('Mercedes', soup)
+        mercedes_data = {
             'url_name_slug': "Mercedes"
         }
         team_scraper.get_championship_titles(
@@ -243,9 +251,9 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue('championship_titles' in mercedes_data)
 
     def test_get_podium_finishes(self):
-        soup=team_scraper._team_page_scrape()
-        renaultList=get_team_list('Renault', soup)
-        renault_data={
+        soup = team_scraper._team_page_scrape()
+        renaultList = get_team_list('Renault', soup)
+        renault_data = {
             'url_name_slug': 'Renault'
         }
         team_scraper.get_podium_finishes(renault_data, renaultList, 'Renault')
@@ -290,10 +298,10 @@ class TestUtils(unittest.TestCase):
             db.init_app(app)
             # look up first driver in db
             get_first_driver_sql = driver_model.Driver.query.all()
-            print('get',get_first_driver_sql)
+            print('get', get_first_driver_sql)
             res = utils.compare_current_to_stored(
                 get_first_driver_sql, driver_model.Driver)
-            print('res',res)
+            print('res', res)
             self.assertTrue(res)
 
     @unittest.skip(' # new class contains none vals')
@@ -333,7 +341,7 @@ class TestUtils(unittest.TestCase):
                 diff_class, driver_model.Driver)
             # print('RES', res)
             utils.log_None_values(res)
-    
+
     def test_hash_password(self):
         password = 'password123'
         hashed = utils.hash_password(password)
@@ -405,9 +413,8 @@ class TestScraperRunner(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-
-
     # make sure runners work together
+
     def test_all_runners(self):
         app = create_test_app()
         with app.app_context():
@@ -447,7 +454,7 @@ class TestScraperRunner(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    @unittest.skip #need to rewrite - no nullable false to fail now
+    @unittest.skip  # need to rewrite - no nullable false to fail now
     # run witn fail flag set to true - test for correct DB action
     def test_driver_runner_failure(self):
         app = create_test_app()
@@ -517,7 +524,8 @@ class TestDriverModel(unittest.TestCase):
             assert driver_pass in db.session
             db.session.remove()
             db.drop_all()
-    @unittest.skip #rewrite needed 
+
+    @unittest.skip  # rewrite needed
     def test_driver_insert_fail(self):
         # should fail missing contstraint
         app = create_test_app()
@@ -680,7 +688,7 @@ class TestTeamModel(unittest.TestCase):
             self.assertFalse(exists)
             db.session.remove()
             db.drop_all()
-        
+
     def test_team_driver_id_match(self):
         app = create_test_app()
         # add to context
@@ -691,7 +699,7 @@ class TestTeamModel(unittest.TestCase):
             team = self.create_new_team_pass()
             team.insert()
             # team = vars(team)
-            # add driver 
+            # add driver
             t = team_model.Team.query.all()
             t_id = t[0].id
             driver = driver_model.Driver.new({
@@ -699,18 +707,16 @@ class TestTeamModel(unittest.TestCase):
                 'country': 'United Kingdom',
                 'driver_number': '11',
                 'team': 'Mercedes',
-                'team_id':t_id
+                'team_id': t_id
             })
             driver.insert()
             d = driver_model.Driver.query.all()
             print(d[0].team_id)
 
-
             db.session.remove()
             db.drop_all()
             # print(team)
             # print(team)
-
 
 
 class TestTeamController(unittest.TestCase):
@@ -745,6 +751,7 @@ class TestTeamController(unittest.TestCase):
             self.assertTrue(type(team), list)
             self.assertTrue(len(team) > 0)
 
+
 class TestDriverController(unittest.TestCase):
     def test_show_all_drivers(self):
         app = create_real_app()
@@ -754,7 +761,6 @@ class TestDriverController(unittest.TestCase):
             self.assertTrue(type(drivers), list)
             self.assertTrue(len(drivers) > 0)
             self.assertTrue(len(drivers) == 20)
-        
 
     def test_show_single_driver_true(self):
         app = create_real_app()
@@ -765,8 +771,8 @@ class TestDriverController(unittest.TestCase):
             self.assertTrue('place_of_birth' in driver)
             self.assertTrue(driver['place_of_birth'], 'Stevenage, England')
 
-
     # test if DB is empty
+
     def test_show_single_driver_false(self):
         app = create_real_app()
         with app.app_context():
@@ -774,39 +780,41 @@ class TestDriverController(unittest.TestCase):
             driver = drivers_controller.show_single_driver('some-random-name')
             self.assertEqual(driver, 'No Driver with that name')
 
+
 class TestUserModel(unittest.TestCase):
     # --------- UTILS FUNCS
     ID = 1111111111
     DATA = {
-                "username":"username1",
-                "password":"password1"
-            }
-    
+        "username": "username1",
+        "password": "password1"
+    }
+
     def create_new_user_pass(self):
-        user = user_model.User.new(self.ID,self.DATA)
+        user = user_model.User.new(self.ID, self.DATA)
         return user
 
-    def create_new_user_fail(self,type_of_failure):
+    def create_new_user_fail(self, type_of_failure):
         if type_of_failure == 'username':
-            return user_model.User  .new(self.ID,{
+            return user_model.User  .new(self.ID, {
                 'password': 'password123'
             })
         elif type_of_failure == 'password':
-             return user_model.User.new(self.ID,{
-                'username':'username123',
+            return user_model.User.new(self.ID, {
+                'username': 'username123',
             })
         else:
             # default
-            print('USER', user_model.User.new(None,{
-                'username':'username1',
-                'password':'password123'
+            print('USER', user_model.User.new(None, {
+                'username': 'username1',
+                'password': 'password123'
             }))
-            return user_model.User.new(None,{
-                'username':'username1',
-                'password':'password123'
+            return user_model.User.new(None, {
+                'username': 'username1',
+                'password': 'password123'
             })
-    # ------------ TESTS 
+    # ------------ TESTS
     # test user.new() - success
+
     def test_encode_auth_token(self):
         app = create_test_app()
         with app.app_context():
@@ -831,11 +839,13 @@ class TestUserModel(unittest.TestCase):
             print('ENCODE', auth_token)
             self.assertTrue(isinstance(auth_token, bytes))
             # should decode to user ID
-            self.assertTrue(user_model.User.decode_auth_token(auth_token) == self.ID)
-            decode  = user_model.User.decode_auth_token(auth_token)
+            self.assertTrue(user_model.User.decode_auth_token(
+                auth_token) == self.ID)
+            decode = user_model.User.decode_auth_token(auth_token)
             print('DECODE', decode)
             db.session.remove()
             db.drop_all()
+
     def test_user_new_pass(self):
         app = create_test_app()
         with app.app_context():
@@ -856,7 +866,7 @@ class TestUserModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance w/o ID
-            self.assertRaises(ValueError,self.create_new_user_fail, 'id')
+            self.assertRaises(ValueError, self.create_new_user_fail, 'id')
             db.session.remove()
             db.drop_all()
 
@@ -866,7 +876,8 @@ class TestUserModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance w/o username
-            self.assertRaises(ValueError,self.create_new_user_fail, 'username')
+            self.assertRaises(
+                ValueError, self.create_new_user_fail, 'username')
             db.session.remove()
             db.drop_all()
 
@@ -876,10 +887,12 @@ class TestUserModel(unittest.TestCase):
             # init db
             db.init_app(app)
             # create driver instance w/o password
-            self.assertRaises(ValueError,self.create_new_user_fail, 'password')
+            self.assertRaises(
+                ValueError, self.create_new_user_fail, 'password')
             db.session.remove()
             db.drop_all()
     # test user.insert()
+
     def test_user_insert_pass(self):
         app = create_test_app()
         with app.app_context():
@@ -895,12 +908,13 @@ class TestUserModel(unittest.TestCase):
     def test_user_insert_fail(self):
         app = create_test_app()
         with app.app_context():
-            db.init_app(app)    
+            db.init_app(app)
             assert user not in db.session
             # raises assertion will not work
             db.session.remove()
             db.drop_all()
     # test user.exists() with id param
+
     def test_user_does_exist_by_id(self):
         app = create_test_app()
         with app.app_context():
@@ -973,37 +987,39 @@ class TestUserModel(unittest.TestCase):
             # check exists okay
             exists1 = user1.exists(user1.id)
             self.assertTrue(exists1)
-            # create second user 
+            # create second user
             user2 = self.create_new_user_pass()
             # cause error b/c of identical id to user1
             self.assertRaises(Exception,
-            user2.insert)
+                              user2.insert)
             # check user 2 is not in db
             exists2 = user2.exists(user2.id)
             self.assertFalse(exists2)
             db.session.remove()
             db.drop_all()
     # fails on unique constraint
+
     def test_users_insert_fail_same_username(self):
-            app = create_test_app()
-            with app.app_context():
-                db.init_app(app)
-                # create and insert new user1
-                user1 = user_model.User.new(1,self.DATA)
-                user1.insert()
-                # check exists okay
-                exists1 = user1.exists(user1.id)
-                self.assertTrue(exists1)
-                # create second user - same username
-                user2 = user_model.User.new(2,self.DATA)
-                self.assertRaises(Exception,
-                user2.insert)
-                 # check user 2 is not in db
-                exists2 = user2.exists(user2.id)
-                self.assertFalse(exists2)
-                db.session.remove()
-                db.drop_all()
+        app = create_test_app()
+        with app.app_context():
+            db.init_app(app)
+            # create and insert new user1
+            user1 = user_model.User.new(1, self.DATA)
+            user1.insert()
+            # check exists okay
+            exists1 = user1.exists(user1.id)
+            self.assertTrue(exists1)
+            # create second user - same username
+            user2 = user_model.User.new(2, self.DATA)
+            self.assertRaises(Exception,
+                              user2.insert)
+            # check user 2 is not in db
+            exists2 = user2.exists(user2.id)
+            self.assertFalse(exists2)
+            db.session.remove()
+            db.drop_all()
     # test user.delete()
+
     def test_single_user_delete(self):
         app = create_test_app()
         with app.app_context():
@@ -1018,7 +1034,7 @@ class TestUserModel(unittest.TestCase):
             assert user not in db.session
             db.session.remove()
             db.drop_all()
-    
+
     # test user.delete()
     def test_mutiple_users_delete(self):
         app = create_test_app()
@@ -1026,16 +1042,16 @@ class TestUserModel(unittest.TestCase):
             db.init_app(app)
             # create 3 test users
             user1 = user_model.User.new(1, {
-                'username':'username1',
-                'password':'password123'
+                'username': 'username1',
+                'password': 'password123'
             })
             user2 = user_model.User.new(2, {
-                'username':'username2',
-                'password':'password123'
+                'username': 'username2',
+                'password': 'password123'
             })
             user3 = user_model.User.new(3, {
-                'username':'username3',
-                'password':'password123'
+                'username': 'username3',
+                'password': 'password123'
             })
             # insert all users
             user1.insert()
@@ -1056,6 +1072,7 @@ class TestUserModel(unittest.TestCase):
             db.session.remove()
             db.drop_all()
     # test user.exists()
+
     def test_user_does_not_exists_after_delete(self):
         app = create_test_app()
         with app.app_context():
@@ -1069,7 +1086,7 @@ class TestUserModel(unittest.TestCase):
             self.assertFalse(user.exists(user.id))
             db.session.remove()
             db.drop_all()
-            
+
     def test_user_update_single_item(self):
         app = create_test_app()
         with app.app_context():
@@ -1085,8 +1102,8 @@ class TestUserModel(unittest.TestCase):
             self.assertEqual(user.team_data, self.DATA.get('team_data'))
             # add driver and team data
             new_data = {
-                "driver_data":['driver1', 'driver5', 'driver6', 'driver7'],
-                "team_data":['team1', 'team5', 'team6', 'team7']
+                "driver_data": ['driver1', 'driver5', 'driver6', 'driver7'],
+                "team_data": ['team1', 'team5', 'team6', 'team7']
             }
             user.update(new_data)
             # check that user data updated
@@ -1107,12 +1124,13 @@ class TestUserController(unittest.TestCase):
     # }
     ID = 1111111111
     DATA = {
-                "username":"username1",
-                "password":"password1"
-            }
+        "username": "username1",
+        "password": "password1"
+    }
     COMBINE_DATA = DATA
     COMBINE_DATA['id'] = ID
     # test combination of user new/insert
+
     def test_register_success(self):
         app = create_test_app()
         # with app.app_context():
@@ -1120,11 +1138,11 @@ class TestUserController(unittest.TestCase):
             db.init_app(app)
             # register new user
             res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
+                'id': self.ID,
+                'username': self.DATA['username'],
                 'password': self.DATA['password']
             })
-            # check correct status code            
+            # check correct status code
             self.assertEqual(res.status_code, 201)
             db.session.remove()
             db.drop_all()
@@ -1135,9 +1153,9 @@ class TestUserController(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             # raise error when ID is none
-            self.assertRaises(ValueError,users_controller.register,{
-                'id': None, 
-                'username':self.DATA['username'],
+            self.assertRaises(ValueError, users_controller.register, {
+                'id': None,
+                'username': self.DATA['username'],
                 'password': self.DATA['password']
             })
             db.session.remove()
@@ -1148,29 +1166,29 @@ class TestUserController(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             # raise error when username is none
-            self.assertRaises(ValueError,users_controller.register,{
-                'id': self.ID, 
-                'username':None,
+            self.assertRaises(ValueError, users_controller.register, {
+                'id': self.ID,
+                'username': None,
                 'password': self.DATA['password']
             })
             db.session.remove()
             db.drop_all()
-            
+
     def test_register_fail_already_exists(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
             # raise error when username is none
             reg_res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
+                'id': self.ID,
+                'username': self.DATA['username'],
                 'password': self.DATA['password']
             })
-            # check correct status code on first entry          
+            # check correct status code on first entry
             self.assertEqual(reg_res.status_code, 201)
-            res2  = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
+            res2 = users_controller.register({
+                'id': self.ID,
+                'username': self.DATA['username'],
                 'password': self.DATA['password']
             })
             print('res2', res2)
@@ -1182,15 +1200,15 @@ class TestUserController(unittest.TestCase):
         with app.app_context():
             db.init_app(app)
             reg_res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
+                'id': self.ID,
+                'username': self.DATA['username'],
                 'password': self.DATA['password']
             })
             # check registered ok
             self.assertEqual(reg_res.status_code, 201)
             status_res = users_controller.status(reg_res)
             self.assertEqual(status_res.status_code, 200)
-            self.assertEqual(json.loads(status_res.data)['status'],'success' )
+            self.assertEqual(json.loads(status_res.data)['status'], 'success')
             db.session.remove()
             db.drop_all()
 
@@ -1200,8 +1218,8 @@ class TestUserController(unittest.TestCase):
             db.init_app(app)
             # print(flask.request.path)
             reg_res = users_controller.register({
-                'id':self.ID, 
-                'username':self.DATA['username'],
+                'id': self.ID,
+                'username': self.DATA['username'],
                 'password': self.DATA['password']
             })
             # check registerd ok
@@ -1212,7 +1230,7 @@ class TestUserController(unittest.TestCase):
             status_res = users_controller.status(login_res)
             # check status okay
             self.assertEqual(status_res.status_code, 200)
-            self.assertEqual(json.loads(status_res.data)['status'],'success' )
+            self.assertEqual(json.loads(status_res.data)['status'], 'success')
 
     def test_login_fail_unregistered_user(self):
         app = create_test_app()
@@ -1222,19 +1240,19 @@ class TestUserController(unittest.TestCase):
             self.assertFalse(logged_in)
             db.session.remove()
             db.drop_all()
-    
+
     def test_login_fail_incorrect_username(self):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-             # register test user
+            # register test user
             reg_res = users_controller.register(self.COMBINE_DATA)
             # check registerd ok
             self.assertEqual(reg_res.status_code, 201)
             # attemp login wrong username
             login_res = users_controller.login({
-                'id':1111111,
-                'username':'username2',
+                'id': 1111111,
+                'username': 'username2',
                 'password': 'some-password'
             })
             # check login fails
@@ -1246,14 +1264,14 @@ class TestUserController(unittest.TestCase):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-             # register test user
+            # register test user
             reg_res = users_controller.register(self.COMBINE_DATA)
             # check registerd ok
             self.assertEqual(reg_res.status_code, 201)
             # attemp login wrong PW
             login_res = users_controller.login({
-                'id':1111111,
-                'username':'username1',
+                'id': 1111111,
+                'username': 'username1',
                 'password': 'some-wrong-password'
             })
             # check login fails
@@ -1273,7 +1291,8 @@ class TestUserController(unittest.TestCase):
             # attempt login
             login_res = users_controller.login(self.COMBINE_DATA)
             self.assertEqual(json.loads(login_res.data)['status'], 'success')
-            self.assertEqual(json.loads(login_res.data)['message'], 'logged in')
+            self.assertEqual(json.loads(login_res.data)
+                             ['message'], 'logged in')
             self.assertEqual(login_res.status_code, 200)
             db.session.remove()
             db.drop_all()
@@ -1285,13 +1304,13 @@ class TestRoutes(unittest.TestCase):
     #     # db = vars(app.extensions['migrate'])['db']
     #     test_app = app.app.test_client()
     #     with test_app as c:
-    #         # db = app.db 
+    #         # db = app.db
     #         # print(db)
     #         r = c.get('/test')
     #         self.assertEqual(r.status_code, 200)
     #         db.session.remove()
     #         db.drop_all()
-           
+
     # def test_register_route_fail(self):
     #     db = vars(app.extensions['migrate'])['db']
     #     test_app = app.test_client()
@@ -1313,16 +1332,17 @@ class TestRoutes(unittest.TestCase):
 
     def test_register_route_pass(self):
         test_app = app.app.test_client()
-        credentials = {   
-            "id":"1234567891012983",
+        credentials = {
+            "id": "1234567891012983",
             "username": "username_321",
             "password": "password123"
         }
         credentials = json.dumps(credentials)
         setup_testing_environment()
         with test_app as c:
-            db = app.db 
-            r = c.post('/register', data=credentials, content_type='application/json')
+            db = app.db
+            r = c.post('/register', data=credentials,
+                       content_type='application/json')
             # cannot receive GET - should be 405
             self.assertEqual(r.status_code, 201)
             db.reflect()
@@ -1330,29 +1350,30 @@ class TestRoutes(unittest.TestCase):
 
     def test_login_route_pass(self):
         test_app = app.app.test_client()
-        credentials = {   
-            "id":"1234567891012983",
+        credentials = {
+            "id": "1234567891012983",
             "username": "username_321",
             "password": "password123"
         }
         credentials = json.dumps(credentials)
         setup_testing_environment()
         with test_app as c:
-            db = app.db 
-            r1 = c.post('/register', data=credentials, content_type='application/json')
+            db = app.db
+            r1 = c.post('/register', data=credentials,
+                        content_type='application/json')
             self.assertEqual(r1.status_code, 201)
-            r2 = c.post('/login', data=credentials, content_type='application/json')
+            r2 = c.post('/login', data=credentials,
+                        content_type='application/json')
             # cannot receive GET - should be 405
             self.assertEqual(r2.status_code, 200)
             self.assertEqual(json.loads(r2.get_data())['status'], 'success')
             # https://jrheard.tumblr.com/post/12759432733/dropping-all-tables-on-postgres-using
             db.reflect()
             db.drop_all()
-            
 
     # def test_login_route_fail_not_exist(self):
     #     test_app = app.test_client()
-    #     credentials = {   
+    #     credentials = {
     #         "id":"1234567891012983",
     #         "username": "username_321",
     #         "password": "password123"
@@ -1370,7 +1391,7 @@ class TestRoutes(unittest.TestCase):
 
     # def test_login_route_fail_incorrect_password(self):
     #     test_app = app.test_client()
-    #     credentials = {   
+    #     credentials = {
     #         "id":"1234567891012983",
     #         "username": "username_321",
     #         "password": "password123"
@@ -1381,7 +1402,7 @@ class TestRoutes(unittest.TestCase):
     #         r1 = c.post('/register', data=credentials, content_type='application/json')
     #         self.assertEqual(r1.status_code, 201)
     #         # login with wrong PW
-    #         r2 = c.post('/login', data=json.dumps({   
+    #         r2 = c.post('/login', data=json.dumps({
     #         "id":"1234567891012983",
     #         "username": "username_321",
     #         "password": "wrong"
@@ -1393,7 +1414,7 @@ class TestRoutes(unittest.TestCase):
 
     # def test_status_token_success_register(self):
     #     test_app = app.test_client()
-    #     credentials = {   
+    #     credentials = {
     #         "id":"1234567891012983",
     #         "username": "username_321",
     #         "password": "password123"
@@ -1403,7 +1424,7 @@ class TestRoutes(unittest.TestCase):
     #     with test_app as c:
     #         r1 = c.post('/register', data=credentials, content_type='application/json')
     #         self.assertEqual(r1.status_code, 201)
-    #         r2 = c.get('/user-status',  
+    #         r2 = c.get('/user-status',
     #             headers=dict(
     #             Authorization='Bearer ' + json.loads(r1.get_data())['auth_token'])
     #             )
@@ -1413,7 +1434,7 @@ class TestRoutes(unittest.TestCase):
 
     # def test_status_token_success_login(self):
     #     test_app = app.test_client()
-    #     credentials = {   
+    #     credentials = {
     #         "id":"1234567891012983",
     #         "username": "username_321",
     #         "password": "password123"
@@ -1423,11 +1444,11 @@ class TestRoutes(unittest.TestCase):
     #     with test_app as c:
     #         r1 = c.post('/register', data=credentials, content_type='application/json')
     #         self.assertEqual(r1.status_code, 201)
-            
+
     #         r2 = c.post('/login', data=credentials,content_type='application/json')
     #         self.assertEqual(r2.status_code, 200)
-          
-    #         r3 = c.get('/user-status',  
+
+    #         r3 = c.get('/user-status',
     #             headers=dict(
     #                 Authorization='Bearer ' + json.loads(r2.get_data())['auth_token']
     #                 )
@@ -1435,7 +1456,7 @@ class TestRoutes(unittest.TestCase):
     #         self.assertEqual(json.loads(r3.get_data())['message'], 'user verified')
     #         self.assertEqual(r3.status_code, 200)
     #         self.assertEqual(json.loads(r3.get_data())['data']['user_id'], 1234567891012983)
-     
+
+
 if __name__ == '__main__':
     unittest.main()
-

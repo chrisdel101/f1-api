@@ -116,7 +116,7 @@ def get_driver_name(name_slug):
         if driver_info.find('h1', {"class", "driver-name"}):
             driver_name = driver_info.find(
                 'h1', {"class", "driver-name"}).text
-            return driver_name
+            return driver_name.strip()
         else:
             print("Warning: No name for driver found.")
     except Exception as e:
@@ -174,6 +174,7 @@ def scrape_driver_details_func1(name_slug):
                'Date of birth',
                'Place of birth',
                ]
+    print('details')
     # if len is more than zero then added unknown markup changes
     unknown_attr = []
     driver_dict = {}
