@@ -22,10 +22,8 @@ class Team(db.Model):
     pole_positions = db.Column(db.String(25))
     fastest_laps = db.Column(db.String(25))
     main_image = db.Column(db.String(500))
-    flag_img_url = db.Column(db.String(500))
     main_logo_url = db.Column(db.String(500))
-    small_logo_url = db.Column(db.String(500))
-    podium_finishes = db.Column(db.String(25))
+    chassis = db.Column(db.String(25))
     championship_titles = db.Column(db.String(25))
     drivers_scraped = db.Column(db.PickleType)
 #   https://stackoverflow.com/a/44595303/5972531
@@ -60,11 +58,9 @@ class Team(db.Model):
             d.pole_positions = scraper_dict.get('pole_positions')
             d.fastest_laps = scraper_dict.get('fastest_laps')
             d.main_image = scraper_dict.get('main_image')
-            d.flag_img_url = scraper_dict.get('flag_img_url')
             d.main_logo_url = scraper_dict.get('main_logo_url')
-            d.small_logo_url = scraper_dict.get('small_logo_url')
-            d.podium_finishes = scraper_dict.get('podium_finishes')
-            d.championship_titles = scraper_dict.get('championship_titles')
+            d.chassis = scraper_dict.get('chassis')
+            d.championship_titles = scraper_dict.get('world_championships')
             d.drivers_scraped = scraper_dict.get('drivers')
             return d
 

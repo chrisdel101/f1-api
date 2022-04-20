@@ -104,3 +104,4 @@ def scrape_teams():
             d.delete(team_name_slug)
         # add to model
         d.insert()
+        # return
