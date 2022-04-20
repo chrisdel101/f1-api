@@ -174,7 +174,6 @@ def scrape_driver_details_func1(name_slug):
                'Date of birth',
                'Place of birth',
                ]
-    print('details')
     # if len is more than zero then added unknown markup changes
     unknown_attr = []
     driver_dict = {}
@@ -187,6 +186,7 @@ def scrape_driver_details_func1(name_slug):
                 for i, detail in enumerate(details):
                     # if they match add to driver object
                     if driver.span and driver.span.text == detail:
+
                         driver_dict[_slugify(driver.span.text)
                                     ] = driver.td.text
                         found = True
@@ -221,7 +221,6 @@ def apply_scraper_func2_complete_driver(name_slug, driver_dict):
     try:
         driver_dict['main_image'] = get_main_image(name_slug).strip()
         driver_dict['driver_name'] = get_driver_name(name_slug).strip()
-        print('NAME', driver_dict['driver_name'])
         driver_dict['driver_number'] = get_driver_number(name_slug).strip()
         driver_dict['flag_img_url'] = get_driver_flag(name_slug).strip()
         return driver_dict

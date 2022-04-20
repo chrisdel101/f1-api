@@ -1,5 +1,7 @@
 import datetime
 # endpoints
+
+
 def home_endpoint():
     return "https://www.formula1.com"
 

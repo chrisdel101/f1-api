@@ -27,7 +27,7 @@ def _team_page_scrape():
 # takes url and index to choose size from list
 def _change_team_img_size(src, list_index):
     # replace scraped img size with one the sizes below
-    regex = "image[\d]+.img.[\d]+.(medium|small|large)"
+    regex = "(image[\\d]+x[\\d]+|image[\\d]+)\\.img\\.[\\d]+\\.(medium|large|small)"
     sizes = ['320', '640', '768', '1536']
     r = "image1.img.{0}.medium".format(sizes[list_index])
     sub = re.sub(regex, r, src)
@@ -66,6 +66,8 @@ def get_main_image(scraper_dict, url_name_slug, force_overwrite=False):
     # get particular team endpint with slug
     page = requests.get(endpoints.team_endpoint(
         url_name_slug), headers=headers)
+    print('EE',
+          url_name_slug)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, 'html.parser')
     if type(scraper_dict) is not dict:
@@ -79,6 +81,7 @@ def get_main_image(scraper_dict, url_name_slug, force_overwrite=False):
         # take first image available, get src
         main_img_src = carousel.find(
             'img')['src']
+        print('img', main_img_src)
         # resize img b/c scrape is wrong
         main_img_src = _change_team_img_size(main_img_src, 3)
         # form into full URL
@@ -120,6 +123,7 @@ def get_main_logo_url(scraper_dict, url_name_slug, force_overwrite=False):
         return scraper_dict
 
 
+# not called
 def get_small_logo_url(scraper_dict, short_team_name, force_overwrite=False):
     # get particular all teams endpint, no slug
     page = requests.get(endpoints.teams_endpoint(), headers=headers)
@@ -208,7 +212,7 @@ def scrape_single_team_stats(team_slug):
                'Base',
                'Team Chief',
                'Technical Chief',
-               'Chasis',
+               'Chassis',
                'Power Unit',
                'First Team Entry',
                'World Championships',
@@ -221,14 +225,15 @@ def scrape_single_team_stats(team_slug):
         if team_details.find_all('tr'):
                 # loop over html
             for team in team_details.find_all('tr'):
-                    # print('Team', team)
-                    # # loop over all wanted details
+                # # loop over all wanted details
                 for detail in details:
-                        #     # if they match add to team object
+                    #     # if they match add to team object
                     if team.span and team.span.text == detail:
+                        print(detail, ": ", team.td.text)
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text
                         continue
+        # print('TT', team_dict)
         return team_dict
 
     except ValueError:

@@ -32,8 +32,9 @@ def setup_testing_environment():
 
 
 def get_team_list(team_name, soup):
-    lis = soup.find_all('li')
-    for li in lis:
+    list = soup.find_all('li')
+    for li in list:
+        print('li', li)
         s = li.find('section')
         if s:
             if s.find('a') and s.find('a')['href']:
@@ -94,6 +95,7 @@ class TestDriverScraper(unittest.TestCase):
 
     def test_scrape_all_driver_standings(self):
         result = driver_scraper.scrape_all_drivers_standings()
+        print('res', result)
         self.assertTrue(type(result) is list)
         self.assertTrue(len(result) > 0)
         res1 = result[0]
@@ -185,6 +187,7 @@ class TestTeamScraper(unittest.TestCase):
     def test_change_team_image_size_medium(self):
         res = team_scraper._change_team_img_size(
             "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
+        print('RES', res)
         self.assertTrue('640' in res)
 
     def test_change_team_image_size_large(self):
@@ -199,77 +202,81 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue(len(result) >= 1)
 
     def test_get_main_image(self):
-        soup = team_scraper._team_page_scrape()
-        ferrariList = get_team_list('Ferrari', soup)
         ferrari_data = {
             'url_name_slug': "Ferrari",
         }
         team_scraper.get_main_image(
-            ferrari_data, ferrariList, 'Ferrari')
+            ferrari_data, 'Ferrari')
         self.assertTrue('main_image' in ferrari_data)
-        williamsList = get_team_list('Williams', soup)
         williams_data = {
             'url_name_slug': "Williams",
         }
         team_scraper.get_main_image(
-            williams_data, williamsList, 'Williams')
+            williams_data, 'Williams')
         self.assertTrue('main_image' in williams_data)
 
-    def test_get_driver_flag_url(self):
-        soup = team_scraper._team_page_scrape()
-        williamsList = get_team_list('Williams', soup)
-        williams_dict = {
-            'url_name_slug': 'Williams'
-        }
-        team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
-        self.assertTrue('flag_img_url' in williams_dict)
+    # this func is missing
+    # def test_get_driver_flag_url(self):
+    #     soup = team_scraper._team_page_scrape()
+    #     williamsList = get_team_list('Williams', soup)
+    #     williams_dict = {
+    #         'url_name_slug': 'Williams'
+    #     }
+    #     team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
+    #     self.assertTrue('flag_img_url' in williams_dict)
 
-    def test_get_logo_url(self):
-        soup = team_scraper._team_page_scrape()
-        haasList = get_team_list('Haas', soup)
-        haas_data = {
-            'url_name_slug': 'Haas'
-        }
-        team_scraper.get_logo_url(haas_data, haasList, 'Haas')
-        self.assertTrue('logo_url' in haas_data)
+    # this func is missing
+    # def test_get_logo_url(self):
+    #     soup = team_scraper._team_page_scrape()
+    #     haasList = get_team_list('Haas', soup)
+    #     haas_data = {
+    #         'url_name_slug': 'Haas'
+    #     }
+    #     team_scraper.get_logo_url(haas_data, haasList, 'Haas')
+    #     self.assertTrue('logo_url' in haas_data)
 
-    def test_get_championship_titles(self):
-        soup = team_scraper._team_page_scrape()
-        racingPointList = get_team_list('Racing-Point', soup)
-        racing_point_data = {
-            'url_name_slug': "Racing-Point",
-        }
-        team_scraper.get_championship_titles(
-            racing_point_data, racingPointList, 'Racing-Point')
-        self.assertTrue('championship_titles' in racing_point_data)
-        MercedesList = get_team_list('Mercedes', soup)
-        mercedes_data = {
-            'url_name_slug': "Mercedes"
-        }
-        team_scraper.get_championship_titles(
-            mercedes_data, MercedesList, 'Mercedes')
-        self.assertTrue('championship_titles' in mercedes_data)
+    # this func is missing
+    # def test_get_championship_titles(self):
+    #     soup = team_scraper._team_page_scrape()
+    #     racingPointList = get_team_list('Racing-Point', soup)
+    #     racing_point_data = {
+    #         'url_name_slug': "Racing-Point",
+    #     }
+    #     team_scraper.get_championship_titles(
+    #         racing_point_data, racingPointList, 'Racing-Point')
+    #     self.assertTrue('championship_titles' in racing_point_data)
+    #     MercedesList = get_team_list('Mercedes', soup)
+    #     mercedes_data = {
+    #         'url_name_slug': "Mercedes"
+    #     }
+    #     team_scraper.get_championship_titles(
+    #         mercedes_data, MercedesList, 'Mercedes')
+    #     self.assertTrue('championship_titles' in mercedes_data)
 
-    def test_get_podium_finishes(self):
-        soup = team_scraper._team_page_scrape()
-        renaultList = get_team_list('Renault', soup)
-        renault_data = {
-            'url_name_slug': 'Renault'
-        }
-        team_scraper.get_podium_finishes(renault_data, renaultList, 'Renault')
-        self.assertTrue('podium_finishes' in renault_data)
+    # # this func is missing
+    # def test_get_podium_finishes(self):
+    #     soup = team_scraper._team_page_scrape()
+    #     renaultList = get_team_list('Renault', soup)
+    #     renault_data = {
+    #         'url_name_slug': 'Renault'
+    #     }
+    #     team_scraper.get_podium_finishes(renault_data, renaultList, 'Renault')
+    #     self.assertTrue('podium_finishes' in renault_data)
 
     def test_get_drivers(self):
         soup = team_scraper._team_page_scrape()
-        renaultList = get_team_list('Renault', soup)
-        renault_data = {
-            'url_name_slug': 'Renault'
+        merc_list = get_team_list('Mercedes', soup)
+        merc_data = {
+            'url_name_slug': 'Mercedes'
         }
-        team_scraper.get_drivers(renault_data, renaultList, 'Renault')
+        print('list', merc_list)
+        print('data', merc_data)
+        team_scraper.get_drivers(merc_list, 'mercedes')
 
-        expected = [{'driver_name': 'Nico  Hulkenberg', 'name_slug': 'nico-hulkenberg'},
-                    {'driver_name': 'Daniel Ricciardo', 'name_slug': 'daniel-ricciardo'}]
-        self.assertEqual(renault_data['drivers'], expected)
+        expected = [{'driver_name': 'Lewis Hamilton', 'name_slug': 'lewis-hamilton'},
+                    {'driver_name': 'George Russell', 'name_slug': 'george-russell'}]
+        print('MERC', merc_data)
+        self.assertEqual(merc_data['drivers'], expected)
 
 
 class TestUtils(unittest.TestCase):
