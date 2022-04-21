@@ -1,11 +1,11 @@
 from flask import Flask, session, make_response
 import json
-import sqlite3
+# import sqlite3
 import flask
 import os
-from datetime import timedelta
+# from datetime import timedelta
 import unittest
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import *
 from utilities.scraper import driver_scraper, team_scraper
 import scraper_runner
@@ -15,19 +15,19 @@ from controllers import drivers_controller, teams_controller, users_controller
 from database import db
 from dotenv import load_dotenv, find_dotenv
 import psycopg2
-import flask_login
-from flask_login import current_user, login_manager, LoginManager, login_required
-import loader
+# import flask_login
+# from flask_login import current_user, login_manager, LoginManager, login_required
+# import loader
 import app
 # from app import app
 
-print('APP', app)
+# print('APP', app)
 
 # https://stackoverflow.com/a/50536837/5972531
 
 
 def setup_testing_environment():
-    print('RUNS')
+    print('SETUP TEST ENV')
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
 
@@ -187,7 +187,7 @@ class TestTeamScraper(unittest.TestCase):
     def test_change_team_image_size_medium(self):
         res = team_scraper._change_team_img_size(
             "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
-        print('RES', res)
+        # print('RES', res)
         self.assertTrue('640' in res)
 
     def test_change_team_image_size_large(self):
@@ -200,6 +200,17 @@ class TestTeamScraper(unittest.TestCase):
         result = team_scraper.scrape_all_team_names()
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
+
+    def test_scrape_single_team_stats(self):
+        result = team_scraper.scrape_single_team_stats('ferrari')
+        self.assertTrue(type(result) is dict)
+        self.assertTrue(result['full_team_name'] is 'Scuderia Ferrari')
+
+    def test_get_small_logo_url(self):
+        result = team_scraper.get_small_logo_url('Ferrari')
+        self.assertTrue('ferrari-logo' in result)
+        result = team_scraper.get_small_logo_url('Red Bull Racing')
+        self.assertTrue('red-bull-racing-logo' in result)
 
     def test_get_main_image(self):
         ferrari_data = {
@@ -376,9 +387,8 @@ class TestScraperRunner(unittest.TestCase):
             # init db
             db.init_app(app)
             scraper_runner.scrape_drivers()
-
             drivers = driver_model.Driver.query.all()
-            # print('Dr', drivers)
+            print('Dr', drivers)
             self.assertTrue(type(drivers) == list)
             self.assertTrue(len(drivers) == 20)
 
@@ -413,6 +423,9 @@ class TestScraperRunner(unittest.TestCase):
             self.assertEqual(ferrari.base, 'Maranello, Italy')
             self.assertEqual(ferrari.power_unit, 'Ferrari')
 
+            self.assertTrue('ferrari-logo' in ferrari.small_logo_url)
+
+            self.assertTrue('haas-f1-team-logo' in haas.small_logo_url)
             self.assertTrue('Haas F1 Team' in haas.full_team_name)
             self.assertEqual(haas.base, 'Kannapolis, United States')
             self.assertEqual(haas.power_unit, 'Ferrari')
@@ -426,8 +439,14 @@ class TestScraperRunner(unittest.TestCase):
         app = create_test_app()
         with app.app_context():
             db.init_app(app)
-            scraper_runner.scrape_drivers()
             scraper_runner.scrape_teams()
+            ferrari = team_model.Team.query.filter_by(
+                team_name_slug='ferrari').first()
+            haas = team_model.Team.query.filter_by(
+                team_name_slug='haas_f1_team').first()
+            print('FERR', ferrari)
+            print('HASS', haas)
+            scraper_runner.scrape_drivers()
             drivers = driver_model.Driver.query.all()
             # print('Dr', drivers)
             self.assertTrue(type(drivers) == list)
@@ -457,6 +476,10 @@ class TestScraperRunner(unittest.TestCase):
             self.assertTrue('Haas F1 Team' in haas.full_team_name)
             self.assertEqual(haas.base, 'Kannapolis, United States')
             self.assertEqual(haas.power_unit, 'Ferrari')
+
+            self.assertTrue('ferrari-logo' in ferrari.small_logo_url)
+
+            self.assertTrue('haas-f1-team-logo' in haas.small_logo_url)
 
             db.session.remove()
             db.drop_all()

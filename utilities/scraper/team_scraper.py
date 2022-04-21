@@ -66,7 +66,7 @@ def get_main_image(scraper_dict, url_name_slug, force_overwrite=False):
     # get particular team endpint with slug
     page = requests.get(endpoints.team_endpoint(
         url_name_slug), headers=headers)
-    print('EE',
+    print('get_main_image',
           url_name_slug)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -122,32 +122,35 @@ def get_main_logo_url(scraper_dict, url_name_slug, force_overwrite=False):
         print('Warning: No logo_img found.')
         return scraper_dict
 
+# uses team name, not team_full_name
 
-# not called
-def get_small_logo_url(scraper_dict, short_team_name, force_overwrite=False):
+
+def get_small_logo_url(team_name):
     # get particular all teams endpint, no slug
     page = requests.get(endpoints.teams_endpoint(), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, 'html.parser')
-    if type(scraper_dict) is not dict:
-        ValueError('Warning: get_small_logo_url must take a dict.')
-    if 'get_small_logo_url' in scraper_dict and not force_overwrite:
-        # return unchanged dict
-        return scraper_dict
+    # if type(scraper_dict) is not dict:
+    #     ValueError('Warning: get_small_logo_url must take a dict.')
+    # if 'get_small_logo_url' in scraper_dict and not force_overwrite:
+    #     # return unchanged dict
+    #     return scraper_dict
     # get stats_container
     teams_container = soup.find(
         'div', {'class', 'team-listing'}).find('div', {'class', 'row'}).find_all('div', {'class', 'col-12'})
     if teams_container:
+        print('TEAM finding logo', team_name)
         for team in teams_container:
-            team_name = team.find('div', {'class', 'name'}).contents[3].text
-            if team_name == short_team_name:
+            find_team_name = team.find(
+                'div', {'class', 'name'}).contents[3].text
+            print('TEAM on page', find_team_name)
+            if find_team_name == team_name:
                 small_logo = team.find(
-                    'div', {'class', 'logo'}).find('img')
-                scraper_dict['small_logo'] = small_logo
-
+                    'div', {'class', 'logo'}).find('img')['data-src']
+                return small_logo
     else:
         print('Warning: No logo_img found.')
-    return scraper_dict
+    # return scraper_dict
 
 
 def get_drivers(scraper_dict, url_name_slug, force_overwrite=False):
@@ -192,9 +195,10 @@ def add_imgs_markup(scraper_dict):
             scraper_dict = get_main_image(
                 scraper_dict, url_name_slug, True)
             scraper_dict = get_main_logo_url(scraper_dict, url_name_slug, True)
-            scraper_dict = get_small_logo_url(
-                scraper_dict, scraper_dict['name'], True)
+            scraper_dict['small_logo_url'] = get_small_logo_url(
+                scraper_dict['name'])
             scraper_dict = get_drivers(scraper_dict, url_name_slug)
+            print('add_imgs_markup end', scraper_dict)
         return scraper_dict
 
     except Exception as e:
@@ -202,34 +206,23 @@ def add_imgs_markup(scraper_dict):
 
 
 # team slug needs to be capitalized
-def scrape_single_team_stats(team_slug):
-    # print('TS', endpoints.team_endpoint(team_slug))
+def scrape_single_team_stats(team_slug, stats_to_scrape):
+    # manually cap first letter
+    team_slug = f'{team_slug[0].upper()}{team_slug[1:len(team_slug)]}'
     page = requests.get(endpoints.team_endpoint(team_slug), headers=headers)
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, 'html.parser')
     team_details = soup.find('section', {'class', 'stats'})
-    details = ['Full Team Name',
-               'Base',
-               'Team Chief',
-               'Technical Chief',
-               'Chassis',
-               'Power Unit',
-               'First Team Entry',
-               'World Championships',
-               'Highest Race Finish',
-               'Pole Positions',
-               'Fastest Laps',
-               ]
     team_dict = {}
     try:
         if team_details.find_all('tr'):
                 # loop over html
             for team in team_details.find_all('tr'):
                 # # loop over all wanted details
-                for detail in details:
+                for stat in stats_to_scrape:
                     #     # if they match add to team object
-                    if team.span and team.span.text == detail:
-                        print(detail, ": ", team.td.text)
+                    if team.span and team.span.text == stat:
+                        # print(stat, ": ", team.td.text)
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text
                         continue

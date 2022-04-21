@@ -45,9 +45,6 @@ def scrape_drivers(fail=False):
                 i = 0
                 break
             i = i + 1
-        # - make instance of driver
-        d = driver_model.Driver.new(new_driver_dict)
-
         if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
                 # fail flag can be set for testing
             if fail:
@@ -56,19 +53,21 @@ def scrape_drivers(fail=False):
             else:
                 # assign random value in tests
                 new_driver_dict['team_id'] = random.randint(1, 100000)
+                print('new_driver_dict', new_driver_dict)
+
         else:
             # match driver team_name_slug to actual team with contains - goal is team_id
+            team_slug = _slugify(new_driver_dict['team'])
             team_match_driver = team_model.Team.query.filter(
-                team_model.Team.team_name_slug.contains(d.team_name_slug)).first()
+                team_model.Team.team_name_slug.contains(team_slug)).first()
+            print('team_match_driver', team_match_driver)
             # get team id from team lookup
             team_id = team_match_driver.id
             # # add foreign key to driver
             new_driver_dict['team_id'] = team_id
-            # reinstansiate driver instance with foriegn key
-            d = driver_model.Driver.new(new_driver_dict)
-
-            # add driver to team drivers_list
+        d = driver_model.Driver.new(new_driver_dict)
         compare = utils.compare_current_to_stored(d, driver_model.Driver)
+
         if compare and type(compare) != dict:
             if d.exists(driver_slug):
                 d.delete(driver_slug)
@@ -80,6 +79,19 @@ def scrape_drivers(fail=False):
 
 
 def scrape_teams():
+    stats_to_scrape = [
+        'Full Team Name',
+        'Base',
+        'Team Chief',
+        'Technical Chief',
+        'Chassis',
+        'Power Unit',
+        'First Team Entry',
+        'World Championships',
+        'Highest Race Finish',
+        'Pole Positions',
+        'Fastest Laps',
+    ]
     # -get all driver names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
     # - loop over names
@@ -88,13 +100,15 @@ def scrape_teams():
         # convert to url_slug - name with starting cap
         url_name_slug = utils.create_url_name_slug(team)
         # scrape each team
-        new_dict = team_scraper.scrape_single_team_stats(url_name_slug)
+        new_dict = team_scraper.scrape_single_team_stats(
+            url_name_slug, stats_to_scrape)
         # add slug to dict
         new_dict['team_name_slug'] = team_name_slug
         # add url slug to dict
         new_dict['url_name_slug'] = url_name_slug
         # add shorter version of name
         new_dict['name'] = team['name']
+        # print('NEW DICT', new_dict)
         # add additional markuop and drivers to dict
         new_dict = team_scraper.add_imgs_markup(new_dict)
         # - insert on scrape into DB
