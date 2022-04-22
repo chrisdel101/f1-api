@@ -10,9 +10,9 @@ class Team(db.Model):
     # underscored name
     team_name_slug = db.Column(
         db.String(100), nullable=False, unique=True)
-    # name with hypens for urls
-    url_name_slug = db.Column(db.String(100))
-    name = db.Column(db.String(100))
+    # shorter version of full name
+    team_name_header = db.Column(db.String(100))
+    team_name = db.Column(db.String(100))
     base = db.Column(db.String(100))
     team_chief = db.Column(db.String(100))
     technical_chief = db.Column(db.String(100))
@@ -46,9 +46,9 @@ class Team(db.Model):
             db.create_all()
             d = cls()
             d.team_name_slug = scraper_dict.get('team_name_slug')
-            d.url_name_slug = scraper_dict.get('url_name_slug')
+            d.team_name_header = scraper_dict.get('team_name_header')
             d.full_team_name = scraper_dict.get('full_team_name')
-            d.name = scraper_dict.get('name')
+            d.team_name = scraper_dict.get('team_name')
             d.base = scraper_dict.get('base')
             d.highest_grid_position = scraper_dict.get('highest_grid_position')
             d.team_chief = scraper_dict.get('team_chief')

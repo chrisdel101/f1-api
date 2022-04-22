@@ -1,3 +1,14 @@
+import app
+from constants import TeamHeaderNames
+import psycopg2
+from dotenv import load_dotenv, find_dotenv
+from database import db
+from controllers import drivers_controller, teams_controller, users_controller
+from models import driver_model, team_model, user_model
+from utilities import utils
+import scraper_runner
+from utilities.scraper import driver_scraper, team_scraper
+from sqlalchemy import *
 from flask import Flask, session, make_response
 import json
 # import sqlite3
@@ -5,20 +16,13 @@ import flask
 import os
 # from datetime import timedelta
 import unittest
+from slugify import Slugify
+slugify = Slugify(to_lower=True)
+slugify.separator = '_'
 # from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import *
-from utilities.scraper import driver_scraper, team_scraper
-import scraper_runner
-from utilities import utils
-from models import driver_model, team_model, user_model
-from controllers import drivers_controller, teams_controller, users_controller
-from database import db
-from dotenv import load_dotenv, find_dotenv
-import psycopg2
 # import flask_login
 # from flask_login import current_user, login_manager, LoginManager, login_required
 # import loader
-import app
 # from app import app
 
 # print('APP', app)
@@ -27,7 +31,7 @@ import app
 
 
 def setup_testing_environment():
-    print('SETUP TEST ENV')
+    print('SETUP_testing_environment')
     load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
 
@@ -47,9 +51,15 @@ def create_test_app():
         app = Flask(__name__)
         app.secret_key = b'12345678910-not-my-real-key'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'dev_testing':
+        if os.environ['FLASK_ENV'] == 'development':
             setup_testing_environment()
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+            app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+        elif os.environ['FLASK_ENV'] == 'dev_testing':
+            setup_testing_environment()
+            app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+                'DEV_TESTING_DB')
+        else:
+            raise RuntimeError("Invalid FLASK_ENV")
         return app
     except Exception as e:
         print('Error in create_test_app', e)
@@ -187,13 +197,11 @@ class TestTeamScraper(unittest.TestCase):
     def test_change_team_image_size_medium(self):
         res = team_scraper._change_team_img_size(
             "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
-        # print('RES', res)
         self.assertTrue('640' in res)
 
     def test_change_team_image_size_large(self):
         res = team_scraper._change_team_img_size(
             "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 2)
-        print(res)
         self.assertTrue('768' in res)
 
     def test_scrape_all_team_names(self):
@@ -202,9 +210,35 @@ class TestTeamScraper(unittest.TestCase):
         self.assertTrue(len(result) >= 1)
 
     def test_scrape_single_team_stats(self):
-        result = team_scraper.scrape_single_team_stats('ferrari')
-        self.assertTrue(type(result) is dict)
-        self.assertTrue(result['full_team_name'] is 'Scuderia Ferrari')
+        stats_to_scrape_run1 = [
+            'Full Team Name',
+            'Base',
+        ]
+        team_name_header1 = TeamHeaderNames.red_bull_racing.value
+        RESULT1 = team_scraper.scrape_single_team_stats(
+            team_name_header1, stats_to_scrape_run1)
+        self.assertTrue(type(RESULT1) is dict)
+        self.assertTrue(slugify
+                        (stats_to_scrape_run1[0]) in RESULT1)
+        self.assertTrue(slugify(stats_to_scrape_run1[1]) in RESULT1)
+        self.assertTrue(utils.word_seperator_manager(
+            team_name_header1, '-') in RESULT1.get('full_team_name'))
+
+        stats_to_scrape_run2 = [
+            'Full Team Name',
+            'First Team Entry',
+            'World Championships',
+            'Highest Race Finish',
+        ]
+        team_name_header2 = TeamHeaderNames.mclaren.value
+        RESULT2 = team_scraper.scrape_single_team_stats(
+            team_name_header2, stats_to_scrape_run2)
+        self.assertTrue(slugify
+                        (stats_to_scrape_run2[0]) in RESULT2)
+        self.assertTrue(slugify(stats_to_scrape_run2[1]) in RESULT2)
+        self.assertTrue(slugify(stats_to_scrape_run2[2]) in RESULT2)
+        self.assertTrue(utils.word_seperator_manager(
+            team_name_header2, '-') in RESULT2.get('full_team_name'))
 
     def test_get_small_logo_url(self):
         result = team_scraper.get_small_logo_url('Ferrari')
@@ -212,94 +246,58 @@ class TestTeamScraper(unittest.TestCase):
         result = team_scraper.get_small_logo_url('Red Bull Racing')
         self.assertTrue('red-bull-racing-logo' in result)
 
+    def test_main_logo_url(self):
+        result1 = team_scraper.get_main_logo_url('Red-Bull')
+        self.assertTrue('Red-Bull-Racing' and 'logo' in result1)
+        result2 = team_scraper.get_main_logo_url('Aston-Martin')
+        self.assertTrue('Aston-Martin' in result2)
+
     def test_get_main_image(self):
-        ferrari_data = {
-            'url_name_slug': "Ferrari",
-        }
-        team_scraper.get_main_image(
-            ferrari_data, 'Ferrari')
-        self.assertTrue('main_image' in ferrari_data)
-        williams_data = {
-            'url_name_slug': "Williams",
-        }
-        team_scraper.get_main_image(
-            williams_data, 'Williams')
-        self.assertTrue('main_image' in williams_data)
-
-    # this func is missing
-    # def test_get_driver_flag_url(self):
-    #     soup = team_scraper._team_page_scrape()
-    #     williamsList = get_team_list('Williams', soup)
-    #     williams_dict = {
-    #         'url_name_slug': 'Williams'
-    #     }
-    #     team_scraper.get_flag_img_url(williams_dict, williamsList, 'Williams')
-    #     self.assertTrue('flag_img_url' in williams_dict)
-
-    # this func is missing
-    # def test_get_logo_url(self):
-    #     soup = team_scraper._team_page_scrape()
-    #     haasList = get_team_list('Haas', soup)
-    #     haas_data = {
-    #         'url_name_slug': 'Haas'
-    #     }
-    #     team_scraper.get_logo_url(haas_data, haasList, 'Haas')
-    #     self.assertTrue('logo_url' in haas_data)
-
-    # this func is missing
-    # def test_get_championship_titles(self):
-    #     soup = team_scraper._team_page_scrape()
-    #     racingPointList = get_team_list('Racing-Point', soup)
-    #     racing_point_data = {
-    #         'url_name_slug': "Racing-Point",
-    #     }
-    #     team_scraper.get_championship_titles(
-    #         racing_point_data, racingPointList, 'Racing-Point')
-    #     self.assertTrue('championship_titles' in racing_point_data)
-    #     MercedesList = get_team_list('Mercedes', soup)
-    #     mercedes_data = {
-    #         'url_name_slug': "Mercedes"
-    #     }
-    #     team_scraper.get_championship_titles(
-    #         mercedes_data, MercedesList, 'Mercedes')
-    #     self.assertTrue('championship_titles' in mercedes_data)
-
-    # # this func is missing
-    # def test_get_podium_finishes(self):
-    #     soup = team_scraper._team_page_scrape()
-    #     renaultList = get_team_list('Renault', soup)
-    #     renault_data = {
-    #         'url_name_slug': 'Renault'
-    #     }
-    #     team_scraper.get_podium_finishes(renault_data, renaultList, 'Renault')
-    #     self.assertTrue('podium_finishes' in renault_data)
+        team_name_header1 = "Red-Bull"
+        team_name_header2 = "Aston-Martin"
+        result1 = team_scraper.get_main_image(team_name_header1)
+        self.assertTrue('gallery' in result1)
+        self.assertTrue('jpg' in result1)
+        self.assertTrue('Red-Bull-Racing' in result1)
+        result2 = team_scraper.get_main_image(team_name_header2)
+        self.assertTrue('gallery' in result2)
+        self.assertTrue('jpg' in result2)
+        self.assertTrue('Aston-Martin' in result2)
 
     def test_get_drivers(self):
-        soup = team_scraper._team_page_scrape()
-        merc_list = get_team_list('Mercedes', soup)
-        merc_data = {
-            'url_name_slug': 'Mercedes'
-        }
-        print('list', merc_list)
-        print('data', merc_data)
-        team_scraper.get_drivers(merc_list, 'mercedes')
-
-        expected = [{'driver_name': 'Lewis Hamilton', 'name_slug': 'lewis-hamilton'},
-                    {'driver_name': 'George Russell', 'name_slug': 'george-russell'}]
-        print('MERC', merc_data)
-        self.assertEqual(merc_data['drivers'], expected)
+        team_name_header1 = "Red-Bull"
+        team_name_header2 = "Aston-Martin"
+        team_name_header3 = "Haas-F1-Team"
+        result1 = team_scraper.get_drivers(team_name_header1)
+        result2 = team_scraper.get_drivers(team_name_header2)
+        result3 = team_scraper.get_drivers(team_name_header3)
+        print("RES", result3)
+        self.assertTrue(next(
+            (driver for driver in result1 if driver["name_slug"] == " max-verstappen"), True))
 
 
 class TestUtils(unittest.TestCase):
 
-    def test_create_url_slug_name(self):
-        dic1 = {'name_slug': 'haas_f1_team', 'name': 'Haas_F1_Team'}
-        dic2 = {'name_slug': 'alfa_romeo_racing',
-                'name': 'Alfa_Romeo_Racing'}
-        url_slug1 = utils.create_url_name_slug(dic1)
-        url_slug2 = utils.create_url_name_slug(dic2)
-        self.assertEqual(url_slug1, 'Haas')
-        self.assertEqual(url_slug2, 'Alfa-Romeo')
+    def test_create_team_header_from_slug(self):
+        name_slug1 = 'haas_f1_team'
+        name_slug2 = 'alfa_romeo_racing'
+        name_slug3 = 'red_bull_racing'
+        name_slug4 = 'mclaren'
+        result1 = utils.create_team_header_from_slug(name_slug1)
+        result2 = utils.create_team_header_from_slug(name_slug2)
+        result3 = utils.create_team_header_from_slug(name_slug3)
+        result4 = utils.create_team_header_from_slug(name_slug4)
+        self.assertEqual(result1, 'Haas')
+        self.assertEqual(result2, 'Alfa-Romeo')
+        self.assertEqual(result4, 'McLaren')
+
+    def test_create_team_header_from_team_name(self):
+        team_name1 = 'Red Bull Racing'
+        team_name2 = 'McLaren'
+        result1 = utils.create_team_header_from_team_name(team_name1)
+        result2 = utils.create_team_header_from_team_name(team_name2)
+        self.assertTrue(result1)
+        print('res', result1)
 
     def test_create_driver_list(self):
         drivers = ['Nico  Hulkenberg', 'Daniel Ricciardo']
@@ -388,7 +386,6 @@ class TestScraperRunner(unittest.TestCase):
             db.init_app(app)
             scraper_runner.scrape_drivers()
             drivers = driver_model.Driver.query.all()
-            print('Dr', drivers)
             self.assertTrue(type(drivers) == list)
             self.assertTrue(len(drivers) == 20)
 
@@ -740,8 +737,6 @@ class TestTeamModel(unittest.TestCase):
                 'team_id': t_id
             })
             driver.insert()
-            d = driver_model.Driver.query.all()
-            print(d[0].team_id)
 
             db.session.remove()
             db.drop_all()

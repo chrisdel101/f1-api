@@ -37,16 +37,18 @@ def serialize_row(row):
         print("Serialize Error", e)
 
 
-def teamShortener(fullName):
-    if fullName == 'Haas F1 Team':
+# used in create_team_header_from_slug
+# headerize, Alfa Romeo Racing to Alfa
+def headerize_team_tame(name):
+    if name == 'Haas F1 Team':
         return 'Haas'
     # count whitespaces - get num of words
-    whiteSpaces = len(fullName.split(' ')) - 1
+    whiteSpaces = len(name.split(' ')) - 1
     # 2 words or toro rosso, etc
     if whiteSpaces <= 1:
-        return fullName
+        return name
     #  else more than 2 words - red bull racing etc
-    splitName = list(fullName)
+    splitName = list(name)
     newName = ''
     whiteSpace = 0
     for char in splitName:
@@ -57,28 +59,63 @@ def teamShortener(fullName):
         newName += char
 
 
-def custom_seperators(word, sep_to_rem, sep_to_add=" "):
+# remove/add separators from a string
+def word_seperator_manager(word, sep_to_rem, sep_to_add=" "):
     s = word.split(sep_to_rem)
     s = sep_to_add.join(s)
     return s
 
 
-# takes dict like {'name_slug': 'red_bull_racing', 'name': 'Red Bull Racing'}
-# returns a string
-def create_url_name_slug(team_name_dict):
-    if type(team_name_dict) is not dict:
-        raise TypeError('utils.create_url_name_slug must take a dict.')
+# takes team_slug and returns header name Red-Bull
+def create_team_header_from_slug(team_name_slug):
     try:
-        full_name = utils.custom_seperators(team_name_dict['name'], "_")
-        # shorten to match urls
-        shortened_name = utils.teamShortener(full_name)
-        # remove underscores - add dashes to match urls
-        shortened_url_name = utils.custom_seperators(shortened_name, '_', '-')
-        # remove whitespace - add dashes
-        url_name_slug = utils.custom_seperators(shortened_url_name, ' ', '-')
-        return url_name_slug
+        # print('team_name_slug', team_name_slug)
+        if team_name_slug == 'mclaren':
+            return 'McLaren'
+        if team_name_slug == 'alphatauri':
+            print('HERE', team_name_slug)
+            return 'AlphaTauri'
+        # strip underscores
+        stripped_slug = utils.word_seperator_manager(team_name_slug, '_')
+        # capitalize each word
+        cap_each_word_list = [f'{word[0].upper()}{word[1:len(word)]}'
+                              for word in stripped_slug.split(' ')]
+        # headerize, Alfa Romeo Racing to Alfa Romeo
+        headerized_team_name = utils.headerize_team_tame(
+            ' '.join(cap_each_word_list))
+        # hypenate headerized_team_name
+        #  Alfa Romeo to  Alfa-Romeo
+        team_name_header = utils.word_seperator_manager(
+            headerized_team_name, ' ', '-')
+        return team_name_header
     except Exception as e:
-        print('an error in utils.create_url_name_slug', e)
+        print('an error in utils.create_team_header_from_slug', e)
+
+
+# takes team_name and returns header name Red-Bull
+def create_team_header_from_team_name(team_name):
+    try:
+        # print('team_name', team_name)
+        if team_name == 'mclaren':
+            return 'McLaren'
+        if team_name == 'alphatauri':
+            print('HERE', team_name)
+            return 'AlphaTauri'
+        # strip underscores
+        stripped_slug = utils.word_seperator_manager(team_name, '_')
+        # capitalize each word
+        cap_each_word_list = [f'{word[0].upper()}{word[1:len(word)]}'
+                              for word in stripped_slug.split(' ')]
+        # headerize, Alfa Romeo Racing to Alfa Romeo
+        headerized_team_name = utils.headerize_team_tame(
+            ' '.join(cap_each_word_list))
+        # hypenate headerized_team_name
+        #  Alfa Romeo to  Alfa-Romeo
+        team_name_header = utils.word_seperator_manager(
+            headerized_team_name, ' ', '-')
+        return team_name_header
+    except Exception as e:
+        print('an error in utils.create_team_header_from_slug', e)
 
 
 # takes string of name
@@ -166,3 +203,9 @@ def check_hashed_password(password, hashed):
 def set_session_time(session, app, mins):
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=mins)
+
+
+# TODO
+# - slug checker
+# - header checker
+# - team_name checker

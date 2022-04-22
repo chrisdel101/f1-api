@@ -53,14 +53,12 @@ def scrape_drivers(fail=False):
             else:
                 # assign random value in tests
                 new_driver_dict['team_id'] = random.randint(1, 100000)
-                print('new_driver_dict', new_driver_dict)
 
         else:
             # match driver team_name_slug to actual team with contains - goal is team_id
             team_slug = _slugify(new_driver_dict['team'])
             team_match_driver = team_model.Team.query.filter(
                 team_model.Team.team_name_slug.contains(team_slug)).first()
-            print('team_match_driver', team_match_driver)
             # get team id from team lookup
             team_id = team_match_driver.id
             # # add foreign key to driver
@@ -92,25 +90,29 @@ def scrape_teams():
         'Pole Positions',
         'Fastest Laps',
     ]
-    # -get all driver names - returns dict w/ name and slug
+    # -get all team names - returns dict w/ name and slug
     all_teams = team_scraper.scrape_all_team_names()
     # - loop over names
     for team in all_teams:
         team_name_slug = team['name_slug']
-        # convert to url_slug - name with starting cap
-        url_name_slug = utils.create_url_name_slug(team)
-        # scrape each team
+        # convert to team_name_header - name with caps
+        team_name_header = utils.create_team_header_from_slug(team_name_slug)
+        # scrape each team -return dict
         new_dict = team_scraper.scrape_single_team_stats(
-            url_name_slug, stats_to_scrape)
+            team_name_header, stats_to_scrape)
         # add slug to dict
         new_dict['team_name_slug'] = team_name_slug
+        new_dict['main_image'] = team_scraper.get_main_image(team_name_header)
+        new_dict['main_logo_url'] = team_scraper.get_main_logo_url(
+            team_name_header)
+        new_dict['small_logo_url'] = team_scraper.get_small_logo_url(
+            team['team_name'])
         # add url slug to dict
-        new_dict['url_name_slug'] = url_name_slug
-        # add shorter version of name
-        new_dict['name'] = team['name']
+        new_dict['team_name_header'] = team_name_header
+        # add shorter version of name from team
+        new_dict['team_name'] = team['team_name']
         # print('NEW DICT', new_dict)
         # add additional markuop and drivers to dict
-        new_dict = team_scraper.add_imgs_markup(new_dict)
         # - insert on scrape into DB
         d = team_model.Team.new(new_dict)
     #    if team exists delete old instance
