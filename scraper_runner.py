@@ -31,8 +31,14 @@ def scrape_drivers(fail=False):
         new_driver_dict = driver_scraper.scrape_driver_stats(
             driver_slug)
         # add etxra data to obj
-        new_driver_dict = driver_scraper.apply_scraper_func2_complete_driver(
-            driver_slug, new_driver_dict)
+        new_driver_dict['main_image'] = driver_scraper.get_main_image(
+            driver_slug).strip()
+        new_driver_dict['driver_name'] = driver_scraper.get_driver_name(
+            driver_slug).strip()
+        new_driver_dict['driver_number'] = driver_scraper.get_driver_number(
+            driver_slug).strip()
+        new_driver_dict['flag_img_url'] = driver_scraper.get_driver_flag(
+            driver_slug).strip()
         i = 0
         # match standing with current driver
         while i < len(standings):
@@ -63,8 +69,8 @@ def scrape_drivers(fail=False):
             team_id = team_match_driver.id
             # # add foreign key to driver
             new_driver_dict['team_id'] = team_id
-        d = driver_model.Driver.new(new_driver_dict)
-        compare = utils.compare_current_to_stored(d, driver_model.Driver)
+        d = driver_model.Driver.new(new_driver_dict).__dict__
+        compare = utils.get_changed_model_values(d, driver_model.Driver)
 
         if compare and type(compare) != dict:
             if d.exists(driver_slug):
@@ -73,7 +79,7 @@ def scrape_drivers(fail=False):
         else:
             print('++++++New instance is missing values++++')
             utils.log_None_values(compare)
-        # return
+        return
 
 
 def scrape_teams():
@@ -95,25 +101,20 @@ def scrape_teams():
     # - loop over names
     for team in all_teams:
         team_name_slug = team['name_slug']
-        # convert to team_name_header - name with caps
+        # convert to team_name_header
         team_name_header = utils.create_team_header_from_slug(team_name_slug)
         # scrape each team -return dict
         new_dict = team_scraper.scrape_single_team_stats(
             team_name_header, stats_to_scrape)
-        # add slug to dict
         new_dict['team_name_slug'] = team_name_slug
         new_dict['main_image'] = team_scraper.get_main_image(team_name_header)
         new_dict['main_logo_url'] = team_scraper.get_main_logo_url(
             team_name_header)
         new_dict['small_logo_url'] = team_scraper.get_small_logo_url(
             team['team_name'])
-        # add url slug to dict
         new_dict['team_name_header'] = team_name_header
-        # add shorter version of name from team
         new_dict['team_name'] = team['team_name']
-        # print('NEW DICT', new_dict)
-        # add additional markuop and drivers to dict
-        # - insert on scrape into DB
+        # - insert into DB
         d = team_model.Team.new(new_dict)
     #    if team exists delete old instance
         if d.exists(team_name_slug):

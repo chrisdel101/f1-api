@@ -3,14 +3,13 @@ from utilities import utils
 from slugify import slugify
 import sqlalchemy
 
+
 # make data into arr of dicts
-
-
 def make_slug_dict(arr):
     result_arr = []
     for item in arr:
         d = {
-            'name': str(item.driver_name),
+            'driver_name': str(item.driver_name),
             'name_slug': slugify(str(item.driver_name).lower())
         }
         result_arr.append(d)

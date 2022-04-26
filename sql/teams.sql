@@ -3,7 +3,7 @@ CREATE TABLE team
     id SERIAL,
     full_team_name VARCHAR(200),
     team_name_slug VARCHAR(50),
-    url_name_slug VARCHAR(50),
+    team_name_header VARCHAR(50),
     name VARCHAR(50),
     base VARCHAR(100),
     team_chief VARCHAR(100),

@@ -1,18 +1,5 @@
 from models import team_model
 from utilities import utils
-from slugify import slugify
-
-
-# make obj with name and slug
-def make_slug_dict(arr):
-    results = []
-    for item in arr:
-        d = {
-            'name': str(item),
-            'name_slug': slugify(str(item).lower())
-        }
-        results.append(d)
-    return result_arr
 
 
 def show_all_teams():
@@ -21,7 +8,7 @@ def show_all_teams():
     for item in arr:
         item = vars(item)
         obj = {
-            'name': item['full_team_name'],
+            'full_team_name': item['full_team_name'],
             'name_slug': item['team_name_slug']
         }
         results.append(obj)
@@ -30,7 +17,6 @@ def show_all_teams():
 
 # takes either the team_name_slug or the team ID
 def show_single_team(identifier):
-    # print('ID', identifier)
     # check if it's ID
     if identifier.isdigit():
         try:

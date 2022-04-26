@@ -54,7 +54,6 @@ def scrape_all_driver_names():
     drivers_list = soup.find(class_='drivers').ul
     drivers = []
     drivers_list = drivers_list.find_all('li')
-
     for driver in drivers_list:
         # remove whitespace
         d = ",".join(driver.text.split())

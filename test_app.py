@@ -1,3 +1,4 @@
+from copy import deepcopy
 import app
 from constants import TeamHeaderNames
 import psycopg2
@@ -294,10 +295,10 @@ class TestUtils(unittest.TestCase):
     def test_create_team_header_from_team_name(self):
         team_name1 = 'Red Bull Racing'
         team_name2 = 'McLaren'
-        result1 = utils.create_team_header_from_team_name(team_name1)
-        result2 = utils.create_team_header_from_team_name(team_name2)
-        self.assertTrue(result1)
-        print('res', result1)
+        RESULT1 = utils.create_team_header_from_team_name(team_name1)
+        RESULT2 = utils.create_team_header_from_team_name(team_name2)
+        self.assertEqual(RESULT1, TeamHeaderNames.red_bull_racing.value)
+        self.assertEqual(RESULT2, TeamHeaderNames.mclaren.value)
 
     def test_create_driver_list(self):
         drivers = ['Nico  Hulkenberg', 'Daniel Ricciardo']
@@ -306,37 +307,46 @@ class TestUtils(unittest.TestCase):
         driver_list = utils.create_driver_list(drivers)
         self.assertEqual(driver_list, expected)
 
-    @unittest.skip('need to redo with a DB with instances inside - currently just returns true')
-    def test_compare_current_to_stored_true(self):
+    # @unittest.skip('need to redo with a DB with instances inside - currently just returns true')
+    def test_get_changed_model_values(self):
         app = create_real_app()
         with app.app_context():
             # init db
             db.init_app(app)
             # look up first driver in db
-            get_first_driver_sql = driver_model.Driver.query.all()
-            print('get', get_first_driver_sql)
-            res = utils.compare_current_to_stored(
-                get_first_driver_sql, driver_model.Driver)
+            first_driver_dict = driver_model.Driver.query.all()[0].__dict__
+            # print('get_first_driver_sql', get_first_driver_sql)
+            copy_first_driver_dict = deepcopy(first_driver_dict)
+            # change some attrs
+            copy_first_driver_dict['name_slug'] = 'something'
+            copy_first_driver_dict['country'] = 'somewhere'
+
+            # print('XX', copy_first_driver_dict)
+            print('YY', first_driver_dict)
+            res = utils.get_changed_model_values(
+                copy_first_driver_dict,
+                first_driver_dict, driver_model.Driver)
             print('res', res)
             self.assertTrue(res)
 
-    @unittest.skip(' # new class contains none vals')
-    def test_compare_current_to_stored_false(self):
+    # @unittest.skip(' # new class contains allnone vals')
+    def test_get_changed_model_values_false(self):
         app = create_real_app()
         with app.app_context():
             # init db
             db.init_app(app)
             # create new instance with diff properties
-            diff_class = driver_model.Driver.new({
+            driver1 = driver_model.Driver.new({
                 'driver_name': 'Lewis Hamilton',
                 'country': 'United Kingdom',
-                'driver_number': '11',
+                'driver_number': '44',
                 'team': 'Mercedes'
             })
-            res = utils.compare_current_to_stored(
-                diff_class, driver_model.Driver)
-            print('1', diff_class)
-            print('2', driver_model.Driver)
+            empty_driver_model = driver_model.Driver
+            res = utils.get_changed_model_values(
+                driver1, empty_driver_model)
+            print('1', driver1)
+            print('2', empty_driver_model)
             self.assertTrue(type(res) == dict)
             self.assertTrue(type(res) != bool)
 
@@ -353,7 +363,7 @@ class TestUtils(unittest.TestCase):
                 'driver_number': '11',
                 'team': 'Mercedes'
             })
-            res = utils.compare_current_to_stored(
+            res = utils.get_changed_model_values(
                 diff_class, driver_model.Driver)
             # print('RES', res)
             utils.log_None_values(res)

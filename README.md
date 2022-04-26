@@ -17,3 +17,5 @@ heroku pg:psql
 - Start postgres
 - using curl: `curl http://127.0.0.1:5000/test`
 - using browser: `localhost:5000`
+
+### Testing
