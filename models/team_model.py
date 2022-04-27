@@ -1,5 +1,4 @@
 from database import db
-from slugify import Slugify
 import os
 
 

@@ -134,57 +134,6 @@ def create_driver_list(driver_list):
         print('an errot in utils.create_driver_list', e)
 
 
-# takes an instance and a model name - if new instance has None - record the props - used to detect new changes
-def get_changed_model_values(current_model_dict, old_model_dict, instance_of_class):
-    # in testing just return true to test
-    # if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
-    #     return True
-    # use slug from new class to query for stored
-    original_slug = old_model_dict.get('name_slug')
-    print('QQQQQQQq', original_slug)
-    # look up same class in DB
-    query_old_data = instance_of_class.query.filter_by(
-        name_slug=original_slug).first()
-    # if nothing stored yet return true
-    if query_old_data == None:
-        return False
-    # loop over stored instance
-    changed_vals = {}
-    for key, value in vars(query_old_data).items():
-        # pass
-        print('KEY', key)
-        if key != "_sa_instance_state" and key != 'id':
-            # don't compate _sa_instance or id
-            if (current_model_dict)[key] != value:
-                # compare stored to new class
-                if current_model_dict[key] == None:
-                    changed_vals[key] = (current_model_dict)[key]
-                    print(f"new instance #{key} is none")
-    print(changed_vals)
-    # if empty dict, no changes
-    if not changed_vals:
-        return True
-        # else return all changes
-    else:
-        print('Changed Vals: ', changed_vals)
-        return changed_vals
-
-
-def log_None_values(dict_to_log):
-    try:
-        # make sure
-        if None not in dict_to_log.values():
-            return 'No None values to log'
-        # add timestamp
-        dict_to_log['timestamp'] = datetime.datetime.now().strftime(
-            "%d/%m/%y %H:%M")
-        # add to txt file
-        with open('none_log.txt', 'a', encoding='utf-8') as f:
-            json.dump(dict_to_log, f, ensure_ascii=False, indent=4)
-    except Exception as e:
-        return('An error ocurred in utils.log_None_vals:', e)
-
-
 # hash password before storing
 def hash_password(password):
     # password = bytes(password, encoding='utf-8')

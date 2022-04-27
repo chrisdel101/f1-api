@@ -1,6 +1,7 @@
 from enum import Enum
 
 
+# used to handle string enum
 class NoValue(Enum):
     def __repr__(self):
         return '<%s.%s>' % (self.__class__.__name__, self.name)

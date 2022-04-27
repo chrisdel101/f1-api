@@ -3,3 +3,4 @@ __pycache__/
 .env
 scratch.py
 newrelic.ini
+testing.db

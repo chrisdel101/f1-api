@@ -1,6 +1,6 @@
 import os
 import psycopg2
-import scraper_runner
+import scraper
 import flask
 from flask_login import current_user, login_required
 from controllers import drivers_controller, teams_controller, users_controller
@@ -115,19 +115,19 @@ def team(team_indentifier):
 
 @app.route('/drivers/scrape-drivers')
 def scrape_drivers():
-    scraper_runner.scrape_drivers()
+    scraper.driver_scraper()
     return 'Complete\n'
 
 
 @app.route('/teams/scrape-teams')
 def scrape_teams():
-    scraper_runner.scrape_teams()
+    scraper.team_scraper()
     return 'Complete\n'
 
 
 @app.route('/scrape-all')
 def all():
-    scraper_runner.main()
+    scraper.main()
     return 'Complete\n'
 
 

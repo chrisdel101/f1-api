@@ -164,9 +164,6 @@ def get_drivers(team_name_header):
 
 def scrape_single_team_stats(team_name_header, stats_to_scrape):
     # manually cap first letter
-    print('URL', team_name_header)
-    print('endpoints.team_endpoint(team_name_header)',
-          endpoints.team_endpoint(team_name_header))
     page = requests.get(endpoints.team_endpoint(
         team_name_header), headers=headers)
     page.encoding = 'utf-8'
@@ -175,7 +172,7 @@ def scrape_single_team_stats(team_name_header, stats_to_scrape):
     team_dict = {}
     try:
         if team_details.find_all('tr'):
-                # loop over html
+            # loop over html
             for team in team_details.find_all('tr'):
                 # # loop over all wanted details
                 for stat in stats_to_scrape:
