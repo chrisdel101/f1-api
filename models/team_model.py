@@ -39,9 +39,6 @@ class Team(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            if os.environ['LOGS'] != 'off':
-                # if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'prod_testing' or os.environ['FLASK_ENV'] == 'dev_testing':
-                print('CREATE TEAM', scraper_dict)
             db.create_all()
             d = cls()
             d.team_name_slug = scraper_dict.get('team_name_slug')
@@ -63,6 +60,10 @@ class Team(db.Model):
             d.chassis = scraper_dict.get('chassis')
             d.championship_titles = scraper_dict.get('world_championships')
             d.drivers_scraped = scraper_dict.get('drivers')
+            if os.environ['LOGS'] != 'off':
+                # if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'prod_testing' or os.environ['FLASK_ENV'] == 'dev_testing':
+                print('CREATED TEAM', d)
+
             return d
 
         except Exception as e:

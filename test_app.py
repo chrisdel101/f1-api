@@ -336,6 +336,10 @@ class TestScraper(unittest.TestCase):
             mclaren = team_model.Team.query.filter_by(
                 team_name_slug='mclaren').first()
 
+            self.assertListEqual(ferrari.drivers_scraped, [
+                {'driver_name': 'Charles Leclerc', 'name_slug': 'charles-leclerc'},
+                {'driver_name': 'Carlos Sainz', 'name_slug': 'carlos-sainz'}
+            ])
             self.assertTrue('Scuderia Ferrari' in ferrari.full_team_name,
                             )
             self.assertEqual(ferrari.base, 'Maranello, Italy')
@@ -347,6 +351,10 @@ class TestScraper(unittest.TestCase):
             self.assertTrue('Haas F1 Team' in haas.full_team_name)
             self.assertEqual(haas.base, 'Kannapolis, United States')
             self.assertEqual(haas.power_unit, 'Ferrari')
+            self.assertListEqual(haas.drivers_scraped, [
+                {'driver_name': 'Mick Schumacher', 'name_slug': 'mick-schumacher'}, {
+                    'driver_name': 'Kevin Magnussen', 'name_slug': 'kevin-magnussen'}
+            ])
 
             self.assertTrue('McLaren' in mclaren.full_team_name)
             self.assertEqual('McLaren', mclaren.team_name_header)

@@ -76,7 +76,6 @@ def get_main_image(team_name_header):
         # take first image available, get src
         main_img_src = carousel.find(
             'img')['src']
-        print('img', main_img_src)
         # resize img b/c scrape is wrong
         main_img_src = _change_team_img_size(main_img_src, 3)
         # form into full URL
@@ -123,7 +122,6 @@ def get_small_logo_url(team_name):
     teams_container = soup.find(
         'div', {'class', 'team-listing'}).find('div', {'class', 'row'}).find_all('div', {'class', 'col-12'})
     if teams_container:
-        print('TEAM finding logo', team_name)
         for team in teams_container:
             find_team_name = team.find(
                 'div', {'class', 'name'}).contents[3].text
@@ -178,11 +176,9 @@ def scrape_single_team_stats(team_name_header, stats_to_scrape):
                 for stat in stats_to_scrape:
                     #     # if they match add to team object
                     if team.span and team.span.text == stat:
-                        # print(stat, ": ", team.td.text)
                         team_dict[_slugify(team.span.text)
                                   ] = team.td.text
                         continue
-        # print('TT', team_dict)
         return team_dict
 
     except ValueError:
