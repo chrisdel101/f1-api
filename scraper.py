@@ -77,7 +77,6 @@ def driver_scraper(fail=False):
             d.insert()
         except Exception as e:
             print('Error inserting driver in scraper:', e)
-            return
 
 
 def team_scraper():
@@ -113,6 +112,7 @@ def team_scraper():
             team['team_name'])
         new_dict['team_name_header'] = team_name_header
         new_dict['team_name'] = team['team_name']
+        new_dict['drivers'] = team_scrape_logic.get_drivers(team_name_header)
         # - insert into DB
         d = team_model.Team.new(new_dict)
     #    if team exists delete old instance
