@@ -1,6 +1,9 @@
 from rq import Worker, Queue, Connection
+from dotenv import load_dotenv, find_dotenv
 import os
 import redis
+
+load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
 
 listen = ['default']

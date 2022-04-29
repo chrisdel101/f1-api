@@ -102,6 +102,30 @@ def worker_test():
     return 'DONE'
 
 
+@app.route('/worker/scrape-drivers', methods=['GET'])
+def worker_scrape_drivers():
+    q.enqueue_call(
+        func=scraper.driver_scraper, result_ttl=5000
+    )
+    return 'Complete'
+
+
+@app.route('/worker/scrape-teams', methods=['GET'])
+def worker_scrape_teams():
+    q.enqueue_call(
+        func=scraper.team_scraper, result_ttl=5000
+    )
+    return 'Complete'
+
+
+@app.route('/worker/scrape-all', methods=['GET'])
+def worker_scrape_all():
+    q.enqueue_call(
+        func=scraper.main, result_ttl=5000
+    )
+    return 'Complete'
+
+
 @app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
     return jsonify(drivers_controller.show_single_driver(driver_slug))
