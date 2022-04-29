@@ -21,7 +21,7 @@ gunicorn==19.9.0
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.1
-Mako==1.2.0
+Mako
 MarkupSafe==1.1.1
 more-itertools==7.2.0
 packaging==21.3
