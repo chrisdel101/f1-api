@@ -6,8 +6,12 @@ from flask_login import current_user, login_required
 from controllers import drivers_controller, teams_controller, users_controller
 from flask import request, jsonify, Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
 from flask_migrate import Migrate
+import worker
+from rq import Queue
+from rq.job import Job
+from worker import conn
+from utilities.utils import count_words_at_url
 
 
 class App:
@@ -36,7 +40,6 @@ class App:
             if os.environ['LOGS'] != 'off':
                 print('app.py: testing DB')
             app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
-            engine = create_engine('sqlite:///:memory:')
         db = SQLAlchemy(app)
         app.db = db
         return {
@@ -50,6 +53,7 @@ a = App()
 app = a.create_app()['app']
 db = a.create_app()['db']
 migrate = Migrate(app, db)
+q = Queue(connection=conn)
 
 # runs before every req
 if os.environ['AUTH'] != 'off':
@@ -70,8 +74,6 @@ if os.environ['AUTH'] != 'off':
 def testing_route():
     print('HELLO')
     return 'hello'
-    # res = make_response()
-    # return res
 
 
 @app.route('/test-login', methods=['GET', 'POST'])
@@ -89,49 +91,52 @@ def all_drivers():
     return jsonify(drivers_controller.show_all_drivers())
 
 
-@app.route('/drivers-test', methods=['GET'])
-def testing_route2():
-
-    return "test"
+@app.route('/test-worker', methods=['GET'])
+def worker_test():
+    job = q.enqueue_call(
+        func=count_words_at_url, args=('heroku.com',), result_ttl=5000
+    )
+    print(job.get_id())
+    return 'DONE'
     # res = make_response()
     # return res
 
 
-@app.route('/drivers/<driver_slug>')
+@ app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
     return jsonify(drivers_controller.show_single_driver(driver_slug))
 
 
-@app.route('/teams')
+@ app.route('/teams')
 def all_teams():
     return jsonify(teams_controller.show_all_teams())
 
 
 # takes a slug or an id
-@app.route('/teams/<team_indentifier>')
+@ app.route('/teams/<team_indentifier>')
 def team(team_indentifier):
     return jsonify(teams_controller.show_single_team(team_indentifier))
 
 
-@app.route('/drivers/scrape-drivers')
+@ app.route('/drivers/scrape-drivers')
 def scrape_drivers():
     scraper.driver_scraper()
     return 'Complete\n'
 
 
-@app.route('/teams/scrape-teams')
+@ app.route('/teams/scrape-teams')
 def scrape_teams():
     scraper.team_scraper()
     return 'Complete\n'
 
 
-@app.route('/scrape-all')
+@ app.route('/scrape-all')
 def all():
     scraper.main()
     return 'Complete\n'
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@ app.route('/login', methods=['GET', 'POST'])
 def login():
     try:
         if request.method == 'GET':
@@ -156,7 +161,7 @@ def login():
         return e
 
 
-@app.route('/register', methods=['POST'])
+@ app.route('/register', methods=['POST'])
 def register():
     parsedData = request.get_json()
     # print('parsed', parsedData)
@@ -167,13 +172,13 @@ def register():
     return users_controller.register(parsedData)
 
 
-@app.route('/user-status')
+@ app.route('/user-status')
 def status():
     auth_header = request.headers.get('Authorization')
     return users_controller.status(auth_header)
 
 
-@app.route('/user', methods=['GET', 'POST'])
+@ app.route('/user', methods=['GET', 'POST'])
 def udpate_user():
     if request.method == 'GET':
         return 'GET'

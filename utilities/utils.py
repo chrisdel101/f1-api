@@ -1,3 +1,4 @@
+import requests
 import bcrypt
 import os
 import datetime
@@ -156,6 +157,9 @@ def set_session_time(session, app, mins):
     app.permanent_session_lifetime = timedelta(minutes=mins)
 
 
+def count_words_at_url(url):
+    resp = requests.get(url)
+    return len(resp.text.split())
 # TODO
 # - slug checker
 # - header checker
