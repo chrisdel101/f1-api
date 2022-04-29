@@ -7,11 +7,10 @@ from controllers import drivers_controller, teams_controller, users_controller
 from flask import request, jsonify, Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-import worker
 from rq import Queue
 from rq.job import Job
 from worker import conn
-from utilities.utils import count_words_at_url
+from utilities import utils
 
 
 class App:
@@ -20,16 +19,19 @@ class App:
         app = Flask(__name__)
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         if os.environ['FLASK_ENV'] == 'production' or os.environ['FLASK_ENV'] == 'prod_testing':
-            app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+            app.secret_key = bytes(
+                os.environ['SECRET_KEY'], encoding='utf-8')
             # app.permanent_session_lifetime = timedelta(hours=24)
-            app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PROD_DB')
+            app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+                'PROD_DB')
             DATABASE_URL = app.config['SQLALCHEMY_DATABASE_URI']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             if os.environ['LOGS'] != 'off':
                 print('app.py: Prod DB')
                 print('connection', conn)
         elif os.environ['FLASK_ENV'] == 'development':
-            app.secret_key = bytes(os.environ['SECRET_KEY'], encoding='utf-8')
+            app.secret_key = bytes(
+                os.environ['SECRET_KEY'], encoding='utf-8')
             # app.permanent_session_lifetime = timedelta(hours=24)
             if os.environ['LOGS'] != 'off':
                 print('app.py: dev DB')
@@ -94,15 +96,13 @@ def all_drivers():
 @app.route('/test-worker', methods=['GET'])
 def worker_test():
     job = q.enqueue_call(
-        func=count_words_at_url, args=('heroku.com',), result_ttl=5000
+        func=scraper.team_scraper, result_ttl=5000
     )
     print(job.get_id())
     return 'DONE'
-    # res = make_response()
-    # return res
 
 
-@ app.route('/drivers/<driver_slug>')
+@app.route('/drivers/<driver_slug>')
 def driver(driver_slug):
     return jsonify(drivers_controller.show_single_driver(driver_slug))
 
