@@ -3,7 +3,11 @@ from dotenv import load_dotenv, find_dotenv
 import os
 import redis
 
-load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
+if os.environ.get('FLASK_ENV'):
+    if os.environ['FLASK_ENV'] == 'development':
+        load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
+else:
+    load_dotenv(find_dotenv(".env", raise_error_if_not_found=True))
 
 
 listen = ['default']
