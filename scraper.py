@@ -19,6 +19,7 @@ def main():
 # - teams must be scraped first - driver depends on team model
 def driver_scraper(fail=False):
     with app.app.app_context():
+        drivers_models = []
         new_driver_dict = None
         team_match_driver = None
         # -get all driver names
@@ -71,19 +72,21 @@ def driver_scraper(fail=False):
                 team_id = team_match_driver.id
                 # # add foreign key to driver
                 new_driver_dict['team_id'] = team_id
-            d = driver_model.Driver.new(new_driver_dict)
-
-            try:
-                if d.exists(driver_slug):
-                    d.delete(driver_slug)
-                d.insert()
-            except Exception as e:
-                print('Error inserting driver in scraper:', e)
+                d = driver_model.Driver.new(new_driver_dict)
+                drivers_models.append(d)
+    # after scrape add to DB
+    try:
+        if len(drivers_models):
+            for model in drivers_models:
+                if model.exists(model.name_slug):
+                    model.delete(model.name_slug)
+                model.insert()
+    except Exception as e:
+        print('Error inserting driver in scraper:', e)
 
 
 def team_scraper():
     with app.app.app_context():
-
         stats_to_scrape = [
             'Full Team Name',
             'Base',
@@ -97,10 +100,11 @@ def team_scraper():
             'Pole Positions',
             'Fastest Laps',
         ]
+        team_models = []
         # -get all team names - returns dict w/ name and slug
-        all_teams = team_scrape_logic.scrape_all_team_names()
+        all_teams_names = team_scrape_logic.scrape_all_team_names()
         # - loop over names
-        for team in all_teams:
+        for team in all_teams_names:
             team_name_slug = team['name_slug']
             # convert to team_name_header
             team_name_header = utils.create_team_header_from_slug(
@@ -119,11 +123,15 @@ def team_scraper():
             new_dict['team_name'] = team['team_name']
             new_dict['drivers'] = team_scrape_logic.get_drivers(
                 team_name_header)
-            # - insert into DB
-            d = team_model.Team.new(new_dict)
-        #    if team exists delete old instance
-            if d.exists(team_name_slug):
-                d.delete(team_name_slug)
-            # add to model
-            d.insert()
-            # return
+            t = team_model.Team.new(new_dict)
+            team_models.append(t)
+
+    try:
+        # print('team_models', team_models)
+        if len(team_models):
+            for model in team_models:
+                if model.exists(model.team_name_slug):
+                    model.delete(model.team_name_slug)
+                model.insert()
+    except Exception as e:
+        print('Error inserting team in scraper:', e)
