@@ -74,7 +74,6 @@ def create_team_header_from_slug(team_name_slug):
         if team_name_slug == 'mclaren':
             return 'McLaren'
         if team_name_slug == 'alphatauri':
-            print('HERE', team_name_slug)
             return 'AlphaTauri'
         # strip underscores
         stripped_slug = utils.word_seperator_manager(team_name_slug, '_')
@@ -100,7 +99,6 @@ def create_team_header_from_team_name(team_name):
         if team_name == 'mclaren':
             return 'McLaren'
         if team_name == 'alphatauri':
-            print('HERE', team_name)
             return 'AlphaTauri'
         # strip underscores
         stripped_slug = utils.word_seperator_manager(team_name, '_')

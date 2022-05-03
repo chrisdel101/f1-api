@@ -1,3 +1,4 @@
+from database import db
 import app
 import os
 import random
@@ -83,6 +84,8 @@ def driver_scraper(fail=False):
                     model.insert()
     except Exception as e:
         print('Error inserting driver in scraper:', e)
+    finally:
+        db.session.close()
 
 
 def team_scraper():
@@ -135,3 +138,5 @@ def team_scraper():
                     model.insert()
     except Exception as e:
         print('Error inserting team in scraper:', e)
+    finally:
+        db.session.close()

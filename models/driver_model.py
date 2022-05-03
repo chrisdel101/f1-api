@@ -96,6 +96,7 @@ class Driver(db.Model):
 
     def exists(self, driver_slug):
         try:
+            print('driver_slug', driver_slug)
             if self.query.filter_by(name_slug=driver_slug).first():
                 return True
             return False

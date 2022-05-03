@@ -2,6 +2,7 @@ from models import driver_model
 from utilities import utils
 from slugify import slugify
 import sqlalchemy
+from database import db
 
 
 # make data into arr of dicts
@@ -21,8 +22,9 @@ def show_all_drivers():
         arr = driver_model.Driver.query.all()
         return make_slug_dict(arr)
     except sqlalchemy.exc.OperationalError:
-        print('Operations error: possibily no table exists in DB')
-        return('Operations error: possibily no table exists in DB')
+        return 'Operations error: possibily no table exists in DB'
+    finally:
+        db.session.close()
 
 
 def show_single_driver(name_slug):
@@ -37,3 +39,5 @@ def show_single_driver(name_slug):
             return None
     except Exception as e:
         print('error in driver_controller.show_single_driver', e)
+    finally:
+        db.session.close()
