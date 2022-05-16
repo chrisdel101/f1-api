@@ -220,6 +220,12 @@ class TestTeamScrapLogic(unittest.TestCase):
         result2 = team_scrape_logic.get_main_logo_url('Aston-Martin')
         self.assertTrue('Aston-Martin' in result2)
 
+    def test_get_all_images(self):
+        team_name_header1 = "Red-Bull"
+        result1 = team_scrape_logic.get_all_images(team_name_header1)
+        self.assertTrue(len(result1) > 1)
+        self.assertTrue(type(result1) is list)
+
     def test_get_main_image(self):
         team_name_header1 = "Red-Bull"
         team_name_header2 = "Aston-Martin"
@@ -296,7 +302,7 @@ class TestScraper(unittest.TestCase):
     # https://stackoverflow.com/questions/42482021/how-to-mock-modelclass-query-filter-by-in-flask-sqlalchemy
     # @patch('models.team_model.Team', return_value="test_slug")
     # @patch('flask_sqlalchemy._QueryProperty.__get__')
-    def test_driver_scraper(self, *args):
+    def test_driver_scraper(self):
         # create app instance
         app = create_test_app()
         # add to context
@@ -735,6 +741,15 @@ class TestDriverController(unittest.TestCase):
             db.init_app(app)
             driver = drivers_controller.show_single_driver('some-random-name')
             self.assertEqual(driver, None)
+
+    def test_make_driver_dto(self):
+        app = create_real_app()
+        with app.app_context():
+            db.init_app(app)
+            slug = 'lewis-hamilton'
+            result = driver_model.Driver.query.filter_by(
+                name_slug=str(slug)).first()
+            print('res', result)
 
 
 @unittest.skip

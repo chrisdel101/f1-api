@@ -119,6 +119,8 @@ def team_scraper():
                 new_dict['team_name_slug'] = team_name_slug
                 new_dict['main_image'] = team_scrape_logic.get_main_image(
                     team_name_header)
+                new_dict['images'] = team_scrape_logic.get_all_images(
+                    team_name_header)
                 new_dict['main_logo_url'] = team_scrape_logic.get_main_logo_url(
                     team_name_header)
                 new_dict['small_logo_url'] = team_scrape_logic.get_small_logo_url(

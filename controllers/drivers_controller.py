@@ -27,6 +27,11 @@ def show_all_drivers():
         db.session.close()
 
 
+def make_driver_dto(name_slug):
+    driver = driver_model.Driver.query.filter_by(
+        name_slug=str(name_slug)).first()
+
+
 def show_single_driver(name_slug):
     try:
         driver = driver_model.Driver.query.filter_by(

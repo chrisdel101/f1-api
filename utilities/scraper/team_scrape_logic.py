@@ -87,6 +87,21 @@ def get_main_image(team_name_header):
         return ''
 
 
+def get_all_images(team_name_header):
+    if not team_name_header:
+        return ValueError('get_main_image missing input')
+    # get particular team endpint with team_name_header
+    page = requests.get(endpoints.team_endpoint(
+        team_name_header), headers=headers)
+    page.encoding = 'utf-8'
+    soup = BeautifulSoup(page.text, 'html.parser')
+    # find main team img
+    image_list = soup.find(
+        'section', {'class', 'main-gallery'}).findAll('img')
+    imgs_urls = [img['src'] for img in image_list]
+    return imgs_urls
+
+
 # team_name_header is capped
 def get_main_logo_url(team_name_header):
     if not team_name_header:
