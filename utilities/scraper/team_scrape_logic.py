@@ -1,3 +1,4 @@
+import logging
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -55,7 +56,6 @@ def scrape_all_team_names():
             team_name = " ".join(name_span.text.split())
             team_dict['team_name'] = team_name
             teams_endpoint.append(team_dict)
-
     if os.environ['LOGS'] != 'off':
         print("logging TEAM NAMES", teams_endpoint)
     return teams_endpoint
@@ -87,19 +87,22 @@ def get_main_image(team_name_header):
         return ''
 
 
-def get_all_images(team_name_header):
-    if not team_name_header:
-        return ValueError('get_main_image missing input')
-    # get particular team endpint with team_name_header
-    page = requests.get(endpoints.team_endpoint(
-        team_name_header), headers=headers)
-    page.encoding = 'utf-8'
-    soup = BeautifulSoup(page.text, 'html.parser')
-    # find main team img
-    image_list = soup.find(
-        'section', {'class', 'main-gallery'}).findAll('img')
-    imgs_urls = [img['src'] for img in image_list]
-    return imgs_urls
+def get_all_carousel_images(team_name_header):
+    try:
+        if not team_name_header:
+            return ValueError('get_main_image missing input')
+        # get particular team endpint with team_name_header
+        page = requests.get(endpoints.team_endpoint(
+            team_name_header), headers=headers)
+        page.encoding = 'utf-8'
+        soup = BeautifulSoup(page.text, 'html.parser')
+        # find main team img
+        image_list = soup.find(
+            'section', {'class', 'main-gallery'}).findAll('img')
+        imgs_urls = [img['src'] for img in image_list]
+        return imgs_urls
+    except Exception as e:
+        return ValueError('Error in get_all_carousel_images %s', e)
 
 
 # team_name_header is capped
@@ -122,7 +125,7 @@ def get_main_logo_url(team_name_header):
             endpoints.home_endpoint(), img_src)
         return logo_url
     else:
-        print('Warning: No logo_img found.')
+        logging.warning('Warning: No logo_img found.')
         return ''
 
 
@@ -146,7 +149,7 @@ def get_small_logo_url(team_name):
                     'div', {'class', 'logo'}).find('img')['data-src']
                 return small_logo
     else:
-        print('Warning: No logo_img found.')
+        logging.warning('Warning: No logo_img found.')
         return ''
 
 
@@ -169,7 +172,7 @@ def get_drivers(team_name_header):
         # attach to obj
         return drivers_list
     else:
-        print('No drivers list found in get_drivers')
+        logging.warning('No drivers list found in get_drivers')
         return ''
 
 # team slug needs to be capitalized
@@ -196,5 +199,5 @@ def scrape_single_team_stats(team_name_header, stats_to_scrape):
                         continue
         return team_dict
 
-    except ValueError:
-        return "An error occured creating driver data."
+    except ValueError as e:
+        logging.error("An error occured creating driver data %s", e)

@@ -1,3 +1,13 @@
+import logging
+logging.basicConfig(
+    # filename=os.path.join(os.getcwd(), 'Logs', 'ErrorLogs','error_log'),
+    # filemode='a', #append to file mode
+    format="%(asctime)s,%(msecs)d %(filename)s %(lineno)d  %(levelname)s %(message)s",
+    level=logging.DEBUG,
+    datefmt="%H:%M:%S"
+)  # noqa https://stackoverflow.com/a/20280587/5972531import json
+logging.getLogger("requests").setLevel(logging.CRITICAL)  # noqa
+logging.getLogger("urllib3").setLevel(logging.CRITICAL)  # noqa
 import os
 import psycopg2
 import scraper

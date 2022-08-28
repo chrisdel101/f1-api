@@ -1,3 +1,4 @@
+import logging
 from database import db
 import os
 
@@ -62,22 +63,20 @@ class Team(db.Model):
             d.chassis = scraper_dict.get('chassis')
             d.championship_titles = scraper_dict.get('world_championships')
             d.drivers_scraped = scraper_dict.get('drivers')
-            if os.environ['LOGS'] != 'off':
-                # if os.environ['FLASK_ENV'] == 'development' or os.environ['FLASK_ENV'] == 'prod_testing' or os.environ['FLASK_ENV'] == 'dev_testing':
-                print('CREATED TEAM', d)
+            logging.debug('CREATED TEAM %s', d)
 
             return d
 
         except Exception as e:
-            print('Create error', e)
+            logging.error('Create error %s', e)
 
     def insert(self):
         try:
             db.session.add(self)
             db.session.commit()
-            print('INSERT OKAY')
+            logging.critical('INSERT OKAY')
         except Exception as e:
-            print('RollBack', e)
+            logging.error('RollBack %s', e)
             db.session.rollback()
 
     def delete(self, team_name_slug):
@@ -85,9 +84,9 @@ class Team(db.Model):
         try:
             db.session.delete(d)
             db.session.commit()
-            print('DELETE OKAY')
+            logging.info('DELETE OKAY')
         except Exception as e:
-            print('Delete Error', e)
+            logging.error('Delete Error %s', e)
 
     def exists(self, team_name_slug):
         try:
@@ -95,7 +94,7 @@ class Team(db.Model):
                 return True
             return False
         except Exception as e:
-            print("Does not exist", e)
+            logging.error("Does not exist %s", e)
             return False
 
     def as_dict(req):

@@ -1,3 +1,4 @@
+import logging
 from utilities import endpoints
 from bs4 import BeautifulSoup
 import requests
@@ -99,10 +100,10 @@ def get_main_image(name_slug):
                 endpoints.home_endpoint(), new_str)
             return main_image
         else:
-            print("Warning: No main image for driver found.")
+            logging.warning("Warning: No main image for driver found.")
 
     except Exception as e:
-        print('An error in driver main_image', e)
+        logging.error('An error in driver main_image %s', e)
 
 
 def get_driver_name(name_slug):
@@ -117,9 +118,9 @@ def get_driver_name(name_slug):
                 'h1', {"class", "driver-name"}).text
             return driver_name.strip()
         else:
-            print("Warning: No name for driver found.")
+            logging.warning("Warning: No name for driver found.")
     except Exception as e:
-        print("An error in getting driver name", e)
+        logging.error("An error in getting driver name %s", e)
 
 
 def get_driver_number(name_slug):
@@ -134,9 +135,9 @@ def get_driver_number(name_slug):
                 'div', {'class', 'driver-number'}).span.text
             return driver_number
         else:
-            print("Warning: No number for driver found.")
+            logging.warning("Warning: No number for driver found.")
     except Exception as e:
-        print("An error on getting driver number", e)
+        logging.error("An error on getting driver number %s", e)
 
 
 def get_driver_flag(name_slug):
@@ -151,9 +152,9 @@ def get_driver_flag(name_slug):
                 'span', {'class', 'icn-flag'}).img['src']
             return "{0}/{1}".format(endpoints.home_endpoint(), flag_img_url)
         else:
-            print("Warning: No flag-icon for driver found.")
+            logging.warning("Warning: No flag-icon for driver found.")
     except Exception as e:
-        print("An error in getting driver flag", e)
+        logging.error("An error in getting driver flag %s", e)
 
 
 def scrape_drivrer_details(name_slug):
@@ -201,16 +202,18 @@ def scrape_drivrer_details(name_slug):
             1: driver_dict
         }
     except Exception as e:
+        logging.error("An error occured creating driver data. %s", e)
         return("An error occured creating driver data.", e)
 
 
 def scrape_driver_stats(name_slug):
     if type(name_slug) is not str:
-        raise TypeError('get_complete_driver_data must take a string.')
+        raise TypeError('scrape_driver_stats must take a string.')
     driver_dict = {}
     try:
         for key, value in scrape_drivrer_details(name_slug)[1].items():
             driver_dict[key] = value
         return driver_dict
     except Exception as e:
+        logging.error("Error in apply_scraper_set1_complete_drive.%s", e)
         return('Error in apply_scraper_set1_complete_driver', e)

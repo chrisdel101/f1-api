@@ -6,3 +6,4 @@ newrelic.ini
 testing.db
 .env.test
 Procfile.test
+venv

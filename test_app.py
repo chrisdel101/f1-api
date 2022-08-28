@@ -12,8 +12,8 @@ from flask import Flask
 import json
 import os
 import unittest
-from slugify import Slugify
-slugify = Slugify(to_lower=True)
+from slugify import slugify
+slugify = slugify(to_lower=True)
 slugify.separator = '_'
 
 
@@ -220,9 +220,9 @@ class TestTeamScrapLogic(unittest.TestCase):
         result2 = team_scrape_logic.get_main_logo_url('Aston-Martin')
         self.assertTrue('Aston-Martin' in result2)
 
-    def test_get_all_images(self):
+    def test_get_all_carousel_images(self):
         team_name_header1 = "Red-Bull"
-        result1 = team_scrape_logic.get_all_images(team_name_header1)
+        result1 = team_scrape_logic.get_all_carousel_images(team_name_header1)
         self.assertTrue(len(result1) > 1)
         self.assertTrue(type(result1) is list)
 

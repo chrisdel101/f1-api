@@ -1,6 +1,7 @@
+import logging
 import os
 from database import db
-from slugify import slugify, Slugify
+from slugify import Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
@@ -47,12 +48,11 @@ class Driver(db.Model):
     @classmethod
     def new(cls, scraper_dict):
         try:
-            if os.environ['LOGS'] != 'off':
-                print('CREATE DRIVER', scraper_dict)
+            logging.debug('CREATE DRIVER', scraper_dict)
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
-            d.name_slug = slugify(d.driver_name).lower()
+            d.name_slug = _slugify(d.driver_name).lower()
             # short version with spaces
             d.team = scraper_dict.get('team')
             # url name with underscores
@@ -74,15 +74,15 @@ class Driver(db.Model):
             d.standings_position = scraper_dict.get('standings_position')
             return d
         except Exception as e:
-            print('Error in Driver new:', e)
+            logging.error('Error in Driver new: %s', e)
 
     def insert(self):
         try:
             db.session.add(self)
             db.session.commit()
-            print('INSERT OKAY')
+            logging.info('INSERT OKAY')
         except Exception as e:
-            print('RollBack', e)
+            logging.error('RollBack %s', e)
             db.session.rollback()
 
     def delete(self, driver_slug):
@@ -90,18 +90,18 @@ class Driver(db.Model):
         try:
             db.session.delete(d)
             db.session.commit()
-            print('DELETE OKAY')
+            logging.info('DELETE OKAY')
         except Exception as e:
-            print('Delete Error', e)
+            logging.error('Delete Error %s', e)
 
     def exists(self, driver_slug):
         try:
-            print('driver_slug', driver_slug)
+            logging.debug('driver_slug %s', driver_slug)
             if self.query.filter_by(name_slug=driver_slug).first():
                 return True
             return False
         except Exception as e:
-            print("Does not exist", e)
+            logging.error("Does not exist %s", e)
             return False
 
     def as_dict(req):
