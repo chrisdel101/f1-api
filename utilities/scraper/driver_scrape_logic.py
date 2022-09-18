@@ -38,12 +38,16 @@ def _change_driver_img_size(src, list_index):
 def _extract_name_from_url(url):
     # revese the string
     rev = url[::-1]
-    regex = "^lmth\.[a-z]+\-[a-z]+\/"
-    ex = re.findall(regex, rev)
-    # remove first chars
-    name = ex[0][5:]
-    # remove trailing / and reverse
-    name = name[:-1][::-1]
+    # match 2 hypens lmth.seirv-ed-kcyn/
+    # & match 1 hypen lmth.seirv-ed-kcyn/
+    regex3 = "^lmth\.([a-z]+\-[a-z]+\-[a-z]+|[a-z]+\-[a-z]+)"
+    # return a list with reversed name
+    extract = re.findall(regex3, rev)
+    # check list len first
+    if not len(extract):
+        raise ValueError('Error _extract_name_from_url: no list to index')
+    # get list item and un-reverse
+    name = extract[0][::-1]
     return name
 
 
@@ -157,9 +161,9 @@ def get_driver_flag(name_slug):
         logging.error("An error in getting driver flag %s", e)
 
 
-def scrape_drivrer_details(name_slug):
+def scrape_driver_details(name_slug):
     if type(name_slug) is not str:
-        raise TypeError('scrape_drivrer_details must take a string.')
+        raise TypeError('scrape_driver_details must take a string.')
     soup = _driver_page_scrape(name_slug)
     driver_details = soup.find(class_='driver-details')
     details = ['Team',
@@ -178,8 +182,10 @@ def scrape_drivrer_details(name_slug):
     unknown_attr = []
     driver_dict = {}
     try:
+        print('driver_details', driver_details)
         if driver_details.find_all('tr'):
             # loop over html
+            print('DRIVER', driver)
             for driver in driver_details.find_all('tr'):
                 # loop over all wanted details
                 found = False
@@ -187,8 +193,9 @@ def scrape_drivrer_details(name_slug):
                     # if they match add to driver object
                     if driver.span and driver.span.text == detail:
 
-                        driver_dict[_slugify(driver.span.text)
-                                    ] = driver.td.text
+                        driver_dict[
+                            _slugify(driver.span.text)
+                        ] = driver.td.text
                         found = True
                         # del item so not loop over again
                         del details[i]
@@ -211,7 +218,7 @@ def scrape_driver_stats(name_slug):
         raise TypeError('scrape_driver_stats must take a string.')
     driver_dict = {}
     try:
-        for key, value in scrape_drivrer_details(name_slug)[1].items():
+        for key, value in scrape_driver_details(name_slug)[1].items():
             driver_dict[key] = value
         return driver_dict
     except Exception as e:
