@@ -1,3 +1,4 @@
+import re
 from constants import TeamHeaderNames
 import psycopg2
 from dotenv import load_dotenv, find_dotenv
@@ -102,8 +103,15 @@ class TestDriverScapeLogic(unittest.TestCase):
 
     def test_scrape_all_driver_names(self):
         result = driver_scrape_logic.scrape_all_driver_names()
+        # test returns a list
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
+        # test list is all single comma seperated - nyke de vries cause errors
+        single_comma_sep_regex = "^[a-z]+\,[a-z]+$"
+        for name in result:
+            print(name)
+            self.assertTrue(
+                bool(re.match(single_comma_sep_regex, name.lower())))
 
     def test_scrape_all_driver_standings(self):
         result = driver_scrape_logic.scrape_all_drivers_standings()
@@ -152,6 +160,10 @@ class TestDriverScapeLogic(unittest.TestCase):
         self.assertEqual(result1[1]['country'], 'Thailand')
         self.assertEqual(result1[1]['date_of_birth'], '23/03/1996')
         self.assertEqual(result1[1]['place_of_birth'], 'London, England')
+        result2 = driver_scrape_logic.scrape_driver_details("max-verstappen")
+        self.assertEqual(result2[1]['country'], 'Netherlands')
+        self.assertEqual(result2[1]['date_of_birth'], '30/09/1997')
+        self.assertEqual(result2[1]['place_of_birth'], 'Hasselt, Belgium')
 
     def test_check_any_new_driver_attrs(self):
         result1 = driver_scrape_logic.scrape_driver_details("alexander-albon")

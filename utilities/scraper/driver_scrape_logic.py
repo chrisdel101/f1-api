@@ -51,8 +51,16 @@ def _extract_name_from_url(url):
     return name
 
 
-# - scrape all drivers names of the page -
-# - return list
+# handle mutli part names
+def comma_seperate_driver_name(name):
+    print('name', name)
+    _list = name.split("\n")
+    print(_list)
+    _str = ''.join(_list)
+    x = _str.strip(" ")
+    print(x)
+
+
 def scrape_all_driver_names():
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -61,6 +69,7 @@ def scrape_all_driver_names():
     drivers_list = drivers_list.find_all('li')
     for driver in drivers_list:
         # remove whitespace
+        d = comma_seperate_driver_name(driver.text)
         d = ",".join(driver.text.split())
         drivers.append(d)
     return drivers
@@ -182,10 +191,8 @@ def scrape_driver_details(name_slug):
     unknown_attr = []
     driver_dict = {}
     try:
-        print('driver_details', driver_details)
-        if driver_details.find_all('tr'):
+        if driver_details and driver_details.find_all('tr'):
             # loop over html
-            print('DRIVER', driver)
             for driver in driver_details.find_all('tr'):
                 # loop over all wanted details
                 found = False

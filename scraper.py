@@ -35,6 +35,7 @@ def driver_scraper(fail=False):
             standings = driver_scrape_logic.scrape_all_drivers_standings()
             # - loop over names
             for driver in all_drivers:
+                print('DDD', driver)
                 # slugify name - fernando-alonso
                 driver_slug = slugify(driver)
                 # scrape more driver data
@@ -85,12 +86,14 @@ def driver_scraper(fail=False):
                     new_driver_dict['team_id'] = team_id
                     d = driver_model.Driver.new(new_driver_dict)
                     drivers_models.append(d)
+
         # after scrape add to DB
             if len(drivers_models):
                 for model in drivers_models:
                     if model.exists(model.  name_slug):
                         model.delete(model.name_slug)
                     model.insert()
+            return
     except Exception as e:
         logging.error('Error inserting driver in scraper: %s', e)
     finally:
