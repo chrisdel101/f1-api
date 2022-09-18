@@ -5,6 +5,10 @@ from slugify import Slugify
 _slugify = Slugify()
 _slugify = Slugify(to_lower=True)
 _slugify.separator = '_'
+# hypen slug driver
+slugify = Slugify()
+slugify = Slugify(to_lower=True)
+slugify.separator = '-'
 
 
 class Driver(db.Model):
@@ -52,7 +56,7 @@ class Driver(db.Model):
             db.create_all()
             d = cls()
             d.driver_name = scraper_dict.get('driver_name')
-            d.name_slug = _slugify(d.driver_name).lower()
+            d.name_slug = slugify(d.driver_name).lower()
             # short version with spaces
             d.team = scraper_dict.get('team')
             # url name with underscores

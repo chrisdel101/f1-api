@@ -19,3 +19,10 @@ heroku pg:psql
 - using browser: `localhost:5000`
 
 ### Testing
+
+- example command
+  `ENV=testing python -m unittest test_app.TestTeamScrapLogic.test_get_all_carousel_images`
+
+## Models + Tables
+
+If tables don't exist they are created at run time. No need to use SQL.

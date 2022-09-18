@@ -126,9 +126,7 @@ def team_scraper():
                 new_dict = team_scrape_logic.scrape_single_team_stats(
                     team_name_header, stats_to_scrape)
                 new_dict['team_name_slug'] = team_name_slug
-                new_dict['main_image'] = team_scrape_logic.get_main_image(
-                    team_name_header)
-                new_dict['images'] = team_scrape_logic.get_all_carousel_images(
+                new_dict['images'] = team_scrape_logic.get_carousel_imgs_for_main_img(
                     team_name_header)
                 new_dict['main_logo_url'] = team_scrape_logic.get_main_logo_url(
                     team_name_header)

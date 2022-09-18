@@ -12,9 +12,10 @@ from flask import Flask
 import json
 import os
 import unittest
-from slugify import slugify
-slugify = slugify(to_lower=True)
-slugify.separator = '_'
+from slugify import Slugify
+_slugify = Slugify()
+_slugify = Slugify(to_lower=True)
+_slugify.separator = '_'
 
 
 # https://stackoverflow.com/a/50536837/5972531
@@ -75,6 +76,20 @@ def create_real_app():
 
 class TestDriverScapeLogic(unittest.TestCase):
 
+    def test__extract_name_from_url(self):
+        test_url_2_hyphens = "/en/results.html/2022/drivers/NYCDEV01/nyck-de-vries.html"
+        test_url_1_hyphens = "/en/results.html/2022/drivers/ALEALB01/alexander-albon.html"
+        test_url_1_hyphens2 = "/en/results.html/2022/drivers/LANNOR01/lando-norris.html"
+        extract_test_1_hyphen = driver_scrape_logic._extract_name_from_url(
+            test_url_1_hyphens)
+        # extract_test_1_hyphen2 = driver_scrape_logic._extract_name_from_url(
+        #     test_url_1_hyphens2)
+        extract_test_2_hyphen = driver_scrape_logic._extract_name_from_url(
+            test_url_2_hyphens)
+        # print('XX', extract_test_1_hyphen)
+        # print('XX', extract_test_1_hyphen2)
+        # print('XX', extract_test_2_hyphen)
+
     def test_change_driver_image_size_medium(self):
         res = driver_scrape_logic._change_driver_img_size(
             "/content/fom-website/en/drivers/sebastian-vettel/_jcr_content/image.img.320.medium.jpg/1554818962683.jpg", 1)
@@ -132,14 +147,14 @@ class TestDriverScapeLogic(unittest.TestCase):
             "george-russell"))
         self.assertRaises(TypeError, driver_scrape_logic.get_driver_number, 33)
 
-    def scrape_drivrer_details(self):
-        result1 = driver_scrape_logic.scrape_drivrer_details("alexander-albon")
+    def scrape_driver_details(self):
+        result1 = driver_scrape_logic.scrape_driver_details("alexander-albon")
         self.assertEqual(result1[1]['country'], 'Thailand')
         self.assertEqual(result1[1]['date_of_birth'], '23/03/1996')
         self.assertEqual(result1[1]['place_of_birth'], 'London, England')
 
     def test_check_any_new_driver_attrs(self):
-        result1 = driver_scrape_logic.scrape_drivrer_details("alexander-albon")
+        result1 = driver_scrape_logic.scrape_driver_details("alexander-albon")
         try:
             self.assertTrue(len(result1[0]) == 0)
         except Exception as e:
@@ -167,6 +182,12 @@ class TestTeamScrapLogic(unittest.TestCase):
             "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 1)
         self.assertTrue('640' in res)
 
+    def test_change_team_image_size_small_to_large(self):
+        str = 'content/fom-website/en/teams/Red-Bull-Racing/_jcr_content/gallery/image101.img.320.medium.jpg/1647107069242.jpg'
+        res = team_scrape_logic._change_team_img_size(
+            str, 3)
+        self.assertTrue('1536' in res)
+
     def test_change_team_image_size_large(self):
         res = team_scrape_logic._change_team_img_size(
             "/content/fom-website/en/teams/Mercedes/_jcr_content/image16x9.img.1536.medium.jpg/1561122939027.jpg", 2)
@@ -186,9 +207,9 @@ class TestTeamScrapLogic(unittest.TestCase):
         RESULT1 = team_scrape_logic.scrape_single_team_stats(
             team_name_header1, stats_to_scrape_run1)
         self.assertTrue(type(RESULT1) is dict)
-        self.assertTrue(slugify
+        self.assertTrue(_slugify
                         (stats_to_scrape_run1[0]) in RESULT1)
-        self.assertTrue(slugify(stats_to_scrape_run1[1]) in RESULT1)
+        self.assertTrue(_slugify(stats_to_scrape_run1[1]) in RESULT1)
         self.assertTrue(utils.word_seperator_manager(
             team_name_header1, '-') in RESULT1.get('full_team_name'))
 
@@ -201,10 +222,10 @@ class TestTeamScrapLogic(unittest.TestCase):
         team_name_header2 = TeamHeaderNames.mclaren.value
         RESULT2 = team_scrape_logic.scrape_single_team_stats(
             team_name_header2, stats_to_scrape_run2)
-        self.assertTrue(slugify
+        self.assertTrue(_slugify
                         (stats_to_scrape_run2[0]) in RESULT2)
-        self.assertTrue(slugify(stats_to_scrape_run2[1]) in RESULT2)
-        self.assertTrue(slugify(stats_to_scrape_run2[2]) in RESULT2)
+        self.assertTrue(_slugify(stats_to_scrape_run2[1]) in RESULT2)
+        self.assertTrue(_slugify(stats_to_scrape_run2[2]) in RESULT2)
         self.assertTrue(utils.word_seperator_manager(
             team_name_header2, '-') in RESULT2.get('full_team_name'))
 
@@ -220,23 +241,13 @@ class TestTeamScrapLogic(unittest.TestCase):
         result2 = team_scrape_logic.get_main_logo_url('Aston-Martin')
         self.assertTrue('Aston-Martin' in result2)
 
-    def test_get_all_carousel_images(self):
+    def test_get_carousel_imgs_for_main_img(self):
         team_name_header1 = "Red-Bull"
-        result1 = team_scrape_logic.get_all_carousel_images(team_name_header1)
+        result1 = team_scrape_logic.get_carousel_imgs_for_main_img(
+            team_name_header1)
+        print('RES', result1)
         self.assertTrue(len(result1) > 1)
         self.assertTrue(type(result1) is list)
-
-    def test_get_main_image(self):
-        team_name_header1 = "Red-Bull"
-        team_name_header2 = "Aston-Martin"
-        result1 = team_scrape_logic.get_main_image(team_name_header1)
-        self.assertTrue('gallery' in result1)
-        self.assertTrue('jpg' in result1)
-        self.assertTrue('Red-Bull-Racing' in result1)
-        result2 = team_scrape_logic.get_main_image(team_name_header2)
-        self.assertTrue('gallery' in result2)
-        self.assertTrue('jpg' in result2)
-        self.assertTrue('Aston-Martin' in result2)
 
     def test_get_drivers(self):
         team_name_header1 = "Red-Bull"

@@ -27,16 +27,25 @@ def _team_page_scrape():
 # manually add in dif sizes for imgs
 # takes url and index to choose size from list
 def _change_team_img_size(src, list_index):
-    # replace scraped img size with one the sizes below
+    # check that str has this pattern
     regex = "(image[\\d]+x[\\d]+|image[\\d]+)\\.img\\.[\\d]+\\.(medium|large|small)"
+    # sizes to replace with
     sizes = ['320', '640', '768', '1536']
-    r = "image1.img.{0}.medium".format(sizes[list_index])
-    sub = re.sub(regex, r, src)
-    if os.environ['LOGS'] != 'off':
+    matched_part = re.search(regex, src)
+    if matched_part:
+        # # ex - image16x9.img.1536.medium
+        matched_part_str = matched_part.group()
+        split_matched_part = matched_part_str.split('.')
+        # replace the num in index 2
+        split_matched_part[2] = sizes[list_index]
+        split_join = ".".join(split_matched_part)
+        # sub in new substr
+        sub = re.sub(regex, split_join, src)
         if src == sub:
-            print('_change_team_img_size: DIMS not changed')
-         # get team id from team lookup
-    return sub
+            logging.debug(
+                '_change_team_img_size: DIMS not changed')
+    # get team id from team lookup
+        return sub
 
 # scrape all team names - returns a list of dicts
 
@@ -87,7 +96,8 @@ def get_main_image(team_name_header):
         return ''
 
 
-def get_all_carousel_images(team_name_header):
+# collect all teams imgs - assign one as main on client
+def get_carousel_imgs_for_main_img(team_name_header):
     try:
         if not team_name_header:
             return ValueError('get_main_image missing input')
@@ -96,13 +106,17 @@ def get_all_carousel_images(team_name_header):
             team_name_header), headers=headers)
         page.encoding = 'utf-8'
         soup = BeautifulSoup(page.text, 'html.parser')
-        # find main team img
-        image_list = soup.find(
+        # find main team imgs - make list
+        images_list = soup.find(
             'section', {'class', 'main-gallery'}).findAll('img')
-        imgs_urls = [img['src'] for img in image_list]
+        # make correct sizing changes - leave src
+        imgs_urls = ["{0}{1}".format(
+            endpoints.home_endpoint(), _change_team_img_size(
+                img['src'], 3)) for img in images_list]
+
         return imgs_urls
     except Exception as e:
-        return ValueError('Error in get_all_carousel_images %s', e)
+        return ValueError('Error in get_carousel_imgs_for_main_img %s', e)
 
 
 # team_name_header is capped
