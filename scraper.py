@@ -31,13 +31,13 @@ def driver_scraper(fail=False):
             team_match_driver = None
             # -get all driver names
             all_drivers = driver_scrape_logic.scrape_all_driver_names()
-            # - get all driver standings
+            # - get all driver standings - contains driver slug
             standings = driver_scrape_logic.scrape_all_drivers_standings()
             # - loop over names
-            for driver in all_drivers:
+            for driver in standings:
                 print('DDD', driver)
-                # slugify name - fernando-alonso
-                driver_slug = slugify(driver)
+                # extract slug from standings
+                driver_slug = driver['name_slug']
                 # scrape more driver data
                 new_driver_dict = driver_scrape_logic.scrape_driver_stats(
                     driver_slug)

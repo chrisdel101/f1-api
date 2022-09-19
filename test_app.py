@@ -76,16 +76,29 @@ def create_real_app():
 
 
 class TestDriverScapeLogic(unittest.TestCase):
+    def test__comma_seperate_driver_name(self):
+        name_one_comma = '\n\n\nValtteri\nBottas\n\n\n\n'
+        name_two_comma = '\n\n\nNyck\nDe Vries\n\n\n\n'
+        comma_sep1 = driver_scrape_logic._comma_seperate_driver_name(
+            name_one_comma)
+        comma_sep2 = driver_scrape_logic._comma_seperate_driver_name(
+            name_two_comma)
+        single_comma_sep_regex = "^[A-Za-z]+\,[A-Za-z]+$"
+        # check matches regex
+        self.assertTrue(
+            bool(re.match(single_comma_sep_regex, comma_sep1)))
+        self.assertTrue(
+            bool(re.match(single_comma_sep_regex, comma_sep2)))
 
-    def test__extract_name_from_url(self):
+    def test__extract_slug_from_url(self):
         test_url_2_hyphens = "/en/results.html/2022/drivers/NYCDEV01/nyck-de-vries.html"
         test_url_1_hyphens = "/en/results.html/2022/drivers/ALEALB01/alexander-albon.html"
         test_url_1_hyphens2 = "/en/results.html/2022/drivers/LANNOR01/lando-norris.html"
-        extract_test_1_hyphen = driver_scrape_logic._extract_name_from_url(
+        extract_test_1_hyphen = driver_scrape_logic._extract_slug_from_url(
             test_url_1_hyphens)
-        # extract_test_1_hyphen2 = driver_scrape_logic._extract_name_from_url(
+        # extract_test_1_hyphen2 = driver_scrape_logic._extract_slug_from_url(
         #     test_url_1_hyphens2)
-        extract_test_2_hyphen = driver_scrape_logic._extract_name_from_url(
+        extract_test_2_hyphen = driver_scrape_logic._extract_slug_from_url(
             test_url_2_hyphens)
         # print('XX', extract_test_1_hyphen)
         # print('XX', extract_test_1_hyphen2)
@@ -107,11 +120,11 @@ class TestDriverScapeLogic(unittest.TestCase):
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) >= 1)
         # test list is all single comma seperated - nyke de vries cause errors
-        single_comma_sep_regex = "^[a-z]+\,[a-z]+$"
+        single_comma_sep_regex = "^[A-Za-z]+\,[A-Za-z]+$"
         for name in result:
             print(name)
             self.assertTrue(
-                bool(re.match(single_comma_sep_regex, name.lower())))
+                bool(re.match(single_comma_sep_regex, name)))
 
     def test_scrape_all_driver_standings(self):
         result = driver_scrape_logic.scrape_all_drivers_standings()

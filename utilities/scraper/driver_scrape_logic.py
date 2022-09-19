@@ -35,7 +35,7 @@ def _change_driver_img_size(src, list_index):
     return sub
 
 
-def _extract_name_from_url(url):
+def _extract_slug_from_url(url):
     # revese the string
     rev = url[::-1]
     # match 2 hypens lmth.seirv-ed-kcyn/
@@ -45,21 +45,22 @@ def _extract_name_from_url(url):
     extract = re.findall(regex3, rev)
     # check list len first
     if not len(extract):
-        raise ValueError('Error _extract_name_from_url: no list to index')
+        raise ValueError('Error _extract_slug_from_url: no list to index')
     # get list item and un-reverse
     name = extract[0][::-1]
     return name
 
 
-# handle mutli part names
-def comma_seperate_driver_name(name):
+# handle mutli part names, make single name with one comma
+def _comma_seperate_driver_name(name):
     print('name', name)
-    _list = name.split("\n")
-    print(_list)
-    _str = ''.join(_list)
-    x = _str.strip(" ")
-    print(x)
+    _list = name.split('\n')
+    _str = ",".join(_list).strip(',').replace(" ", "")
+    return _str
 
+
+# return list of comma sep'd names
+# can have more than 2 names - Nyck,De,Vries
 
 def scrape_all_driver_names():
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
@@ -69,7 +70,7 @@ def scrape_all_driver_names():
     drivers_list = drivers_list.find_all('li')
     for driver in drivers_list:
         # remove whitespace
-        d = comma_seperate_driver_name(driver.text)
+        # d = _comma_seperate_driver_name(driver.text)
         d = ",".join(driver.text.split())
         drivers.append(d)
     return drivers
@@ -83,11 +84,12 @@ def scrape_all_drivers_standings():
     rows = standings_list.find_all('tr')
     drivers = []
     for row in rows:
+        print(row)
         if row.find('a'):
             # get url with name
             href = row.find('a')['href']
             # extract name slug
-            name_slug = _extract_name_from_url(href)
+            name_slug = _extract_slug_from_url(href)
             points = row.find('td', {'class', 'bold'}).text
             position = row.find('td', {'class', 'dark'}).text
             drivers.append(
