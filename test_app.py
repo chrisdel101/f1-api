@@ -90,19 +90,41 @@ class TestDriverScapeLogic(unittest.TestCase):
         self.assertTrue(
             bool(re.match(single_comma_sep_regex, comma_sep2)))
 
-    def test__extract_slug_from_url(self):
+    # test with driver names
+    def test__extract_driver_name_slug_from_url(self):
         test_url_2_hyphens = "/en/results.html/2022/drivers/NYCDEV01/nyck-de-vries.html"
         test_url_1_hyphens = "/en/results.html/2022/drivers/ALEALB01/alexander-albon.html"
         test_url_1_hyphens2 = "/en/results.html/2022/drivers/LANNOR01/lando-norris.html"
-        extract_test_1_hyphen = driver_scrape_logic._extract_slug_from_url(
+
+        extract_test_1_hyphen = driver_scrape_logic._extract_driver_name_slug_from_url(
             test_url_1_hyphens)
-        # extract_test_1_hyphen2 = driver_scrape_logic._extract_slug_from_url(
-        #     test_url_1_hyphens2)
-        extract_test_2_hyphen = driver_scrape_logic._extract_slug_from_url(
+        extract_test_1_hyphen2 = driver_scrape_logic._extract_driver_name_slug_from_url(
+            test_url_1_hyphens2)
+        extract_test_2_hyphen = driver_scrape_logic._extract_driver_name_slug_from_url(
             test_url_2_hyphens)
-        # print('XX', extract_test_1_hyphen)
-        # print('XX', extract_test_1_hyphen2)
-        # print('XX', extract_test_2_hyphen)
+
+        regex_to_match = "([a-z]+\-[a-z]+\-[a-z]+|[a-z]+\-[a-z]+)"
+        self.assertTrue(bool(re.match(regex_to_match, extract_test_1_hyphen)))
+        self.assertTrue(bool(re.match(regex_to_match, extract_test_1_hyphen2)))
+        self.assertTrue(bool(re.match(regex_to_match, extract_test_2_hyphen)))
+
+    # test with car standings names
+    def test__extract_driver_name_slug_from_url(self):
+        test_url_2_hyphens = "/en/results.html/2022/drivers/NYCDEV01/nyck-de-vries.html"
+        test_url_1_hyphens = "/en/results.html/2022/drivers/ALEALB01/alexander-albon.html"
+        test_url_1_hyphens2 = "/en/results.html/2022/drivers/LANNOR01/lando-norris.html"
+
+        extract_test_1_hyphen = driver_scrape_logic._extract_driver_name_slug_from_url(
+            test_url_1_hyphens)
+        extract_test_1_hyphen2 = driver_scrape_logic._extract_driver_name_slug_from_url(
+            test_url_1_hyphens2)
+        extract_test_2_hyphen = driver_scrape_logic._extract_driver_name_slug_from_url(
+            test_url_2_hyphens)
+
+        regex_to_match = "([a-z]+\-[a-z]+\-[a-z]+|[a-z]+\-[a-z]+)"
+        self.assertTrue(bool(re.match(regex_to_match, extract_test_1_hyphen)))
+        self.assertTrue(bool(re.match(regex_to_match, extract_test_1_hyphen2)))
+        self.assertTrue(bool(re.match(regex_to_match, extract_test_2_hyphen)))
 
     def test_change_driver_image_size_medium(self):
         res = driver_scrape_logic._change_driver_img_size(

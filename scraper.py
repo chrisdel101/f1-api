@@ -29,39 +29,19 @@ def driver_scraper(fail=False):
             drivers_models = []
             new_driver_dict = None
             team_match_driver = None
-            # -get all driver names
-            all_drivers = driver_scrape_logic.scrape_all_driver_names()
             # - get all driver standings - contains driver slug
             standings = driver_scrape_logic.scrape_all_drivers_standings()
+            # -get all driver names
+            all_drivers = driver_scrape_logic.extract_all_drivers_names_from_standings(
+                standings)
             # - loop over names
-            for driver in standings:
-                print('DDD', driver)
+            for standing in standings:
                 # extract slug from standings
-                driver_slug = driver['name_slug']
+                driver_slug = standing['name_slug']
+                print('DDD', driver_slug)
                 # scrape more driver data
-                new_driver_dict = driver_scrape_logic.scrape_driver_stats(
+                new_driver_dict = driver_scrape_logic.gather_driver_data(
                     driver_slug)
-                # add etxra data to obj
-                new_driver_dict['main_image'] = driver_scrape_logic.get_main_image(
-                    driver_slug).strip()
-                new_driver_dict['driver_name'] = driver_scrape_logic.get_driver_name(
-                    driver_slug).strip()
-                new_driver_dict['driver_number'] = driver_scrape_logic.get_driver_number(
-                    driver_slug).strip()
-                new_driver_dict['flag_img_url'] = driver_scrape_logic.get_driver_flag(
-                    driver_slug).strip()
-                i = 0
-                # match standing with current driver
-                while i < len(standings):
-                    if driver_slug == standings[i].get('name_slug'):
-                        new_driver_dict['points'] = standings[i].get('points')
-                        new_driver_dict['standings_position'] = standings[i].get(
-                            'standings_position')
-                        # remove item from list so not looped over again
-                        standings.pop(i)
-                        i = 0
-                        break
-                    i = i + 1
                 if os.environ['FLASK_ENV'] == 'dev_testing' or os.environ['FLASK_ENV'] == 'prod_testing':
                     # fail flag can be set for testing
                     if fail:
@@ -72,18 +52,8 @@ def driver_scraper(fail=False):
                         new_driver_dict['team_id'] = random.randint(1, 100000)
 
                 else:
-                    # match driver team_name_slug to actual team with contains - goal is team_id
-                    # slug -> aston_martin
-                    team_slug = _slugify(new_driver_dict['team'])
-                    team_match_driver = team_model.Team.query.filter(
-                        team_model.Team.team_name_slug.contains(team_slug)).first()
-                    # get team id from team lookup
-                    team_id = team_match_driver.id
-                    if not team_id:
-                        logging.error("driverScraper team_id error")
-                        raise ValueError('driverScraper team_id ')
-                    # # add foreign key to driver
-                    new_driver_dict['team_id'] = team_id
+                    new_driver_dict = driver_scrape_logic.gather_drivers_team_data(
+                        _slugify(new_driver_dict['team']))
                     d = driver_model.Driver.new(new_driver_dict)
                     drivers_models.append(d)
 

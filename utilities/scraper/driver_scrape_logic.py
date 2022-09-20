@@ -35,7 +35,8 @@ def _change_driver_img_size(src, list_index):
     return sub
 
 
-def _extract_slug_from_url(url):
+# takes in hypenated name and strips leaving slug
+def _extract_driver_name_slug_from_url(url):
     # revese the string
     rev = url[::-1]
     # match 2 hypens lmth.seirv-ed-kcyn/
@@ -45,13 +46,14 @@ def _extract_slug_from_url(url):
     extract = re.findall(regex3, rev)
     # check list len first
     if not len(extract):
-        raise ValueError('Error _extract_slug_from_url: no list to index')
+        raise ValueError(
+            'Error _extract_driver_name_slug_from_url: no list to index')
     # get list item and un-reverse
     name = extract[0][::-1]
     return name
 
 
-# handle mutli part names, make single name with one comma
+# handle mutli part names, make single name with one comma - NOT USED
 def _comma_seperate_driver_name(name):
     print('name', name)
     _list = name.split('\n')
@@ -61,7 +63,6 @@ def _comma_seperate_driver_name(name):
 
 # return list of comma sep'd names
 # can have more than 2 names - Nyck,De,Vries
-
 def scrape_all_driver_names():
     page = requests.get(endpoints.drivers_endpoint(), headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
@@ -70,10 +71,17 @@ def scrape_all_driver_names():
     drivers_list = drivers_list.find_all('li')
     for driver in drivers_list:
         # remove whitespace
-        # d = _comma_seperate_driver_name(driver.text)
         d = ",".join(driver.text.split())
         drivers.append(d)
     return drivers
+
+
+# extract names from standings, includes reserve drivers
+def extract_all_drivers_names_from_standings(standings_list):
+    driver_names = []
+    for standing in standings_list:
+        driver_names.append(standing['name_slug'])
+    return driver_names
 
 
 def scrape_all_drivers_standings():
@@ -84,19 +92,22 @@ def scrape_all_drivers_standings():
     rows = standings_list.find_all('tr')
     drivers = []
     for row in rows:
-        print(row)
+        #    find row with a tag - first valid row
         if row.find('a'):
+            tds = row.find_all('td')
             # get url with name
             href = row.find('a')['href']
             # extract name slug
-            name_slug = _extract_slug_from_url(href)
-            points = row.find('td', {'class', 'bold'}).text
-            position = row.find('td', {'class', 'dark'}).text
+            name_slug = _extract_driver_name_slug_from_url(href)
+            points = tds[5].text
+            position = tds[1].text
+            car = tds[4].text.strip()
             drivers.append(
                 {
                     'name_slug': name_slug,
                     'points': points,
-                    'standings_position': position
+                    'standings_position': position,
+                    'car': car
                 }
             )
     return drivers
